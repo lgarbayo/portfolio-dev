@@ -8,8 +8,8 @@ export class BootScene extends Phaser.Scene {
 
     preload() {
         this.load.spritesheet("player", "/assets/sprites/player.png", {
-            frameWidth: 24,
-            frameHeight: 32,
+            frameWidth: 640,
+            frameHeight: 640,
         });
 
         this.createSolidTexture("world-node", 64, 64, 0xffffff);
@@ -118,8 +118,8 @@ export class BootScene extends Phaser.Scene {
         };
 
         make("player-idle", [0], 2, -1);
-        make("player-wave", [1], 8, 0);
-        make("player-run", [2, 0], 8, -1);
-        make("player-jump", [3], 1, 0);
+        make("player-run", [1, 0], 8, -1);
+        make("player-jump", [2], 1, 0);
+        make("player-wave", [3], 8, -1);
     }
 }

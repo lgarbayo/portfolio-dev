@@ -85,10 +85,10 @@ export class WorldScene extends Phaser.Scene {
         this.player.setBounce(0.15);
         this.player.setDragX(650);
         this.player.setMaxVelocity(320, 800);
-        this.player.setScale(4);
+        this.player.setScale(0.2);
         const body = this.player.body as Phaser.Physics.Arcade.Body;
-        body.setSize(this.player.width * 0.4, this.player.height * 0.8);
-        body.setOffset(this.player.width * 0.3, this.player.height * 0.1);
+        body.setSize(this.player.width * 0.3, this.player.height * 0.8);
+        body.setOffset(this.player.width * 0.225, this.player.height * 0.1);
         this.physics.add.collider(this.player, this.platforms);
         this.player.play("player-idle");
     }
@@ -209,23 +209,24 @@ export class WorldScene extends Phaser.Scene {
     }
 
     private handleWaveInput() {
-        if (!this.waveKey || this.isWaving) return;
-        if (Phaser.Input.Keyboard.JustDown(this.waveKey)) {
-            this.playWaveAnimation();
+        if (!this.waveKey) return;
+
+        if (this.waveKey.isDown && !this.isWaving) {
+            this.startWave();
+        } else if (this.waveKey.isUp && this.isWaving) {
+            this.stopWave();
         }
     }
 
-    private playWaveAnimation() {
+    private startWave() {
         this.isWaving = true;
         this.player.setVelocityX(0);
         this.player.setAccelerationX(0);
         this.player.play("player-wave", true);
+    }
 
-        this.player.once(Phaser.Animations.Events.ANIMATION_COMPLETE, (animation: Phaser.Animations.Animation) => {
-            if (animation.key === "player-wave") {
-                this.isWaving = false;
-                this.player.play("player-idle", true);
-            }
-        });
+    private stopWave() {
+        this.isWaving = false;
+        this.player.play("player-idle", true);
     }
 }

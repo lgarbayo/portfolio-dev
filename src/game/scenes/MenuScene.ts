@@ -76,7 +76,7 @@ export class MenuScene extends Phaser.Scene {
         const listY = height * 0.30;
         const spacing = 68;
 
-        this.cursor = this.add.sprite(listX - 46, listY, "player").setScale(1.8);
+        this.cursor = this.add.sprite(listX - 46, listY, "player").setScale(0.09);
         this.cursor.play("player-run");
 
         this.worlds.forEach((world, index) => {

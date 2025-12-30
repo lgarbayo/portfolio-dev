@@ -8,16 +8,15 @@ type WorldNode = Phaser.Physics.Arcade.Image & {
 export class WorldScene extends Phaser.Scene {
     private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
     private interactKey?: Phaser.Input.Keyboard.Key;
+    private waveKey?: Phaser.Input.Keyboard.Key;
     private player!: Phaser.Physics.Arcade.Sprite;
     private platforms!: Phaser.Physics.Arcade.StaticGroup;
     private worldNodes!: Phaser.Physics.Arcade.StaticGroup;
-    private selectionTitle!: Phaser.GameObjects.Text;
-    private selectionSummary!: Phaser.GameObjects.Text;
-    private promptText!: Phaser.GameObjects.Text;
     private highlight?: Phaser.GameObjects.Image;
     private flashMessage?: Phaser.GameObjects.Text;
     private activeWorld?: PortfolioWorld;
     private overlapTimeout = 0;
+    private isWaving = false;
 
     constructor() {
         super("WorldScene");
@@ -28,6 +27,7 @@ export class WorldScene extends Phaser.Scene {
 
         this.cursors = this.input.keyboard!.createCursorKeys();
         this.interactKey = this.input.keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
+        this.waveKey = this.input.keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.B);
 
         this.addGridBackground();
         this.setupPlatforms();
@@ -37,6 +37,7 @@ export class WorldScene extends Phaser.Scene {
     }
 
     update(time: number) {
+        this.handleWaveInput();
         this.handleMovement();
         this.handleSelectionTimeout(time);
 
@@ -77,30 +78,16 @@ export class WorldScene extends Phaser.Scene {
         this.player.setBounce(0.15);
         this.player.setDragX(650);
         this.player.setMaxVelocity(320, 800);
+        this.player.setScale(4);
+        const body = this.player.body as Phaser.Physics.Arcade.Body;
+        body.setSize(this.player.width * 0.4, this.player.height * 0.8);
+        body.setOffset(this.player.width * 0.3, this.player.height * 0.1);
         this.physics.add.collider(this.player, this.platforms);
+        this.player.play("player-idle");
     }
 
     private setupUI() {
-        const { width, height } = this.scale;
-        this.selectionTitle = this.add.text(32, height - 180, "Explora un mundo", {
-            fontFamily: "monospace",
-            fontSize: "28px",
-            color: "#f8fafc",
-        });
-
-        this.selectionSummary = this.add.text(32, height - 130, "Muévete con ← → y salta con ↑", {
-            fontFamily: "monospace",
-            fontSize: "20px",
-            wordWrap: { width: width - 64 },
-            color: "#cbd5f5",
-        });
-
-        this.promptText = this.add.text(32, height - 70, "Acércate a una puerta y pulsa ENTER para entrar", {
-            fontFamily: "monospace",
-            fontSize: "18px",
-            color: "#94a3b8",
-        });
-
+        const { width } = this.scale;
         this.flashMessage = this.add
             .text(width / 2, 80, "", {
                 fontFamily: "monospace",
@@ -149,10 +136,6 @@ export class WorldScene extends Phaser.Scene {
         if (this.activeWorld?.id === world.id) return;
 
         this.activeWorld = world;
-        this.selectionTitle.setText(world.title);
-        this.selectionSummary.setText(world.summary);
-        this.promptText.setText("Pulsa ENTER para visitar este mundo");
-
         this.highlight
             ?.setPosition(node.x, node.y)
             .setTint(world.color)
@@ -162,26 +145,49 @@ export class WorldScene extends Phaser.Scene {
     private handleSelectionTimeout(time: number) {
         if (this.activeWorld && time > this.overlapTimeout) {
             this.activeWorld = undefined;
-            this.selectionTitle.setText("Explora un mundo");
-            this.selectionSummary.setText("Muévete con ← → y salta con ↑");
-            this.promptText.setText("Acércate a una puerta y pulsa ENTER para entrar");
             this.highlight?.setVisible(false);
         }
     }
 
     private handleMovement() {
+        if (this.isWaving) {
+            this.player.setAccelerationX(0);
+            return;
+        }
+
         const acceleration = 900;
+        let moving = false;
         if (this.cursors.left?.isDown) {
             this.player.setAccelerationX(-acceleration);
+            this.player.setFlipX(true);
+            moving = true;
         } else if (this.cursors.right?.isDown) {
             this.player.setAccelerationX(acceleration);
+            this.player.setFlipX(false);
+            moving = true;
         } else {
             this.player.setAccelerationX(0);
         }
 
         const isGrounded = (this.player.body as Phaser.Physics.Arcade.Body).blocked.down;
-        if (this.cursors.up?.isDown && isGrounded) {
+        const jumpPressed = this.cursors.up?.isDown;
+        const initiatedJump = jumpPressed && isGrounded;
+        if (initiatedJump) {
             this.player.setVelocityY(-560);
+            this.player.play("player-jump", true);
+        }
+
+        if (!isGrounded || initiatedJump) {
+            if (this.player.anims.currentAnim?.key !== "player-jump") {
+                this.player.play("player-jump", true);
+            }
+            return;
+        }
+
+        if (moving) {
+            this.player.play("player-run", true);
+        } else if (this.player.anims.currentAnim?.key !== "player-idle") {
+            this.player.play("player-idle", true);
         }
     }
 
@@ -192,6 +198,27 @@ export class WorldScene extends Phaser.Scene {
             alpha: 0,
             duration: 1300,
             ease: "Sine.easeInOut",
+        });
+    }
+
+    private handleWaveInput() {
+        if (!this.waveKey || this.isWaving) return;
+        if (Phaser.Input.Keyboard.JustDown(this.waveKey)) {
+            this.playWaveAnimation();
+        }
+    }
+
+    private playWaveAnimation() {
+        this.isWaving = true;
+        this.player.setVelocityX(0);
+        this.player.setAccelerationX(0);
+        this.player.play("player-wave", true);
+
+        this.player.once(Phaser.Animations.Events.ANIMATION_COMPLETE, (animation: Phaser.Animations.Animation) => {
+            if (animation.key === "player-wave") {
+                this.isWaving = false;
+                this.player.play("player-idle", true);
+            }
         });
     }
 }

@@ -17,6 +17,7 @@ export class WorldScene extends Phaser.Scene {
     private activeWorld?: PortfolioWorld;
     private overlapTimeout = 0;
     private isWaving = false;
+    private backKey?: Phaser.Input.Keyboard.Key;
 
     constructor() {
         super("WorldScene");
@@ -28,6 +29,7 @@ export class WorldScene extends Phaser.Scene {
         this.cursors = this.input.keyboard!.createCursorKeys();
         this.interactKey = this.input.keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
         this.waveKey = this.input.keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.B);
+        this.backKey = this.input.keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.BACKSPACE);
 
         this.addGridBackground();
         this.setupPlatforms();
@@ -40,6 +42,11 @@ export class WorldScene extends Phaser.Scene {
         this.handleWaveInput();
         this.handleMovement();
         this.handleSelectionTimeout(time);
+
+        if (this.backKey && Phaser.Input.Keyboard.JustDown(this.backKey)) {
+            this.scene.start("MenuScene");
+            return;
+        }
 
         if (
             this.activeWorld &&

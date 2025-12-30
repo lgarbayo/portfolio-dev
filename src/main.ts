@@ -7,7 +7,6 @@ let landingAudioEnabled = false;
 
 const overlay = document.querySelector<HTMLElement>("#game-overlay");
 const landingVideo = document.querySelector<HTMLVideoElement>("#landing-video");
-const closeButtons = document.querySelectorAll<HTMLButtonElement>('[data-action="close-game"]');
 
 const showOverlay = () => {
     overlay?.classList.add("is-visible");
@@ -18,6 +17,8 @@ const hideOverlay = () => {
     overlay?.classList.remove("is-visible");
     overlay?.setAttribute("aria-hidden", "true");
     landingVideo?.play().catch(() => undefined);
+    game?.destroy(true);
+    game = null;
 };
 
 const mountGame = () => {
@@ -28,10 +29,6 @@ const mountGame = () => {
     showOverlay();
 };
 
-closeButtons.forEach((button) => {
-    button.addEventListener("click", hideOverlay);
-});
-
 const preventKeys = new Set(["Space", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"]);
 
 document.addEventListener(
@@ -39,16 +36,17 @@ document.addEventListener(
     (event) => {
         enableLandingAudio();
 
-        if (event.key === "Escape" && overlay?.classList.contains("is-visible")) {
-            hideOverlay();
-        }
-
-        if (event.key === "Enter" && !overlay?.classList.contains("is-visible")) {
-            mountGame();
-        }
-
-        if (!overlay?.classList.contains("is-visible") && preventKeys.has(event.code)) {
-            event.preventDefault();
+        if (overlay?.classList.contains("is-visible")) {
+            if (event.key === "Escape") {
+                hideOverlay();
+            }
+        } else {
+            if (event.key === "Enter") {
+                mountGame();
+            }
+            if (preventKeys.has(event.code)) {
+                event.preventDefault();
+            }
         }
     },
     { passive: false },
@@ -62,9 +60,6 @@ const enableLandingAudio = () => {
     landingAudioEnabled = true;
 };
 
-const handlePointerInteraction = () => {
+document.addEventListener("pointerdown", () => {
     enableLandingAudio();
-    document.removeEventListener("pointerdown", handlePointerInteraction);
-};
-
-document.addEventListener("pointerdown", handlePointerInteraction);
+});

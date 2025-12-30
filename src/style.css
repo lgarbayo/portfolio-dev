@@ -60,21 +60,6 @@ body {
   pointer-events: none;
 }
 
-.btn {
-  border-radius: 999px;
-  border: 1px solid rgba(148, 163, 184, 0.35);
-  padding: 0.65rem 1.6rem;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  background: transparent;
-  color: #e2e8f0;
-}
-
-.btn--ghost {
-  border-color: rgba(248, 250, 252, 0.5);
-}
-
 .game-overlay {
   position: fixed;
   inset: 0;
@@ -100,15 +85,6 @@ body {
   background: #010409;
   display: flex;
   flex-direction: column;
-}
-
-.game-toolbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1rem 1.5rem;
-  background: rgba(3, 7, 18, 0.92);
-  border-bottom: 1px solid rgba(148, 163, 184, 0.25);
 }
 
 #app {

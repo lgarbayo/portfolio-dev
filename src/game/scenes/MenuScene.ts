@@ -3,6 +3,10 @@ import type { PortfolioWorld } from "../data/portfolioWorlds";
 
 export class MenuScene extends Phaser.Scene {
     private startKey?: Phaser.Input.Keyboard.Key;
+    private cursor?: Phaser.GameObjects.Sprite;
+    private worlds: PortfolioWorld[] = [];
+    private selectedIndex = 0;
+    private entries: Phaser.GameObjects.Container[] = [];
 
     constructor() {
         super("MenuScene");
@@ -10,48 +14,27 @@ export class MenuScene extends Phaser.Scene {
 
     create() {
         const { width, height } = this.scale;
-        this.cameras.main.setBackgroundColor(0x030712);
+        this.worlds = (this.registry.get("portfolioWorlds") || []) as PortfolioWorld[];
+        const savedWorldId = this.registry.get("selectedWorldId") as string | undefined;
+        if (savedWorldId) {
+            const savedIndex = this.worlds.findIndex((world) => world.id === savedWorldId);
+            this.selectedIndex = savedIndex >= 0 ? savedIndex : 0;
+        } else {
+            this.selectedIndex = 0;
+        }
+        this.entries = [];
 
-        const title = this.add
-            .text(width / 2, height * 0.22, "Portfolio Overworld", {
-                fontFamily: "monospace",
-                fontSize: "48px",
-                color: "#FFFFFF",
-            })
-            .setOrigin(0.5);
-
-        this.add
-            .text(width / 2, title.y + 72, "Un CV jugable construido con Phaser + TS", {
-                fontFamily: "monospace",
-                fontSize: "20px",
-                color: "#cbd5f5",
-            })
-            .setOrigin(0.5);
-
-        const worlds = (this.registry.get("portfolioWorlds") || []) as PortfolioWorld[];
-        const worldIntro = this.add.container(width / 2, height * 0.52);
-
-        worlds.forEach((world, index) => {
-            this.addWorldRow(worldIntro, world, index);
-        });
-
-        const startButton = this.add
-            .text(width / 2, height * 0.82, "PULSA ENTER O CLICK PARA JUGAR", {
-                fontFamily: "monospace",
-                fontSize: "24px",
-                backgroundColor: "#14b8a6",
-                color: "#031522",
-                padding: { x: 12, y: 8 },
-            })
-            .setOrigin(0.5)
-            .setInteractive({ useHandCursor: true });
-
-        startButton.on("pointerdown", () => this.launchWorld());
-        startButton.on("pointerover", () => startButton.setStyle({ backgroundColor: "#2dd4bf" }));
-        startButton.on("pointerout", () => startButton.setStyle({ backgroundColor: "#14b8a6" }));
+        this.createBackdrop(width, height);
+        this.createTitle(width, height);
+        this.createWorldList(width, height);
+        this.createHint(width, height);
 
         this.startKey = this.input.keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
         this.startKey?.once("down", () => this.launchWorld());
+
+        this.input.keyboard?.on("keydown-UP", () => this.moveSelection(-1));
+        this.input.keyboard?.on("keydown-DOWN", () => this.moveSelection(1));
+        this.input.keyboard?.on("keydown-SPACE", () => this.launchWorld());
     }
 
     update() {
@@ -60,28 +43,101 @@ export class MenuScene extends Phaser.Scene {
         }
     }
 
-    private addWorldRow(container: Phaser.GameObjects.Container, world: PortfolioWorld, index: number) {
-        const y = index * 44;
-        const dot = this.add.rectangle(-220, y, 22, 22, world.color).setOrigin(0.5);
-        const label = this.add
-            .text(-180, y, `${index + 1}. ${world.title}`, {
+    private createBackdrop(width: number, height: number) {
+        this.cameras.main.setBackgroundColor(0x000000);
+
+        const scanlines = this.add.graphics({ fillStyle: { color: 0x000000, alpha: 0.25 } });
+        for (let y = 0; y < height; y += 4) {
+            scanlines.fillRect(0, y, width, 2);
+        }
+        scanlines.setDepth(1);
+    }
+
+    private createTitle(width: number, height: number) {
+        const title = this.add
+            .text(width / 2, height * 0.13, "PORTFOLIO QUEST", {
                 fontFamily: "monospace",
-                fontSize: "20px",
-                color: "#f1f5f9",
+                fontSize: "56px",
+                color: "#5CE68E",
             })
-            .setOrigin(0, 0.5);
-        const summary = this.add
-            .text(-20, y, world.summary, {
+            .setOrigin(0.5);
+
+        this.tweens.add({
+            targets: title,
+            alpha: 0.35,
+            duration: 600,
+            yoyo: true,
+            repeat: -1,
+        });
+    }
+
+    private createWorldList(width: number, height: number) {
+        const listX = width * 0.3;
+        const listY = height * 0.30;
+        const spacing = 68;
+
+        this.cursor = this.add.sprite(listX - 46, listY, "player").setScale(1.8);
+        this.cursor.play("player-run");
+
+        this.worlds.forEach((world, index) => {
+            const row = this.add.container(listX, listY + index * spacing);
+            const badge = this.add.rectangle(-12, 0, 26, 26, world.color).setOrigin(0.5);
+            const name = this.add
+                .text(20, 0, `${index + 1}. ${world.title}`, {
+                    fontFamily: "monospace",
+                    fontSize: "26px",
+                    color: "#F5DEB3",
+                })
+                .setOrigin(0, 0.5);
+
+            row.add([badge, name]);
+            row.setAlpha(index === this.selectedIndex ? 1 : 0.35);
+            this.entries.push(row);
+        });
+
+        this.updateCursorPosition();
+    }
+
+    private createHint(width: number, height: number) {
+        this.add
+            .text(width / 2, height * 0.82, "ENTER/SPACE TO START · BACKSPACE TO RETURN", {
                 fontFamily: "monospace",
                 fontSize: "16px",
-                color: "#94a3b8",
-                wordWrap: { width: 500 },
+                color: "#8DA0BF",
             })
-            .setOrigin(0, 0.5);
-        container.add([dot, label, summary]);
+            .setOrigin(0.5);
+
+        this.add
+            .text(width / 2, height * 0.9, "©2025 LUIS GARBAYO · MADE WITH PHASER && TS", {
+                fontFamily: "monospace",
+                fontSize: "14px",
+                color: "#5CE68E",
+            })
+            .setOrigin(0.5);
+    }
+
+    private moveSelection(delta: number) {
+        const total = this.worlds.length;
+        this.selectedIndex = Phaser.Math.Wrap(this.selectedIndex + delta, 0, total);
+        this.updateCursorPosition();
+    }
+
+    private updateCursorPosition() {
+        this.entries.forEach((entry, idx) => {
+            entry.setAlpha(idx === this.selectedIndex ? 1 : 0.35);
+        });
+
+        const entry = this.entries[this.selectedIndex];
+        if (!entry || !this.cursor) return;
+        this.cursor.setPosition(entry.x - 46, entry.y);
+        if (this.cursor.anims.currentAnim?.key !== "player-run") {
+            this.cursor.play("player-run");
+        }
     }
 
     private launchWorld() {
+        const selectedWorld = this.worlds[this.selectedIndex];
+        this.registry.set("selectedWorldId", selectedWorld?.id ?? "about");
         this.scene.start("WorldScene");
     }
 }

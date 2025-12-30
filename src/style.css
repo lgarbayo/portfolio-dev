@@ -62,29 +62,30 @@ body {
 
 .btn {
   border-radius: 999px;
-  border: none;
-  padding: 1.1rem 2.8rem;
-  font-size: 1.1rem;
-  font-weight: 700;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  padding: 0.65rem 1.6rem;
+  font-size: 1rem;
+  font-weight: 600;
   cursor: pointer;
-  transition: transform 160ms ease, box-shadow 160ms ease;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  background: transparent;
+  color: #e2e8f0;
+}
+
+.btn--ghost {
+  border-color: rgba(248, 250, 252, 0.5);
 }
 
 .game-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(2, 6, 23, 0.92);
-  backdrop-filter: blur(16px);
+  background: rgba(2, 6, 23, 0.85);
+  backdrop-filter: blur(14px);
   display: flex;
   align-items: center;
   justify-content: center;
   opacity: 0;
   visibility: hidden;
   transition: opacity 200ms ease;
-  padding: 1rem;
   z-index: 10;
 }
 
@@ -94,12 +95,11 @@ body {
 }
 
 .game-shell {
-  width: min(1280px, 100%);
+  width: 100%;
+  height: 100%;
   background: #010409;
-  border-radius: 20px;
-  border: 1px solid rgba(148, 163, 184, 0.3);
-  overflow: hidden;
-  box-shadow: 0 20px 70px rgba(0, 0, 0, 0.8);
+  display: flex;
+  flex-direction: column;
 }
 
 .game-toolbar {
@@ -107,37 +107,14 @@ body {
   justify-content: space-between;
   align-items: center;
   padding: 1rem 1.5rem;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.2);
-  background: rgba(2, 6, 23, 0.85);
-}
-
-.btn--ghost {
-  border-radius: 999px;
-  border: 1px solid rgba(248, 250, 252, 0.4);
-  padding: 0.5rem 1.25rem;
-  background: transparent;
-  color: #e2e8f0;
-  cursor: pointer;
+  background: rgba(3, 7, 18, 0.92);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.25);
 }
 
 #app {
   width: 100%;
-  height: 720px;
+  flex: 1;
   background: #030712;
-}
-
-@media (max-width: 720px) {
-  body {
-    padding: 0;
-  }
-
-  .game-shell {
-    height: 100%;
-  }
-
-  #app {
-    height: calc(100% - 64px);
-  }
 }
 
 @media (max-aspect-ratio: 16/9) {

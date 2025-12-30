@@ -32,17 +32,27 @@ closeButtons.forEach((button) => {
     button.addEventListener("click", hideOverlay);
 });
 
-document.addEventListener("keydown", (event) => {
-    enableLandingAudio();
+const preventKeys = new Set(["Space", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"]);
 
-    if (event.key === "Escape" && overlay?.classList.contains("is-visible")) {
-        hideOverlay();
-    }
+document.addEventListener(
+    "keydown",
+    (event) => {
+        enableLandingAudio();
 
-    if (event.key === "Enter" && !overlay?.classList.contains("is-visible")) {
-        mountGame();
-    }
-});
+        if (event.key === "Escape" && overlay?.classList.contains("is-visible")) {
+            hideOverlay();
+        }
+
+        if (event.key === "Enter" && !overlay?.classList.contains("is-visible")) {
+            mountGame();
+        }
+
+        if (!overlay?.classList.contains("is-visible") && preventKeys.has(event.code)) {
+            event.preventDefault();
+        }
+    },
+    { passive: false },
+);
 
 const enableLandingAudio = () => {
     if (!landingVideo || landingAudioEnabled) return;

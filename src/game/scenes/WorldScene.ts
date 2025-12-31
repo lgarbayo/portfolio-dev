@@ -79,7 +79,6 @@ export class WorldScene extends Phaser.Scene {
         }
 
         blocks.forEach((blockData, index) => {
-            // El PRIMER bloque (índice 0) es el interactivo tipo Mario
             const targetGroup = index === 0 ? this.interactiveBlocks : this.platforms;
             
             const block = targetGroup.create(blockData.x, blockData.y, "brick-block") as Phaser.Physics.Arcade.Image;
@@ -89,7 +88,6 @@ export class WorldScene extends Phaser.Scene {
             block.refreshBody();
             
             if (index === 0) {
-                // Metadata solo para el bloque interactivo
                 block.setData("worldId", activeWorld.id);
                 block.setData("isHit", false);
             }
@@ -108,7 +106,6 @@ export class WorldScene extends Phaser.Scene {
         body.setOffset(this.player.width * 0.225, this.player.height * 0.1);
         this.physics.add.collider(this.player, this.platforms);
         
-        // 🎯 COLLIDER: detecta cuando el jugador golpea el bloque interactivo
         this.physics.add.collider(
             this.player,
             this.interactiveBlocks,
@@ -185,9 +182,6 @@ export class WorldScene extends Phaser.Scene {
         this.player.play("player-idle", true);
     }
 
-    /**
-     * 🍄 Callback estilo Mario: detecta cuando el jugador salta y golpea el bloque desde ABAJO
-     */
     private onPlayerHitBlock(
         player: Phaser.GameObjects.GameObject,
         block: Phaser.GameObjects.GameObject
@@ -195,12 +189,10 @@ export class WorldScene extends Phaser.Scene {
         const playerBody = (player as Phaser.Physics.Arcade.Sprite).body as Phaser.Physics.Arcade.Body;
         const blockBody = (block as Phaser.Physics.Arcade.Image).body as Phaser.Physics.Arcade.Body;
         
-        // Solo activar si el jugador golpea desde ABAJO (cabeza del jugador toca base del bloque)
         const hitFromBelow = playerBody.touching.up && blockBody.touching.down;
         
         if (!hitFromBelow) return;
         
-        // Evitar múltiples activaciones
         const isHit = block.getData("isHit");
         if (isHit) return;
         
@@ -209,14 +201,12 @@ export class WorldScene extends Phaser.Scene {
         const worldId = block.getData("worldId");
         console.log(`🍄 Bloque golpeado! Mundo: ${worldId}`);
         
-        // 🎯 Abrir modal según el mundo
         const modalId = `${worldId}Modal`;
         const modal = document.getElementById(modalId);
         if (modal) {
             modal.classList.add("open");
         }
         
-        // Reset después de 1 segundo para poder volver a golpear
         this.time.delayedCall(1000, () => {
             block.setData("isHit", false);
         });

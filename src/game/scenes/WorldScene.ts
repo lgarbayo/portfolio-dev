@@ -6,6 +6,7 @@ export class WorldScene extends Phaser.Scene {
     private waveKey?: Phaser.Input.Keyboard.Key;
     private player!: Phaser.Physics.Arcade.Sprite;
     private platforms!: Phaser.Physics.Arcade.StaticGroup;
+    private interactiveBlocks!: Phaser.Physics.Arcade.StaticGroup;
     private activeWorld?: PortfolioWorld;
     private isWaving = false;
     private backKey?: Phaser.Input.Keyboard.Key;
@@ -56,6 +57,7 @@ export class WorldScene extends Phaser.Scene {
 
     private setupPlatforms() {
         this.platforms = this.physics.add.staticGroup();
+        this.interactiveBlocks = this.physics.add.staticGroup();
         const { width, height } = this.scale;
         const ground = this.platforms.create(width / 2, height - 10, "ground") as Phaser.Physics.Arcade.Image;
         ground.setScale(width / 16, 6);
@@ -67,6 +69,7 @@ export class WorldScene extends Phaser.Scene {
         const activeWorld = this.activeWorld;
         if (!activeWorld?.structures) return;
         const { pipe, blocks } = activeWorld.structures;
+        
         if (pipe) {
             const pipeSprite = this.platforms.create(pipe.x, pipe.y, "pipe") as Phaser.Physics.Arcade.Image;
             pipeSprite.setDisplaySize(pipe.width, pipe.height);
@@ -75,12 +78,21 @@ export class WorldScene extends Phaser.Scene {
             pipeSprite.refreshBody();
         }
 
-        blocks.forEach((blockData) => {
-            const block = this.platforms.create(blockData.x, blockData.y, "brick-block") as Phaser.Physics.Arcade.Image;
+        blocks.forEach((blockData, index) => {
+            // El PRIMER bloque (índice 0) es el interactivo tipo Mario
+            const targetGroup = index === 0 ? this.interactiveBlocks : this.platforms;
+            
+            const block = targetGroup.create(blockData.x, blockData.y, "brick-block") as Phaser.Physics.Arcade.Image;
             block.setDisplaySize(blockData.width, blockData.height);
             block.setTint(activeWorld.color);
             block.setVisible(false);
             block.refreshBody();
+            
+            if (index === 0) {
+                // Metadata solo para el bloque interactivo
+                block.setData("worldId", activeWorld.id);
+                block.setData("isHit", false);
+            }
         });
     }
 
@@ -95,6 +107,16 @@ export class WorldScene extends Phaser.Scene {
         body.setSize(this.player.width * 0.3, this.player.height * 0.8);
         body.setOffset(this.player.width * 0.225, this.player.height * 0.1);
         this.physics.add.collider(this.player, this.platforms);
+        
+        // 🎯 COLLIDER: detecta cuando el jugador golpea el bloque interactivo
+        this.physics.add.collider(
+            this.player,
+            this.interactiveBlocks,
+            this.onPlayerHitBlock,
+            undefined,
+            this
+        );
+        
         this.player.play("player-idle");
     }
 
@@ -161,5 +183,42 @@ export class WorldScene extends Phaser.Scene {
     private stopWave() {
         this.isWaving = false;
         this.player.play("player-idle", true);
+    }
+
+    /**
+     * 🍄 Callback estilo Mario: detecta cuando el jugador salta y golpea el bloque desde ABAJO
+     */
+    private onPlayerHitBlock(
+        player: Phaser.GameObjects.GameObject,
+        block: Phaser.GameObjects.GameObject
+    ) {
+        const playerBody = (player as Phaser.Physics.Arcade.Sprite).body as Phaser.Physics.Arcade.Body;
+        const blockBody = (block as Phaser.Physics.Arcade.Image).body as Phaser.Physics.Arcade.Body;
+        
+        // Solo activar si el jugador golpea desde ABAJO (cabeza del jugador toca base del bloque)
+        const hitFromBelow = playerBody.touching.up && blockBody.touching.down;
+        
+        if (!hitFromBelow) return;
+        
+        // Evitar múltiples activaciones
+        const isHit = block.getData("isHit");
+        if (isHit) return;
+        
+        block.setData("isHit", true);
+        
+        const worldId = block.getData("worldId");
+        console.log(`🍄 Bloque golpeado! Mundo: ${worldId}`);
+        
+        // 🎯 Abrir modal según el mundo
+        const modalId = `${worldId}Modal`;
+        const modal = document.getElementById(modalId);
+        if (modal) {
+            modal.classList.add("open");
+        }
+        
+        // Reset después de 1 segundo para poder volver a golpear
+        this.time.delayedCall(1000, () => {
+            block.setData("isHit", false);
+        });
     }
 }

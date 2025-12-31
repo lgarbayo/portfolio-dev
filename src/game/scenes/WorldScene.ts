@@ -183,14 +183,43 @@ export class WorldScene extends Phaser.Scene {
     }
 
     private onPlayerHitBlock(
-        player: Phaser.GameObjects.GameObject,
-        block: Phaser.GameObjects.GameObject
+        playerObj:
+            | Phaser.Types.Physics.Arcade.GameObjectWithBody
+            | Phaser.Physics.Arcade.Body
+            | Phaser.Physics.Arcade.StaticBody
+            | Phaser.Tilemaps.Tile,
+        blockObj:
+            | Phaser.Types.Physics.Arcade.GameObjectWithBody
+            | Phaser.Physics.Arcade.Body
+            | Phaser.Physics.Arcade.StaticBody
+            | Phaser.Tilemaps.Tile,
     ) {
-        const playerBody = (player as Phaser.Physics.Arcade.Sprite).body as Phaser.Physics.Arcade.Body;
-        const blockBody = (block as Phaser.Physics.Arcade.Image).body as Phaser.Physics.Arcade.Body;
-        
-        const hitFromBelow = playerBody.touching.up && blockBody.touching.down;
-        
+        const resolveGameObject = (
+            target:
+                | Phaser.Types.Physics.Arcade.GameObjectWithBody
+                | Phaser.Physics.Arcade.Body
+                | Phaser.Physics.Arcade.StaticBody
+                | Phaser.Tilemaps.Tile,
+        ): Phaser.GameObjects.GameObject | null => {
+            if (target instanceof Phaser.Physics.Arcade.Body || target instanceof Phaser.Physics.Arcade.StaticBody) {
+                return target.gameObject as Phaser.GameObjects.GameObject;
+            }
+            if (target instanceof Phaser.Tilemaps.Tile) {
+                return target.tilemapLayer ?? null;
+            }
+            return target;
+        };
+
+        const player = resolveGameObject(playerObj);
+        const block = resolveGameObject(blockObj);
+        if (!player || !block) return;
+        if (!(player instanceof Phaser.Physics.Arcade.Sprite)) return;
+        if (!(block instanceof Phaser.Physics.Arcade.Image)) return;
+
+        const playerBody = player.body as Phaser.Physics.Arcade.Body | undefined;
+        if (!playerBody) return;
+
+        const hitFromBelow = playerBody.touching.up || playerBody.blocked.up;
         if (!hitFromBelow) return;
         
         const isHit = block.getData("isHit");

@@ -1,21 +1,12 @@
 import Phaser from "phaser";
 import type { PortfolioWorld } from "../data/portfolioWorlds";
 
-type WorldNode = Phaser.Physics.Arcade.Image & {
-    worldData?: PortfolioWorld;
-};
-
 export class WorldScene extends Phaser.Scene {
     private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
-    private interactKey?: Phaser.Input.Keyboard.Key;
     private waveKey?: Phaser.Input.Keyboard.Key;
     private player!: Phaser.Physics.Arcade.Sprite;
     private platforms!: Phaser.Physics.Arcade.StaticGroup;
-    private worldNodes!: Phaser.Physics.Arcade.StaticGroup;
-    private highlight?: Phaser.GameObjects.Image;
-    private flashMessage?: Phaser.GameObjects.Text;
     private activeWorld?: PortfolioWorld;
-    private overlapTimeout = 0;
     private isWaving = false;
     private backKey?: Phaser.Input.Keyboard.Key;
 
@@ -24,51 +15,42 @@ export class WorldScene extends Phaser.Scene {
     }
 
     create() {
-        this.cameras.main.setBackgroundColor(0x050a1f);
-
+        const worlds = (this.registry.get("portfolioWorlds") || []) as PortfolioWorld[];
+        this.activeWorld = this.getSelectedWorld(worlds);
+        this.cameras.main.setBackgroundColor(0x000000);
         this.cursors = this.input.keyboard!.createCursorKeys();
-        this.interactKey = this.input.keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
         this.waveKey = this.input.keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.B);
         this.backKey = this.input.keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.BACKSPACE);
 
-        this.addGridBackground();
+        this.addWorldBackground();
         this.setupPlatforms();
         this.spawnPlayer();
-        this.setupUI();
-        this.spawnWorldNodes();
     }
 
-    update(time: number) {
+    update() {
         this.handleWaveInput();
         this.handleMovement();
-        this.handleSelectionTimeout(time);
 
         if (this.backKey && Phaser.Input.Keyboard.JustDown(this.backKey)) {
             this.scene.start("MenuScene");
             return;
         }
-
-        if (
-            this.activeWorld &&
-            this.interactKey &&
-            Phaser.Input.Keyboard.JustDown(this.interactKey)
-        ) {
-            this.enterWorld(this.activeWorld);
-        }
     }
 
-    private addGridBackground() {
+    private getSelectedWorld(worlds: PortfolioWorld[]): PortfolioWorld | undefined {
+        if (!worlds.length) return undefined;
+        const selectedId = this.registry.get("selectedWorldId") as string | undefined;
+        const match = selectedId ? worlds.find((world) => world.id === selectedId) : undefined;
+        return match ?? worlds[0];
+    }
+
+    private addWorldBackground() {
+        if (!this.activeWorld) return;
         const { width, height } = this.scale;
-        const graphics = this.add.graphics({ x: 0, y: 0 });
-        graphics.lineStyle(1, 0x0a1638, 0.5);
-        const cell = 80;
-        for (let x = 0; x <= width; x += cell) {
-            graphics.lineBetween(x, 0, x, height);
-        }
-        for (let y = 0; y <= height; y += cell) {
-            graphics.lineBetween(0, y, width, y);
-        }
-        graphics.setDepth(-1);
+        this.add
+            .image(width / 2, height / 2, this.activeWorld.background.key)
+            .setDisplaySize(width, height)
+            .setDepth(-2);
     }
 
     private setupPlatforms() {
@@ -76,6 +58,7 @@ export class WorldScene extends Phaser.Scene {
         const { width, height } = this.scale;
         const ground = this.platforms.create(width / 2, height - 10, "ground") as Phaser.Physics.Arcade.Image;
         ground.setScale(width / 16, 6);
+        ground.setVisible(false);
         ground.refreshBody();
     }
 
@@ -91,69 +74,6 @@ export class WorldScene extends Phaser.Scene {
         body.setOffset(this.player.width * 0.225, this.player.height * 0.1);
         this.physics.add.collider(this.player, this.platforms);
         this.player.play("player-idle");
-    }
-
-    private setupUI() {
-        const { width } = this.scale;
-        this.flashMessage = this.add
-            .text(width / 2, 80, "", {
-                fontFamily: "monospace",
-                fontSize: "26px",
-                backgroundColor: "#14b8a6",
-                color: "#031522",
-                padding: { x: 12, y: 8 },
-            })
-            .setOrigin(0.5)
-            .setAlpha(0);
-
-        this.highlight = this.add.image(0, 0, "world-node-highlight").setVisible(false).setDepth(1);
-    }
-
-    private spawnWorldNodes() {
-        const worlds = (this.registry.get("portfolioWorlds") || []) as PortfolioWorld[];
-        this.worldNodes = this.physics.add.staticGroup();
-
-        worlds.forEach((world) => {
-            const node = this.worldNodes
-                .create(world.position.x, world.position.y, "world-node")
-                .setScale(0.9) as WorldNode;
-            node.setTint(world.color);
-            node.worldData = world;
-            node.refreshBody();
-
-            this.add
-                .text(world.position.x, world.position.y - 54, world.title, {
-                    fontFamily: "monospace",
-                    fontSize: "18px",
-                    color: "#f8fafc",
-                })
-                .setOrigin(0.5);
-        });
-
-        this.physics.add.overlap(this.player, this.worldNodes, (_player, node) => {
-            this.handleWorldOverlap(node as WorldNode);
-        });
-    }
-
-    private handleWorldOverlap(node: WorldNode) {
-        const world = node.worldData;
-        if (!world) return;
-
-        this.overlapTimeout = this.time.now + 80;
-        if (this.activeWorld?.id === world.id) return;
-
-        this.activeWorld = world;
-        this.highlight
-            ?.setPosition(node.x, node.y)
-            .setTint(world.color)
-            .setVisible(true);
-    }
-
-    private handleSelectionTimeout(time: number) {
-        if (this.activeWorld && time > this.overlapTimeout) {
-            this.activeWorld = undefined;
-            this.highlight?.setVisible(false);
-        }
     }
 
     private handleMovement() {
@@ -196,16 +116,6 @@ export class WorldScene extends Phaser.Scene {
         } else if (this.player.anims.currentAnim?.key !== "player-idle") {
             this.player.play("player-idle", true);
         }
-    }
-
-    private enterWorld(world: PortfolioWorld) {
-        this.flashMessage?.setText(`Entrando en ${world.title}...`).setAlpha(1);
-        this.tweens.add({
-            targets: this.flashMessage,
-            alpha: 0,
-            duration: 1300,
-            ease: "Sine.easeInOut",
-        });
     }
 
     private handleWaveInput() {

@@ -11,6 +11,9 @@ export class BootScene extends Phaser.Scene {
             frameWidth: 640,
             frameHeight: 640,
         });
+        portfolioWorlds.forEach((world) => {
+            this.load.image(world.background.key, world.background.path);
+        });
 
         this.createSolidTexture("world-node", 64, 64, 0xffffff);
         this.createSolidTexture("world-node-highlight", 78, 78, 0xffffff);

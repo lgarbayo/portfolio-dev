@@ -24,6 +24,7 @@ export class WorldScene extends Phaser.Scene {
 
         this.addWorldBackground();
         this.setupPlatforms();
+        this.addWorldStructures();
         this.spawnPlayer();
     }
 
@@ -62,6 +63,27 @@ export class WorldScene extends Phaser.Scene {
         ground.refreshBody();
     }
 
+    private addWorldStructures() {
+        const activeWorld = this.activeWorld;
+        if (!activeWorld?.structures) return;
+        const { pipe, blocks } = activeWorld.structures;
+        if (pipe) {
+            const pipeSprite = this.platforms.create(pipe.x, pipe.y, "pipe") as Phaser.Physics.Arcade.Image;
+            pipeSprite.setDisplaySize(pipe.width, pipe.height);
+            pipeSprite.setTint(activeWorld.color);
+            pipeSprite.setVisible(false);
+            pipeSprite.refreshBody();
+        }
+
+        blocks.forEach((blockData) => {
+            const block = this.platforms.create(blockData.x, blockData.y, "brick-block") as Phaser.Physics.Arcade.Image;
+            block.setDisplaySize(blockData.width, blockData.height);
+            block.setTint(activeWorld.color);
+            block.setVisible(false);
+            block.refreshBody();
+        });
+    }
+
     private spawnPlayer() {
         this.player = this.physics.add.sprite(120, 520, "player");
         this.player.setCollideWorldBounds(true);
@@ -83,6 +105,7 @@ export class WorldScene extends Phaser.Scene {
         }
 
         const acceleration = 900;
+        const jumpVelocity = -700;
         let moving = false;
         if (this.cursors.left?.isDown) {
             this.player.setAccelerationX(-acceleration);
@@ -100,7 +123,7 @@ export class WorldScene extends Phaser.Scene {
         const jumpPressed = this.cursors.up?.isDown;
         const initiatedJump = jumpPressed && isGrounded;
         if (initiatedJump) {
-            this.player.setVelocityY(-560);
+            this.player.setVelocityY(jumpVelocity);
             this.player.play("player-jump", true);
         }
 

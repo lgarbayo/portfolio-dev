@@ -13,14 +13,6 @@ const showOverlay = () => {
     overlay?.setAttribute("aria-hidden", "false");
 };
 
-const hideOverlay = () => {
-    overlay?.classList.remove("is-visible");
-    overlay?.setAttribute("aria-hidden", "true");
-    landingVideo?.play().catch(() => undefined);
-    game?.destroy(true);
-    game = null;
-};
-
 const mountGame = () => {
     if (!game) {
         game = new Phaser.Game(gameConfig);
@@ -37,9 +29,7 @@ document.addEventListener(
         enableLandingAudio();
 
         if (overlay?.classList.contains("is-visible")) {
-            if (event.key === "Escape") {
-                hideOverlay();
-            }
+            // ESC ya no cierra el overlay del juego
         } else {
             if (event.key === "Enter") {
                 mountGame();

@@ -34,8 +34,11 @@ export class WorldScene extends Phaser.Scene {
         this.handleMovement();
 
         if (this.backKey && Phaser.Input.Keyboard.JustDown(this.backKey)) {
-            this.scene.start("MenuScene");
-            return;
+            const openModal = document.querySelector('.portfolio-modal.open');
+            if (!openModal) {
+                this.scene.start("MenuScene");
+                return;
+            }
         }
     }
 
@@ -69,7 +72,7 @@ export class WorldScene extends Phaser.Scene {
         const activeWorld = this.activeWorld;
         if (!activeWorld?.structures) return;
         const { pipe, blocks } = activeWorld.structures;
-        
+
         if (pipe) {
             const pipeSprite = this.platforms.create(pipe.x, pipe.y, "pipe") as Phaser.Physics.Arcade.Image;
             pipeSprite.setDisplaySize(pipe.width, pipe.height);
@@ -79,15 +82,16 @@ export class WorldScene extends Phaser.Scene {
         }
 
         blocks.forEach((blockData, index) => {
-            const targetGroup = index === 0 ? this.interactiveBlocks : this.platforms;
-            
+            const interactiveIndex = activeWorld.id === "experience" ? 2 : 0;
+            const targetGroup = index === interactiveIndex ? this.interactiveBlocks : this.platforms;
+
             const block = targetGroup.create(blockData.x, blockData.y, "brick-block") as Phaser.Physics.Arcade.Image;
             block.setDisplaySize(blockData.width, blockData.height);
             block.setTint(activeWorld.color);
             block.setVisible(false);
             block.refreshBody();
-            
-            if (index === 0) {
+
+            if (index === interactiveIndex) {
                 block.setData("worldId", activeWorld.id);
                 block.setData("isHit", false);
             }
@@ -105,7 +109,7 @@ export class WorldScene extends Phaser.Scene {
         body.setSize(this.player.width * 0.3, this.player.height * 0.8);
         body.setOffset(this.player.width * 0.225, this.player.height * 0.1);
         this.physics.add.collider(this.player, this.platforms);
-        
+
         this.physics.add.collider(
             this.player,
             this.interactiveBlocks,
@@ -113,7 +117,7 @@ export class WorldScene extends Phaser.Scene {
             undefined,
             this
         );
-        
+
         this.player.play("player-idle");
     }
 
@@ -124,7 +128,7 @@ export class WorldScene extends Phaser.Scene {
         }
 
         const acceleration = 900;
-        const jumpVelocity = -700;
+        const jumpVelocity = -750;
         let moving = false;
         if (this.cursors.left?.isDown) {
             this.player.setAccelerationX(-acceleration);
@@ -214,28 +218,30 @@ export class WorldScene extends Phaser.Scene {
         const block = resolveGameObject(blockObj);
         if (!player || !block) return;
         if (!(player instanceof Phaser.Physics.Arcade.Sprite)) return;
-        if (!(block instanceof Phaser.Physics.Arcade.Image)) return;
+        if (!(block instanceof Phaser.Physics.Arcade.Image || block instanceof Phaser.Physics.Arcade.Sprite)) return;
 
         const playerBody = player.body as Phaser.Physics.Arcade.Body | undefined;
         if (!playerBody) return;
 
         const hitFromBelow = playerBody.touching.up || playerBody.blocked.up;
         if (!hitFromBelow) return;
-        
+
         const isHit = block.getData("isHit");
         if (isHit) return;
-        
+
         block.setData("isHit", true);
-        
+
         const worldId = block.getData("worldId");
-        console.log(`🍄 Bloque golpeado! Mundo: ${worldId}`);
-        
+
+        block.setData("isHit", true);
+
         const modalId = `${worldId}Modal`;
         const modal = document.getElementById(modalId);
+
         if (modal) {
             modal.classList.add("open");
         }
-        
+
         this.time.delayedCall(1000, () => {
             block.setData("isHit", false);
         });

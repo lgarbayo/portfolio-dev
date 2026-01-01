@@ -108,7 +108,7 @@ export class MenuScene extends Phaser.Scene {
             .setOrigin(0.5);
 
         this.add
-            .text(width / 2, height * 0.9, "©2025 LUIS GARBAYO · MADE WITH PHASER && TS", {
+            .text(width / 2, height * 0.9, "© 2026 Luis Garbayo Fernández · MADE WITH PHASER && TS", {
                 fontFamily: "monospace",
                 fontSize: "14px",
                 color: "#5CE68E",

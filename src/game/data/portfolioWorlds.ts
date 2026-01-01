@@ -26,8 +26,8 @@ export const portfolioWorlds: PortfolioWorld[] = [
         structures: {
             pipe: { x: 777, y: 616, width: 111, height: 173 },
             blocks: [
-                { x: 90, y: 460, width: 20, height: 93 },
-                { x: 417, y: 460, width: 275, height: 93 },
+                { x: 90, y: 440, width: 20, height: 63 },
+                { x: 417, y: 440, width: 275, height: 63 },
                 { x: 415, y: 230, width: 18, height: 93 },
             ],
         },
@@ -40,24 +40,6 @@ export const portfolioWorlds: PortfolioWorld[] = [
         background: {
             key: "world-bg-projects",
             path: "/assets/tiles/projects.jpeg",
-        },
-        structures: {
-            pipe: { x: 777, y: 616, width: 111, height: 138 },
-            blocks: [
-                { x: 90, y: 460, width: 20, height: 70 },
-                { x: 417, y: 460, width: 275, height: 70 },
-                { x: 415, y: 230, width: 18, height: 70 },
-            ],
-        },
-    },
-    {
-        id: "skills",
-        title: "SKILLS",
-        color: 0x5c4b51,
-        position: { x: 780, y: 420 },
-        background: {
-            key: "world-bg-skills",
-            path: "/assets/tiles/skills.jpeg",
         },
         structures: {
             pipe: { x: 777, y: 616, width: 111, height: 138 },

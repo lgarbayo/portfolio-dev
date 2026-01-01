@@ -104,6 +104,7 @@ body {
   0% {
     opacity: 0.15;
   }
+
   100% {
     opacity: 0.4;
   }
@@ -173,6 +174,12 @@ body {
   font-size: 2rem;
 }
 
+.modal-content h2.contact-title,
+.modal-content h2.about-title,
+.modal-content h2.experience-title {
+  color: #5CE68E;
+}
+
 .modal-content p {
   color: rgba(255, 255, 255, 0.8);
   line-height: 1.6;
@@ -191,4 +198,297 @@ body {
 
 .modal-content li:last-child {
   border-bottom: none;
+}
+
+.modal-content--about {
+  max-width: 1500px;
+}
+
+.about-title {
+  font-family: monospace;
+  font-size: 48px;
+  color: #5CE68E;
+  margin-bottom: 2rem;
+  text-align: center;
+  font-weight: normal;
+  letter-spacing: 2px;
+  animation: titleGlow 0.6s ease-in-out infinite alternate;
+}
+
+.about-container {
+  display: flex;
+  gap: 3rem;
+  align-items: center;
+}
+
+.about-content {
+  flex: 1;
+}
+
+.about-profile {
+  flex-shrink: 0;
+}
+
+.about-profile-image {
+  width: 400px;
+  height: 500px;
+  border-radius: 8px;
+  object-fit: cover;
+  border: 4px solid #5CE68E;
+  transition: all 0.3s ease;
+}
+
+.about-profile-image:hover {
+  transform: scale(1.02);
+}
+
+@media (max-width: 900px) {
+  .about-container {
+    flex-direction: column;
+  }
+
+  .about-profile {
+    align-self: center;
+    position: static;
+  }
+
+  .about-profile-image {
+    width: 200px;
+    height: 200px;
+  }
+}
+
+.about-section {
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 12px;
+  border-left: 3px solid #5CE68E;
+}
+
+.about-section-title {
+  font-family: monospace;
+  font-size: 1.3rem;
+  color: #5CE68E;
+  margin-top: 0;
+  margin-bottom: 1rem;
+  font-weight: 600;
+}
+
+.about-text {
+  color: rgba(255, 255, 255, 0.9);
+  line-height: 1.8;
+  font-size: 1.05rem;
+  margin: 0;
+}
+
+.about-text strong {
+  color: #5CE68E;
+  font-weight: 600;
+}
+
+.modal-content--experience {
+  max-width: 2000px;
+}
+
+.experience-title {
+  font-family: monospace;
+  font-size: 48px;
+  color: #5CE68E;
+  margin: 0 0 2rem 0;
+  text-align: center;
+  font-weight: normal;
+  letter-spacing: 2px;
+  animation: titleGlow 0.6s ease-in-out infinite alternate;
+}
+
+.experience-item {
+  margin-bottom: 2.5rem;
+  padding: 1.5rem;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 12px;
+  border-left: 3px solid #5CE68E;
+}
+
+.experience-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.experience-role {
+  font-family: monospace;
+  font-size: 1.4rem;
+  color: #5CE68E;
+  margin: 0;
+  font-weight: 600;
+}
+
+.experience-company {
+  font-family: monospace;
+  font-size: 1.1rem;
+  color: rgba(92, 230, 142, 0.8);
+  font-weight: 500;
+}
+
+.experience-period {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.95rem;
+  margin: 0 0 1rem 0;
+  font-style: italic;
+}
+
+.experience-description {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.experience-description li {
+  color: rgba(255, 255, 255, 0.9);
+  line-height: 1.7;
+  font-size: 1.05rem;
+  margin-bottom: 0.75rem;
+  padding-left: 1.5rem;
+  position: relative;
+}
+
+.experience-description li:before {
+  content: "•";
+  color: #5CE68E;
+  font-size: 1.2rem;
+  position: absolute;
+  left: 0;
+}
+
+.experience-description li strong {
+  color: #5CE68E;
+  font-weight: 600;
+}
+
+.experience-logo {
+  height: 45px;
+  width: auto;
+  object-fit: contain;
+}
+
+.experience-logo--inline {
+  height: 45px;
+}
+
+.experience-tech {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(92, 230, 142, 0.2);
+}
+
+.tech-badge {
+  display: inline-block;
+  padding: 0.4rem 0.8rem;
+  background: rgba(92, 230, 142, 0.1);
+  border: 1px solid rgba(92, 230, 142, 0.3);
+  border-radius: 6px;
+  color: #5CE68E;
+  font-size: 0.85rem;
+  font-family: monospace;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.tech-badge:hover {
+  background: rgba(92, 230, 142, 0.2);
+  border-color: rgba(92, 230, 142, 0.5);
+  transform: translateY(-2px);
+}
+
+.tech-stack {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.modal-content--contact {
+  text-align: center;
+}
+
+.contact-title {
+  font-family: monospace;
+  font-size: 56px;
+  color: #5CE68E;
+  margin-bottom: 1.5rem;
+  font-weight: normal;
+  letter-spacing: 2px;
+  animation: titleGlow 1.2s ease-in-out infinite alternate;
+}
+
+@keyframes titleGlow {
+  0% {
+    opacity: 0.35;
+  }
+
+  100% {
+    opacity: 1;
+  }
+}
+
+.contact-description {
+  color: rgba(255, 255, 255, 0.9);
+  line-height: 1.8;
+  margin-bottom: 2rem;
+  font-size: 1.3rem;
+}
+
+.contact-buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.contact-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 1rem;
+  background: rgba(92, 230, 142, 0.1);
+  border: 2px solid #5CE68E;
+  border-radius: 50%;
+  color: #5CE68E;
+  text-decoration: none;
+  font-family: monospace;
+  font-size: 16px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  width: 60px;
+  height: 60px;
+}
+
+.contact-btn:hover {
+  background: rgba(92, 230, 142, 0.2);
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(92, 230, 142, 0.3);
+}
+
+.contact-btn:active {
+  transform: translateY(-2px);
+}
+
+.contact-btn__icon {
+  width: 2rem;
+  height: 2rem;
+  filter: brightness(0) saturate(100%) invert(81%) sepia(18%) saturate(1154%) hue-rotate(83deg) brightness(96%) contrast(91%);
+}
+
+.contact-btn:hover .contact-btn__icon {
+  filter: brightness(0) saturate(100%) invert(81%) sepia(18%) saturate(1154%) hue-rotate(83deg) brightness(110%) contrast(91%);
 }

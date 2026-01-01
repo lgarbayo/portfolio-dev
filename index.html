@@ -1,87 +1,186 @@
 <!doctype html>
 <html lang="es">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/me-2d.png" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Luis's Interactive portfolio</title>
-  </head>
-  <body>
-    <div class="artwork-hero">
-      <video
-        id="landing-video"
-        class="artwork-hero__video"
-        autoplay
-        loop
-        muted
-        playsinline
-        poster="/assets/ui/landing.png"
-      >
-        <source src="/assets/ui/landing_V2.mp4" type="video/mp4" />
-      </video>
-      <div class="artwork-hero__overlay"></div>
-    </div>
 
-    <div id="game-overlay" class="game-overlay" aria-hidden="true">
-      <div class="game-shell" role="dialog" aria-label="Portfolio jugable">
-        <div id="app"></div>
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/me-2d.png" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Luis's Interactive portfolio</title>
+</head>
+
+<body>
+  <div class="artwork-hero">
+    <video id="landing-video" class="artwork-hero__video" autoplay loop muted playsinline
+      poster="/assets/ui/landing.png">
+      <source src="/assets/ui/landing_V2.mp4" type="video/mp4" />
+    </video>
+    <div class="artwork-hero__overlay"></div>
+  </div>
+
+  <div id="game-overlay" class="game-overlay" aria-hidden="true">
+    <div class="game-shell" role="dialog" aria-label="Portfolio jugable">
+      <div id="app"></div>
+    </div>
+  </div>
+
+  <div id="aboutModal" class="portfolio-modal">
+    <div class="modal-content modal-content--about">
+      <button class="modal-close" onclick="document.getElementById('aboutModal').classList.remove('open')">✕</button>
+      <h2 class="about-title">ABOUT ME</h2>
+
+      <div class="about-container">
+        <div class="about-content">
+          <div class="about-section">
+            <h3 class="about-section-title">Building Solutions with Purpose</h3>
+            <p class="about-text">My journey has always been driven by a fascination with how technology reshapes the
+              world. Currently ending the degree in Computer Engineering at the University of Vigo, I have
+              built a solid interest in software development, data analysis, cloud computing and machine learning. I
+              don't just write code; I focus on the logic behind it, aiming for structured, efficient, and scalable
+              solutions that solve real-world problems.</p>
+          </div>
+
+          <div class="about-section">
+            <h3 class="about-section-title">From Development to Education</h3>
+            <p class="about-text">In 2025, I made the leap into professional development, an experience that shifted my
+              perspective. It sparked a deep interest in creating unique tools designed to make a positive social
+              impact. This technical side is balanced by my background as a STEM educator. Teaching
+              complex subjects to high school students and preparing them for university entrance exams has been vital
+              for my growth. It taught me how to communicate complex ideas clearly, adapt to different learning styles,
+              and maintain a mindset of continuous improvement.</p>
+          </div>
+
+          <div class="about-section">
+            <h3 class="about-section-title">The Vision</h3>
+            <p class="about-text">I thrive in dynamic environments where I can blend technical rigor with a
+              collaborative spirit. I see myself as a proactive problem-solver who values teamwork and constant
+              evolution. My goal is simple: to keep growing as a professional while building digital resources that are
+              not only functional but truly valuable to today's society.</p>
+          </div>
+        </div>
+
+        <div class="about-profile">
+          <img src="/assets/ui/yo.jpg" alt="Luis Garbayo" class="about-profile-image" />
+        </div>
       </div>
     </div>
+  </div>
 
-    <div id="aboutModal" class="portfolio-modal">
-      <div class="modal-content">
-        <button class="modal-close" onclick="document.getElementById('aboutModal').classList.remove('open')">✕</button>
-        <h2>📖 About Me</h2>
-        <p>Hola! Soy Luis, desarrollador...</p>
-        <p>Aquí puedes poner tu biografía, skills, etc.</p>
-      </div>
+  <div id="projectsModal" class="portfolio-modal">
+    <div class="modal-content">
+      <button class="modal-close" onclick="document.getElementById('projectsModal').classList.remove('open')">✕</button>
+      <h2>💼 Projects</h2>
+      <p>Mis proyectos destacados:</p>
+      <ul>
+        <li>Proyecto 1</li>
+        <li>Proyecto 2</li>
+        <li>Proyecto 3</li>
+      </ul>
     </div>
+  </div>
 
-    <div id="projectsModal" class="portfolio-modal">
-      <div class="modal-content">
-        <button class="modal-close" onclick="document.getElementById('projectsModal').classList.remove('open')">✕</button>
-        <h2>💼 Projects</h2>
-        <p>Mis proyectos destacados:</p>
-        <ul>
-          <li>Proyecto 1</li>
-          <li>Proyecto 2</li>
-          <li>Proyecto 3</li>
+  <div id="experienceModal" class="portfolio-modal">
+    <div class="modal-content modal-content--experience">
+      <button class="modal-close"
+        onclick="document.getElementById('experienceModal').classList.remove('open')">✕</button>
+      <h2 class="experience-title">EXPERIENCE</h2>
+
+      <div class="experience-item">
+        <div class="experience-header">
+          <h3 class="experience-role">Software Developer Intern @ Dataspartan</h3>
+          <img src="/assets/ui/DS-Logo-Transparent-1-2.png" alt="Dataspartan logo"
+            class="experience-logo experience-logo--inline" />
+        </div>
+        <p class="experience-period">Sept 2025 – Dec 2025</p>
+        <ul class="experience-description">
+          <li>Contributed to full-stack development projects focusing on high-quality code and scalable solutions.</li>
+          <li>Assisted in the integration of Artificial Intelligence features into existing company workflows.</li>
+          <li>Mastered industry-standard DevOps tools, including Docker for containerization, Git for version control,
+            and advanced shell scripting.</li>
+        </ul>
+        <div class="tech-stack">
+          <span class="tech-badge">Java</span>
+          <span class="tech-badge">Spring Boot</span>
+          <span class="tech-badge">Docker</span>
+          <span class="tech-badge">MySQL</span>
+          <span class="tech-badge">PostgreSQL</span>
+          <span class="tech-badge">Git</span>
+          <span class="tech-badge">MapStruct</span>
+          <span class="tech-badge">Flyway</span>
+          <span class="tech-badge">Angular</span>
+          <span class="tech-badge">TypeScript</span>
+          <span class="tech-badge">Python</span>
+          <span class="tech-badge">FastAPI</span>
+        </div>
+      </div>
+
+      <div class="experience-item">
+        <div class="experience-header">
+          <h3 class="experience-role">STEM Private Tutor</h3>
+        </div>
+        <p class="experience-period">Sept 2024 – Present</p>
+        <ul class="experience-description">
+          <li>Providing personalized academic support for Secondary and High School students, developing custom
+            pedagogical materials and exercises tailored to individual learning gaps, resulting in improved academic
+            performance and exam confidence.</li>
+        </ul>
+      </div>
+
+      <div class="experience-item">
+        <div class="experience-header">
+          <h3 class="experience-role">Student Mentor @ PAT-ANAE Program (University of Vigo)</h3>
+        </div>
+        <p class="experience-period">2025 – Present</p>
+        <ul class="experience-description">
+          <li>Guiding new students through their university transition as an official mentor, offering specialized
+            academic and organizational support for the Computer Engineering program</li>
+        </ul>
+      </div>
+
+      <div class="experience-item">
+        <div class="experience-header">
+          <h3 class="experience-role">IT Systems Training Scholarship @ Santander Open Academy</h3>
+        </div>
+        <p class="experience-period">2025 – Present</p>
+        <ul class="experience-description">
+          <li>Selected for the Santander Systems Training Scholarship (2025/2026), focusing
+            on advanced IT infrastructure and system management.</li>
         </ul>
       </div>
     </div>
+  </div>
 
-    <div id="skillsModal" class="portfolio-modal">
-      <div class="modal-content">
-        <button class="modal-close" onclick="document.getElementById('skillsModal').classList.remove('open')">✕</button>
-        <h2>⚡ Skills</h2>
-        <p>Tecnologías que domino:</p>
-        <ul>
-          <li>JavaScript / TypeScript</li>
-          <li>React / Vue / Angular</li>
-          <li>Node.js</li>
-        </ul>
+  <div id="contactModal" class="portfolio-modal">
+    <div class="modal-content modal-content--contact">
+      <button class="modal-close" onclick="document.getElementById('contactModal').classList.remove('open')">✕</button>
+      <h2 class="contact-title">GET IN TOUCH</h2>
+      <p class="contact-description">I'm always eager to exchange ideas with other builders, dive into complex technical
+        challenges, or explore
+        emerging trends. If you're looking for a collaborator or simply want to talk code, I'm just a message away.</p>
+      <div class="contact-buttons">
+        <a href="mailto:lugarbayo@gmail.com" class="contact-btn">
+          <img src="/assets/ui/mail-svgrepo-com.svg" alt="Email" class="contact-btn__icon" />
+        </a>
+        <a href="https://linkedin.com/in/luis-garbayo" target="_blank" rel="noopener noreferrer" class="contact-btn">
+          <img src="/assets/ui/linkedin-svgrepo-com.svg" alt="LinkedIn" class="contact-btn__icon" />
+        </a>
+        <a href="https://github.com/lgarbayo" target="_blank" rel="noopener noreferrer" class="contact-btn">
+          <img src="/assets/ui/github-mark-white.svg" alt="GitHub" class="contact-btn__icon" />
+        </a>
       </div>
     </div>
+  </div>
 
-    <div id="experienceModal" class="portfolio-modal">
-      <div class="modal-content">
-        <button class="modal-close" onclick="document.getElementById('experienceModal').classList.remove('open')">✕</button>
-        <h2>🏆 Experience</h2>
-        <p>Mi experiencia profesional:</p>
-        <p>Puedes añadir tu CV aquí</p>
-      </div>
-    </div>
+  <script type="module" src="/src/main.ts"></script>
+  <script>
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') {
+        const openModal = document.querySelector('.portfolio-modal.open');
+        if (openModal) {
+          openModal.classList.remove('open');
+        }
+      }
+    });
+  </script>
+</body>
 
-    <div id="contactModal" class="portfolio-modal">
-      <div class="modal-content">
-        <button class="modal-close" onclick="document.getElementById('contactModal').classList.remove('open')">✕</button>
-        <h2>📧 Contact</h2>
-        <p>Email: tu@email.com</p>
-        <p>LinkedIn: /tu-perfil</p>
-        <p>GitHub: /tu-usuario</p>
-      </div>
-    </div>
-
-    <script type="module" src="/src/main.ts"></script>
-  </body>
 </html>

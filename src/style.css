@@ -100,6 +100,29 @@ body {
   }
 }
 
+@media (max-width: 768px) {
+  .artwork-hero {
+    height: 100vh;
+    padding: 0;
+  }
+
+  .artwork-hero__video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    clip-path: inset(12% 0% 12% 0%);
+  }
+
+  .artwork-hero__overlay {
+    background: radial-gradient(circle at center, transparent 15%, rgba(1, 4, 9, 0.92));
+  }
+
+  .game-shell {
+    padding: 0.5rem;
+  }
+}
+
 @keyframes shimmer {
   0% {
     opacity: 0.15;
@@ -206,7 +229,7 @@ body {
 
 .about-title {
   font-family: monospace;
-  font-size: 48px;
+  font-size: clamp(2rem, 3vw, 3rem);
   color: #5CE68E;
   margin-bottom: 2rem;
   text-align: center;
@@ -278,7 +301,7 @@ body {
 .about-text {
   color: rgba(255, 255, 255, 0.9);
   line-height: 1.8;
-  font-size: 1.05rem;
+  font-size: clamp(1rem, 0.95rem + 0.4vw, 1.1rem);
   margin: 0;
 }
 
@@ -293,7 +316,7 @@ body {
 
 .experience-title {
   font-family: monospace;
-  font-size: 48px;
+  font-size: clamp(2rem, 3vw, 3rem);
   color: #5CE68E;
   margin: 0 0 2rem 0;
   text-align: center;
@@ -350,7 +373,7 @@ body {
 .experience-description li {
   color: rgba(255, 255, 255, 0.9);
   line-height: 1.7;
-  font-size: 1.05rem;
+  font-size: clamp(1rem, 0.95rem + 0.35vw, 1.05rem);
   margin-bottom: 0.75rem;
   padding-left: 1.5rem;
   position: relative;
@@ -376,7 +399,7 @@ body {
 }
 
 .experience-logo--inline {
-  height: 45px;
+  height: 65px;
 }
 
 .experience-tech {
@@ -491,4 +514,43 @@ body {
 
 .contact-btn:hover .contact-btn__icon {
   filter: brightness(0) saturate(100%) invert(81%) sepia(18%) saturate(1154%) hue-rotate(83deg) brightness(110%) contrast(91%);
+}
+
+@media (max-width: 768px) {
+  .modal-content {
+    width: 95%;
+    padding: 1.25rem;
+  }
+
+  .about-container {
+    flex-direction: column;
+    gap: 1.5rem;
+    align-items: center;
+  }
+
+  .about-content,
+  .about-profile {
+    width: 100%;
+  }
+
+  .about-profile-image {
+    width: min(260px, 70vw);
+    height: min(320px, 75vw);
+    margin: 0 auto;
+    display: block;
+  }
+
+  .experience-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .experience-logo--inline {
+    align-self: flex-start;
+    margin-top: 0.5rem;
+  }
+
+  .experience-item {
+    padding: 1rem;
+  }
 }

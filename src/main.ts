@@ -2,6 +2,17 @@ import "./style.css";
 import Phaser from "phaser";
 import { gameConfig } from "./game/GameConfig";
 
+window.addEventListener("load", () => {
+  const preloader = document.getElementById("preloader");
+  if (preloader) {
+    preloader.classList.add("fade-out");
+    setTimeout(() => {
+      preloader.style.display = "none";
+      document.body.classList.add("loaded");
+    }, 500);
+  }
+});
+
 let game: Phaser.Game | null = null;
 let landingAudioEnabled = false;
 
@@ -103,6 +114,21 @@ closeOverlayButton?.addEventListener("click", (event) => {
         hideOverlay();
     }
     setTimeout(() => setTouchBlock(false), 50);
+});
+
+document.querySelectorAll(".modal-close").forEach((button) => {
+    const closeModal = (event: Event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        const modalId = button.getAttribute("data-close");
+        if (modalId) {
+            const modal = document.getElementById(modalId);
+            modal?.classList.remove("open");
+        }
+    };
+    
+    button.addEventListener("touchend", closeModal, { passive: false });
+    button.addEventListener("click", closeModal);
 });
 
 heroArea?.addEventListener("click", () => {

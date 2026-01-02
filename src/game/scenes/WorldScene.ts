@@ -118,7 +118,7 @@ export class WorldScene extends Phaser.Scene {
         }
 
         blocks.forEach((blockData, index) => {
-            const interactiveIndex = activeWorld.id === "experience" ? 2 : 0;
+            const interactiveIndex = (activeWorld.id === "experience" || activeWorld.id === "projects") ? 2 : 0;
             const targetGroup = index === interactiveIndex ? this.interactiveBlocks : this.platforms;
 
             const block = targetGroup.create(blockData.x, blockData.y, "brick-block") as Phaser.Physics.Arcade.Image;

@@ -75,7 +75,7 @@ body {
 }
 
 .game-overlay__close {
-  display: none; /* Oculto en todos los dispositivos */
+  display: none;
 }
 
 .game-overlay__close:hover {
@@ -261,9 +261,102 @@ body {
   font-size: 2rem;
 }
 
+.projects-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  align-items: start;
+}
+
+.projects-column {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.projects-column-title {
+  font-family: monospace;
+  font-size: 1.5rem;
+  color: #5CE68E;
+  margin: 0 0 1.5rem 0;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid rgba(92, 230, 142, 0.3);
+  font-weight: 600;
+  letter-spacing: 1px;
+}
+
+@media (max-width: 1024px) {
+  .projects-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.project-card {
+  margin-bottom: 2.5rem;
+  padding: 1.5rem;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 12px;
+  border-left: 3px solid #5CE68E;
+}
+
+.project-card h3 {
+  font-family: monospace;
+  font-size: 1.4rem;
+  color: #5CE68E;
+  margin: 0 0 1rem 0;
+  font-weight: 600;
+}
+
+.project-description {
+  color: rgba(255, 255, 255, 0.9);
+  line-height: 1.7;
+  font-size: clamp(1rem, 0.95rem + 0.35vw, 1.05rem);
+  margin-bottom: 1rem;
+}
+
+.tech-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 1rem 0;
+}
+
+.tech-badge {
+  background: rgba(92, 230, 142, 0.15);
+  color: #5CE68E;
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  border: 1px solid rgba(92, 230, 142, 0.3);
+}
+
+.project-features {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.9rem;
+  margin: 1rem 0;
+  font-style: italic;
+}
+
+.project-link {
+  display: inline-block;
+  color: #5CE68E;
+  text-decoration: none;
+  font-weight: 600;
+  margin-top: 0.5rem;
+  transition: all 0.2s ease;
+}
+
+.project-link:hover {
+  color: #7EF4A9;
+  transform: translateX(5px);
+}
+
+
 .modal-content h2.contact-title,
 .modal-content h2.about-title,
-.modal-content h2.experience-title {
+.modal-content h2.experience-title,
+.modal-content h2.projects-title {
   color: #5CE68E;
 }
 
@@ -376,6 +469,21 @@ body {
 
 .modal-content--experience {
   max-width: 2000px;
+}
+
+.modal-content--projects {
+  max-width: 2000px;
+}
+
+.projects-title {
+  font-family: monospace;
+  font-size: clamp(2rem, 3vw, 3rem);
+  color: #5CE68E;
+  margin: 0 0 2rem 0;
+  text-align: center;
+  font-weight: normal;
+  letter-spacing: 2px;
+  animation: titleGlow 0.6s ease-in-out infinite alternate;
 }
 
 .experience-title {
@@ -688,5 +796,18 @@ body {
   .tech-badge {
     font-size: 0.75rem;
     padding: 0.3rem 0.6rem;
+  }
+  
+  .project-card h3 {
+    font-size: 1.2rem;
+  }
+  
+  .project-description {
+    font-size: 0.85rem;
+    line-height: 1.5;
+  }
+  
+  .project-features {
+    font-size: 0.75rem;
   }
 }

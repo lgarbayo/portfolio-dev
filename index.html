@@ -68,15 +68,90 @@
   </div>
 
   <div id="projectsModal" class="portfolio-modal">
-    <div class="modal-content">
+    <div class="modal-content modal-content--projects">
       <button class="modal-close" onclick="document.getElementById('projectsModal').classList.remove('open')">✕</button>
-      <h2>💼 Projects</h2>
-      <p>Mis proyectos destacados:</p>
-      <ul>
-        <li>Proyecto 1</li>
-        <li>Proyecto 2</li>
-        <li>Proyecto 3</li>
-      </ul>
+      <h2 class="projects-title">PROJECTS</h2>
+
+      <div class="projects-grid">
+        <div class="projects-column">
+          <h3 class="projects-column-title">App Web</h3>
+          <div class="project-card">
+            <h3>TaskGroup</h3>
+            <p class="project-description">Collaborative task management system for shared projects. Full-stack
+              application that allows teams to create projects, assign tasks, and track progress in real-time.</p>
+            <div class="tech-badges">
+              <span class="tech-badge">Angular</span>
+              <span class="tech-badge">TypeScript</span>
+              <span class="tech-badge">RxJS</span>
+              <span class="tech-badge">Laravel</span>
+              <span class="tech-badge">Eloquent ORM</span>
+              <span class="tech-badge">Docker</span>
+              <span class="tech-badge">PHP</span>
+              <span class="tech-badge">PostgreSQL</span>
+            </div>
+            <p class="project-features">Project management • Task assignment • Progress tracking • Invitation system</p>
+            <a href="https://github.com/lgarbayo/TaskGroup" target="_blank" class="project-link">View on GitHub →</a>
+          </div>
+
+          <div class="project-card">
+            <h3>Project Manager Web</h3>
+            <p class="project-description">Angular web application for project visualization and management. Intuitive
+              interface with Gantt charts, milestone analysis, and integrated AI estimations.</p>
+            <div class="tech-badges">
+              <span class="tech-badge">Angular 20</span>
+              <span class="tech-badge">TypeScript</span>
+              <span class="tech-badge">RxJS</span>
+              <span class="tech-badge">Signals</span>
+              <span class="tech-badge">REST Client</span>
+            </div>
+            <p class="project-features">Gantt view • Progress analysis • AI estimates • Milestone management</p>
+            <a href="https://github.com/lgarbayo/awesome-project-manager-app-web" target="_blank"
+              class="project-link">View on GitHub →</a>
+          </div>
+        </div>
+
+        <div class="projects-column">
+          <h3 class="projects-column-title">Backend</h3>
+          <div class="project-card">
+            <h3>Project Manager API</h3>
+            <p class="project-description">Java Spring Boot REST API with hexagonal architecture for advanced project
+              management with AI-powered analysis. Integrates RAG services for task estimation and automatic description
+              generation.</p>
+            <div class="tech-badges">
+              <span class="tech-badge">Java 21</span>
+              <span class="tech-badge">Spring Boot</span>
+              <span class="tech-badge">Docker</span>
+              <span class="tech-badge">PostgreSQL</span>
+              <span class="tech-badge">MapStruct</span>
+              <span class="tech-badge">Flyway</span>
+              <span class="tech-badge">Python</span>
+              <span class="tech-badge">FastAPI</span>
+              <span class="tech-badge">AI/RAG</span>
+            </div>
+            <p class="project-features">Task and milestone management • AI estimation • Project analysis • Description
+              generation</p>
+            <a href="https://github.com/lgarbayo/project-manager-API-Rest" target="_blank" class="project-link">View on
+              GitHub →</a>
+          </div>
+
+          <div class="project-card">
+            <h3>Book Catalog API</h3>
+            <p class="project-description">Java Spring Boot REST API with hexagonal architecture for managing book and
+              author catalogs. Exhaustive validation, centralized error handling, and production-ready decoupled
+              architecture.</p>
+            <div class="tech-badges">
+              <span class="tech-badge">Java 21</span>
+              <span class="tech-badge">Spring Boot</span>
+              <span class="tech-badge">MySQL</span>
+              <span class="tech-badge">Docker</span>
+            </div>
+            <p class="project-features">Complete CRUD • ISBN validation • Edition management • Hexagonal architecture
+            </p>
+            <a href="https://github.com/lgarbayo/Book-Catalog-API-Rest" target="_blank" class="project-link">View on
+              GitHub →</a>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 

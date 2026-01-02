@@ -6,6 +6,7 @@ export type PortfolioWorld = {
     background: {
         key: string;
         path: string;
+        mobilePath?: string;
     };
     structures: {
         pipe: { x: number; y: number; width: number; height: number };
@@ -22,6 +23,7 @@ export const portfolioWorlds: PortfolioWorld[] = [
         background: {
             key: "world-bg-about",
             path: "/assets/tiles/about me.jpeg",
+            mobilePath: "/assets/tiles/mobile/about me.jpeg",
         },
         structures: {
             pipe: { x: 777, y: 616, width: 111, height: 173 },
@@ -40,6 +42,7 @@ export const portfolioWorlds: PortfolioWorld[] = [
         background: {
             key: "world-bg-projects",
             path: "/assets/tiles/projects.jpeg",
+            mobilePath: "/assets/tiles/mobile/projects.jpeg",
         },
         structures: {
             pipe: { x: 777, y: 616, width: 111, height: 138 },
@@ -58,6 +61,7 @@ export const portfolioWorlds: PortfolioWorld[] = [
         background: {
             key: "world-bg-experience",
             path: "/assets/tiles/experience.jpeg",
+            mobilePath: "/assets/tiles/mobile/experience.jpeg",
         },
         structures: {
             pipe: { x: 1000000, y: 10000000, width: 0, height: 0 },
@@ -76,6 +80,7 @@ export const portfolioWorlds: PortfolioWorld[] = [
         background: {
             key: "world-bg-contact",
             path: "/assets/tiles/contact.jpeg",
+            mobilePath: "/assets/tiles/mobile/contact.jpeg",
         },
         structures: {
             pipe: { x: 777, y: 616, width: 111, height: 138 },

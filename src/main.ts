@@ -7,10 +7,24 @@ let landingAudioEnabled = false;
 
 const overlay = document.querySelector<HTMLElement>("#game-overlay");
 const landingVideo = document.querySelector<HTMLVideoElement>("#landing-video");
+const closeOverlayButton = document.querySelector<HTMLButtonElement>("#close-overlay");
+const heroArea = document.querySelector<HTMLElement>(".artwork-hero");
+
+const setTouchBlock = (blocked: boolean) => {
+    (window as typeof window & { __blockGameInput?: boolean }).__blockGameInput = blocked;
+};
 
 const showOverlay = () => {
     overlay?.classList.add("is-visible");
     overlay?.setAttribute("aria-hidden", "false");
+};
+
+const hideOverlay = () => {
+    overlay?.classList.remove("is-visible");
+    overlay?.setAttribute("aria-hidden", "true");
+    landingVideo?.play().catch(() => undefined);
+    game?.destroy(true);
+    game = null;
 };
 
 const mountGame = () => {
@@ -21,6 +35,14 @@ const mountGame = () => {
     showOverlay();
 };
 
+const returnToMenuFromWorld = () => {
+    if (game?.scene.isActive("WorldScene")) {
+        game.scene.start("MenuScene");
+        return true;
+    }
+    return false;
+};
+
 const preventKeys = new Set(["Space", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"]);
 
 document.addEventListener(
@@ -29,7 +51,12 @@ document.addEventListener(
         enableLandingAudio();
 
         if (overlay?.classList.contains("is-visible")) {
-            // ESC ya no cierra el overlay del juego
+            if (event.key === "Escape") {
+                const handled = returnToMenuFromWorld();
+                if (!handled) {
+                    hideOverlay();
+                }
+            }
         } else {
             if (event.key === "Enter") {
                 mountGame();
@@ -52,4 +79,34 @@ const enableLandingAudio = () => {
 
 document.addEventListener("pointerdown", () => {
     enableLandingAudio();
+});
+
+const stopPointerPropagation = (event: Event) => {
+    event.stopPropagation();
+    event.preventDefault();
+};
+
+closeOverlayButton?.addEventListener("pointerdown", (event) => {
+    stopPointerPropagation(event);
+    setTouchBlock(true);
+});
+const releaseBlock = (event: Event) => {
+    stopPointerPropagation(event);
+    setTimeout(() => setTouchBlock(false), 50);
+};
+closeOverlayButton?.addEventListener("pointerup", releaseBlock);
+closeOverlayButton?.addEventListener("pointercancel", releaseBlock);
+
+closeOverlayButton?.addEventListener("click", (event) => {
+    event.stopPropagation();
+    if (!returnToMenuFromWorld()) {
+        hideOverlay();
+    }
+    setTimeout(() => setTouchBlock(false), 50);
+});
+
+heroArea?.addEventListener("click", () => {
+    if (overlay?.classList.contains("is-visible")) return;
+    enableLandingAudio();
+    mountGame();
 });

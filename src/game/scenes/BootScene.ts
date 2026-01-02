@@ -11,8 +11,17 @@ export class BootScene extends Phaser.Scene {
             frameWidth: 640,
             frameHeight: 640,
         });
+        
+        const isTouchDevice = this.sys.game.device.input.touch;
+        const isSmallScreen = this.scale.width <= 820;
+        const preferMobileAssets = isTouchDevice || isSmallScreen;
+        
         portfolioWorlds.forEach((world) => {
-            this.load.image(world.background.key, world.background.path);
+            const backgroundPath =
+                preferMobileAssets && world.background.mobilePath
+                    ? world.background.mobilePath
+                    : world.background.path;
+            this.load.image(world.background.key, backgroundPath);
         });
 
         this.createSolidTexture("world-node", 64, 64, 0xffffff);

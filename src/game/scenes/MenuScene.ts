@@ -7,6 +7,7 @@ export class MenuScene extends Phaser.Scene {
     private worlds: PortfolioWorld[] = [];
     private selectedIndex = 0;
     private entries: Phaser.GameObjects.Container[] = [];
+    private tapZones: Phaser.GameObjects.Zone[] = [];
 
     constructor() {
         super("MenuScene");
@@ -93,6 +94,16 @@ export class MenuScene extends Phaser.Scene {
             row.add([badge, name]);
             row.setAlpha(index === this.selectedIndex ? 1 : 0.35);
             this.entries.push(row);
+
+            const zone = this.add
+                .zone(width * 0.5, listY + index * spacing, width * 0.8, spacing)
+                .setInteractive({ useHandCursor: true });
+            zone.on("pointerdown", () => this.setSelection(index));
+            zone.on("pointerup", () => {
+                this.setSelection(index);
+                this.launchWorld();
+            });
+            this.tapZones.push(zone);
         });
 
         this.updateCursorPosition();
@@ -133,6 +144,12 @@ export class MenuScene extends Phaser.Scene {
         if (this.cursor.anims.currentAnim?.key !== "player-run") {
             this.cursor.play("player-run");
         }
+    }
+
+    private setSelection(index: number) {
+        if (!this.worlds.length) return;
+        this.selectedIndex = Phaser.Math.Clamp(index, 0, this.worlds.length - 1);
+        this.updateCursorPosition();
     }
 
     private launchWorld() {

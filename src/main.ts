@@ -33,6 +33,7 @@ window.addEventListener("load", () => {
 
 let game: Phaser.Game | null = null;
 let landingAudioEnabled = false;
+let audioEnabledTime = 0;
 
 const overlay = document.querySelector<HTMLElement>("#game-overlay");
 const landingVideo = document.querySelector<HTMLVideoElement>("#landing-video");
@@ -104,6 +105,7 @@ const enableLandingAudio = () => {
     landingVideo.volume = 0.8;
     landingVideo.play().catch(() => undefined);
     landingAudioEnabled = true;
+    audioEnabledTime = Date.now();
 };
 
 document.addEventListener("pointerdown", () => {
@@ -151,6 +153,14 @@ document.querySelectorAll(".modal-close").forEach((button) => {
 
 heroArea?.addEventListener("click", () => {
     if (overlay?.classList.contains("is-visible")) return;
-    enableLandingAudio();
+    
+    if (!landingAudioEnabled) {
+        enableLandingAudio();
+        return;
+    }
+    
+    const timeSinceAudioEnabled = Date.now() - audioEnabledTime;
+    if (timeSinceAudioEnabled < 300) return;
+    
     mountGame();
 });

@@ -2,12 +2,19 @@ import "./style.css";
 import Phaser from "phaser";
 import { gameConfig } from "./game/GameConfig";
 
-// Detectar móvil y cargar el video correcto
 window.addEventListener("DOMContentLoaded", () => {
     const landingVideo = document.querySelector<HTMLVideoElement>("#landing-video");
-    const isMobile = window.innerWidth <= 768;
-    
-    if (landingVideo && isMobile) {
+
+    const isMobileOrTablet = (() => {
+        const hasTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+        const mobileRegex = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i;
+        const isMobileUA = mobileRegex.test(navigator.userAgent);
+        const hasOrientation = 'orientation' in window || 'onorientationchange' in window;
+
+        return hasTouch && (isMobileUA || hasOrientation);
+    })();
+
+    if (landingVideo && isMobileOrTablet) {
         landingVideo.src = "/assets/ui/landing_mobile_V2.mp4";
         landingVideo.load();
     }

@@ -3,14 +3,14 @@ import Phaser from "phaser";
 import { gameConfig } from "./game/GameConfig";
 
 window.addEventListener("load", () => {
-  const preloader = document.getElementById("preloader");
-  if (preloader) {
-    preloader.classList.add("fade-out");
-    setTimeout(() => {
-      preloader.style.display = "none";
-      document.body.classList.add("loaded");
-    }, 500);
-  }
+    const preloader = document.getElementById("preloader");
+    if (preloader) {
+        preloader.classList.add("fade-out");
+        setTimeout(() => {
+            preloader.style.display = "none";
+            document.body.classList.add("loaded");
+        }, 500);
+    }
 });
 
 let game: Phaser.Game | null = null;
@@ -126,7 +126,7 @@ document.querySelectorAll(".modal-close").forEach((button) => {
             modal?.classList.remove("open");
         }
     };
-    
+
     button.addEventListener("touchend", closeModal, { passive: false });
     button.addEventListener("click", closeModal);
 });

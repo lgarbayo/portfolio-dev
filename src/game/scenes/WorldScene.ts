@@ -84,11 +84,11 @@ export class WorldScene extends Phaser.Scene {
         if (!this.activeWorld) return;
         const { width, height } = this.scale;
         const bg = this.add.image(width / 2, height / 2, this.activeWorld.background.key);
-        
+
         const scaleX = width / bg.width;
         const scaleY = height / bg.height;
         const scale = Math.max(scaleX, scaleY);
-        
+
         bg.setScale(scale);
         bg.setScrollFactor(0);
         bg.setDepth(-2);
@@ -161,7 +161,7 @@ export class WorldScene extends Phaser.Scene {
         if (!this.sys.game.device.input.touch) {
             return;
         }
-        
+
         this.input.addPointer(2);
         this.input.on("pointerdown", this.handlePointerDown, this);
         this.input.on("pointermove", this.handlePointerMove, this);
@@ -171,15 +171,15 @@ export class WorldScene extends Phaser.Scene {
 
     private isTouchingBackButton(x: number, y: number): boolean {
         if (!this.backButton) return false;
-        
+
         const buttonX = this.backButton.x;
         const buttonY = this.backButton.y;
         const hitRadius = 120;
-        
+
         const distance = Math.sqrt(
             Math.pow(x - buttonX, 2) + Math.pow(y - buttonY, 2)
         );
-        
+
         return distance <= hitRadius;
     }
 
@@ -210,7 +210,7 @@ export class WorldScene extends Phaser.Scene {
                 lineSpacing: 6
             });
         }
-        
+
         this.hintText.setOrigin(0.5, 0.5);
         this.hintText.setAlpha(0.85);
 
@@ -248,7 +248,7 @@ export class WorldScene extends Phaser.Scene {
         arrowText.setOrigin(0.5, 0.5);
 
         this.backButton.add([shadow, backgroundOuter, backgroundInner, border, arrowText]);
-        
+
         this.backButton.setData('background', backgroundOuter);
         this.backButton.setData('border', border);
         this.backButton.setData('arrow', arrowText);
@@ -281,12 +281,12 @@ export class WorldScene extends Phaser.Scene {
     private handlePointerDown(pointer: Phaser.Input.Pointer) {
         if (this.inputLocked) return;
         if (!pointer.primaryDown) return;
-        
+
         if (this.backButton && this.isTouchingBackButton(pointer.x, pointer.y)) {
             const background = this.backButton.getData('background');
             const border = this.backButton.getData('border');
             const arrow = this.backButton.getData('arrow');
-            
+
             if (background) {
                 background.setAlpha(0.95);
             }
@@ -298,7 +298,7 @@ export class WorldScene extends Phaser.Scene {
             }
             return;
         }
-        
+
         const meta = this.getPointerMeta(pointer);
         meta.downTimestamp = this.time.now;
         meta.moved = false;
@@ -318,11 +318,11 @@ export class WorldScene extends Phaser.Scene {
     private handlePointerMove(pointer: Phaser.Input.Pointer) {
         if (this.inputLocked) return;
         if (!pointer.isDown) return;
-        
+
         if (this.backButton && this.isTouchingBackButton(pointer.x, pointer.y)) {
             return;
         }
-        
+
         const meta = this.getPointerMeta(pointer);
         meta.moved = true;
         const zone = this.getTouchZone(pointer.x);
@@ -347,12 +347,12 @@ export class WorldScene extends Phaser.Scene {
 
     private handlePointerUp(pointer: Phaser.Input.Pointer) {
         if (this.inputLocked) return;
-        
+
         if (this.backButton && this.isTouchingBackButton(pointer.x, pointer.y)) {
             const background = this.backButton.getData('background');
             const border = this.backButton.getData('border');
             const arrow = this.backButton.getData('arrow');
-            
+
             if (background) {
                 background.setAlpha(0.85);
             }
@@ -362,14 +362,14 @@ export class WorldScene extends Phaser.Scene {
             if (arrow) {
                 arrow.setScale(1);
             }
-            
+
             const openModal = document.querySelector('.portfolio-modal.open');
             if (!openModal) {
                 this.scene.start('MenuScene');
             }
             return;
         }
-        
+
         const meta = this.touchMeta.get(pointer.id);
         const zone = meta?.zone;
         const downTimestamp = meta?.downTimestamp ?? this.time.now;

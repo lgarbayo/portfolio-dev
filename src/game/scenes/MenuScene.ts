@@ -110,13 +110,17 @@ export class MenuScene extends Phaser.Scene {
     }
 
     private createHint(width: number, height: number) {
-        this.add
-            .text(width / 2, height * 0.82, "ENTER/SPACE TO START · BACKSPACE TO RETURN", {
-                fontFamily: "monospace",
-                fontSize: "16px",
-                color: "#8DA0BF",
-            })
-            .setOrigin(0.5);
+        const isTouchDevice = this.sys.game.device.input.touch;
+        
+        if (!isTouchDevice) {
+            this.add
+                .text(width / 2, height * 0.82, "ENTER/SPACE TO START · BACKSPACE TO RETURN", {
+                    fontFamily: "monospace",
+                    fontSize: "16px",
+                    color: "#8DA0BF",
+                })
+                .setOrigin(0.5);
+        }
 
         this.add
             .text(width / 2, height * 0.9, "© 2026 Luis Garbayo Fernández · MADE WITH PHASER && TS", {

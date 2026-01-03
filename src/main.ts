@@ -2,6 +2,17 @@ import "./style.css";
 import Phaser from "phaser";
 import { gameConfig } from "./game/GameConfig";
 
+// Detectar móvil y cargar el video correcto
+window.addEventListener("DOMContentLoaded", () => {
+    const landingVideo = document.querySelector<HTMLVideoElement>("#landing-video");
+    const isMobile = window.innerWidth <= 768;
+    
+    if (landingVideo && isMobile) {
+        landingVideo.src = "/assets/ui/landing_mobile_V2.mp4";
+        landingVideo.load();
+    }
+});
+
 window.addEventListener("load", () => {
     const preloader = document.getElementById("preloader");
     if (preloader) {

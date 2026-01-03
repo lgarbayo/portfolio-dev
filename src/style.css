@@ -200,7 +200,7 @@ body {
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 768px), (orientation: portrait) and (max-width: 1366px) {
   .artwork-hero {
     height: 100vh;
     padding: 0;

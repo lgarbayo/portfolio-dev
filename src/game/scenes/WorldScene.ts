@@ -194,7 +194,7 @@ export class WorldScene extends Phaser.Scene {
         background.strokeRoundedRect(0, 0, 380, 90, 10);
 
         if (this.sys.game.device.input.touch) {
-            this.hintText = this.add.text(190, 45, 'Tap left/right to move • Tap to jump\nHold center to surprise', {
+            this.hintText = this.add.text(190, 45, 'Tap left/right to move • Tap to jump\nHold center for a surprise', {
                 fontSize: '17px',
                 color: '#ffffff',
                 fontFamily: 'monospace',
@@ -202,7 +202,7 @@ export class WorldScene extends Phaser.Scene {
                 lineSpacing: 6
             });
         } else {
-            this.hintText = this.add.text(190, 45, '← → Arrows to move ↑ to jump\nB to surprise', {
+            this.hintText = this.add.text(190, 45, '← → Arrows to move ↑ to jump\nB for a surprise', {
                 fontSize: '17px',
                 color: '#ffffff',
                 fontFamily: 'monospace',

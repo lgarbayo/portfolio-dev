@@ -22,8 +22,8 @@ export const portfolioWorlds: PortfolioWorld[] = [
         position: { x: 240, y: 420 },
         background: {
             key: "world-bg-about",
-            path: "/assets/tiles/about me.jpeg",
-            mobilePath: "/assets/tiles/mobile/about me.jpeg",
+            path: "/assets/tiles/about me.webp",
+            mobilePath: "/assets/tiles/mobile/about me.webp",
         },
         structures: {
             pipe: { x: 777, y: 616, width: 111, height: 173 },
@@ -41,8 +41,8 @@ export const portfolioWorlds: PortfolioWorld[] = [
         position: { x: 520, y: 320 },
         background: {
             key: "world-bg-projects",
-            path: "/assets/tiles/projects.jpeg",
-            mobilePath: "/assets/tiles/mobile/projects.jpeg",
+            path: "/assets/tiles/projects.webp",
+            mobilePath: "/assets/tiles/mobile/projects.webp",
         },
         structures: {
             pipe: { x: 777, y: 616, width: 111, height: 138 },
@@ -60,8 +60,8 @@ export const portfolioWorlds: PortfolioWorld[] = [
         position: { x: 1040, y: 320 },
         background: {
             key: "world-bg-experience",
-            path: "/assets/tiles/experience.jpeg",
-            mobilePath: "/assets/tiles/mobile/experience.jpeg",
+            path: "/assets/tiles/experience.webp",
+            mobilePath: "/assets/tiles/mobile/experience.webp",
         },
         structures: {
             pipe: { x: 1000000, y: 10000000, width: 0, height: 0 },
@@ -79,8 +79,8 @@ export const portfolioWorlds: PortfolioWorld[] = [
         position: { x: 1180, y: 520 },
         background: {
             key: "world-bg-contact",
-            path: "/assets/tiles/contact.jpeg",
-            mobilePath: "/assets/tiles/mobile/contact.jpeg",
+            path: "/assets/tiles/contact.webp",
+            mobilePath: "/assets/tiles/mobile/contact.webp",
         },
         structures: {
             pipe: { x: 777, y: 616, width: 111, height: 138 },

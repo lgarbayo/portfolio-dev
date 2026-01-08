@@ -75,8 +75,11 @@ export class WorldScene extends Phaser.Scene {
             }
         }
 
-        // Entrar al pipe con tecla B
         if (this.isNearPipe && this.waveKey && Phaser.Input.Keyboard.JustDown(this.waveKey)) {
+            this.enterPipe();
+        }
+
+        if (this.isNearPipe && this.touchWaveActive && this.isWaving) {
             this.enterPipe();
         }
     }

@@ -13,3 +13,9 @@ Built with **Phaser 3**, **TypeScript**, and **Vite**.
 ## License
 
 © 2026 Luis Garbayo Fernández
+
+## Additional Credits
+
+- **Character Sprite**: Custom design by Luis Garbayo Fernández
+- **Game Inspiration**: Super Mario Bros® is a registered trademark of Nintendo Co., Ltd.
+  This project is a personal portfolio and is not affiliated with, endorsed by, or connected to Nintendo.

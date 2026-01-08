@@ -19,11 +19,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
----
-
-## Additional Credits
-
-- **Character Sprite**: Custom design by Luis Garbayo Fernández
-- **Game Inspiration**: Super Mario Bros® is a registered trademark of Nintendo Co., Ltd.
-  This project is a personal portfolio and is not affiliated with, endorsed by, or connected to Nintendo.

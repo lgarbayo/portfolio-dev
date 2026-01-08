@@ -24,6 +24,11 @@ export class BootScene extends Phaser.Scene {
             this.load.image(world.background.key, backgroundPath);
         });
 
+        this.load.svg("home-icon", "/assets/tiles/ui/home-1-svgrepo-com.svg", {
+            width: 64,
+            height: 64,
+        });
+
         this.createSolidTexture("world-node", 64, 64, 0xffffff);
         this.createSolidTexture("world-node-highlight", 78, 78, 0xffffff);
         this.createSolidTexture("ground", 16, 16, 0x262b44);

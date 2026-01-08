@@ -221,10 +221,6 @@ export class WorldScene extends Phaser.Scene {
     }
 
     private createBackButton() {
-        if (!this.sys.game.device.input.touch) {
-            return;
-        }
-
         const buttonSize = 52;
         const padding = 18;
 
@@ -240,18 +236,44 @@ export class WorldScene extends Phaser.Scene {
         const border = this.add.circle(0, 0, buttonSize / 2, 0x5CE68E, 0);
         border.setStrokeStyle(2.5, 0x5CE68E, 0.85);
 
-        const arrowText = this.add.text(0, 0, '←', {
-            fontSize: '32px',
-            color: '#5CE68E',
-            fontStyle: 'bold'
-        });
-        arrowText.setOrigin(0.5, 0.5);
+        const icon = this.add.image(0, -1, "home-icon");
+        icon.setDisplaySize(24, 24);
+        icon.setTint(0x5CE68E);
+        icon.setAlpha(0.95);
+        icon.setData('originalScale', icon.scaleX);
 
-        this.backButton.add([shadow, backgroundOuter, backgroundInner, border, arrowText]);
+        this.backButton.add([shadow, backgroundOuter, backgroundInner, border, icon]);
 
         this.backButton.setData('background', backgroundOuter);
         this.backButton.setData('border', border);
-        this.backButton.setData('arrow', arrowText);
+        this.backButton.setData('icon', icon);
+
+        if (!this.sys.game.device.input.touch) {
+            this.backButton.setInteractive(
+                new Phaser.Geom.Circle(0, 0, buttonSize / 2),
+                Phaser.Geom.Circle.Contains,
+            );
+            this.backButton.on("pointerover", () => {
+                this.input.setDefaultCursor("pointer");
+            });
+            this.backButton.on("pointerdown", () => {
+                backgroundOuter.setAlpha(0.95);
+                border.setStrokeStyle(2.5, 0x5CE68E, 1);
+            });
+            this.backButton.on("pointerup", () => {
+                backgroundOuter.setAlpha(0.85);
+                border.setStrokeStyle(2.5, 0x5CE68E, 0.85);
+                const openModal = document.querySelector('.portfolio-modal.open');
+                if (!openModal) {
+                    this.scene.start("MenuScene");
+                }
+            });
+            this.backButton.on("pointerout", () => {
+                backgroundOuter.setAlpha(0.85);
+                border.setStrokeStyle(2.5, 0x5CE68E, 0.85);
+                this.input.setDefaultCursor("default");
+            });
+        }
     }
 
 
@@ -285,7 +307,7 @@ export class WorldScene extends Phaser.Scene {
         if (this.backButton && this.isTouchingBackButton(pointer.x, pointer.y)) {
             const background = this.backButton.getData('background');
             const border = this.backButton.getData('border');
-            const arrow = this.backButton.getData('arrow');
+            const icon = this.backButton.getData('icon');
 
             if (background) {
                 background.setAlpha(0.95);
@@ -293,8 +315,9 @@ export class WorldScene extends Phaser.Scene {
             if (border) {
                 border.setStrokeStyle(2.5, 0x5CE68E, 1);
             }
-            if (arrow) {
-                arrow.setScale(0.95);
+            if (icon) {
+                const originalScale = icon.getData('originalScale') || 1;
+                icon.setScale(originalScale * 0.95);
             }
             return;
         }
@@ -351,7 +374,7 @@ export class WorldScene extends Phaser.Scene {
         if (this.backButton && this.isTouchingBackButton(pointer.x, pointer.y)) {
             const background = this.backButton.getData('background');
             const border = this.backButton.getData('border');
-            const arrow = this.backButton.getData('arrow');
+            const icon = this.backButton.getData('icon');
 
             if (background) {
                 background.setAlpha(0.85);
@@ -359,8 +382,9 @@ export class WorldScene extends Phaser.Scene {
             if (border) {
                 border.setStrokeStyle(2.5, 0x5CE68E, 0.85);
             }
-            if (arrow) {
-                arrow.setScale(1);
+            if (icon) {
+                const originalScale = icon.getData('originalScale') || 1;
+                icon.setScale(originalScale);
             }
 
             const openModal = document.querySelector('.portfolio-modal.open');

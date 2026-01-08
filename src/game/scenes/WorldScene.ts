@@ -27,6 +27,8 @@ export class WorldScene extends Phaser.Scene {
     private inputLocked = false;
     private backButton?: Phaser.GameObjects.Container;
     private hintText?: Phaser.GameObjects.Text;
+    private pipeSprite?: Phaser.Physics.Arcade.Image;
+    private isNearPipe = false;
 
     constructor() {
         super("WorldScene");
@@ -63,6 +65,7 @@ export class WorldScene extends Phaser.Scene {
 
         this.handleWaveInput();
         this.handleMovement();
+        this.checkPipeProximity();
 
         if (this.backKey && Phaser.Input.Keyboard.JustDown(this.backKey)) {
             const openModal = document.querySelector(".portfolio-modal.open");
@@ -70,6 +73,11 @@ export class WorldScene extends Phaser.Scene {
                 this.scene.start("MenuScene");
                 return;
             }
+        }
+
+        // Entrar al pipe con tecla B
+        if (this.isNearPipe && this.waveKey && Phaser.Input.Keyboard.JustDown(this.waveKey)) {
+            this.enterPipe();
         }
     }
 
@@ -110,11 +118,11 @@ export class WorldScene extends Phaser.Scene {
         const { pipe, blocks } = activeWorld.structures;
 
         if (pipe) {
-            const pipeSprite = this.platforms.create(pipe.x, pipe.y, "pipe") as Phaser.Physics.Arcade.Image;
-            pipeSprite.setDisplaySize(pipe.width, pipe.height);
-            pipeSprite.setTint(activeWorld.color);
-            pipeSprite.setVisible(false);
-            pipeSprite.refreshBody();
+            this.pipeSprite = this.platforms.create(pipe.x, pipe.y, "pipe") as Phaser.Physics.Arcade.Image;
+            this.pipeSprite.setDisplaySize(pipe.width, pipe.height);
+            this.pipeSprite.setTint(activeWorld.color);
+            this.pipeSprite.setVisible(false);
+            this.pipeSprite.refreshBody();
         }
 
         blocks.forEach((blockData, index) => {
@@ -194,16 +202,16 @@ export class WorldScene extends Phaser.Scene {
         background.strokeRoundedRect(0, 0, 380, 90, 10);
 
         if (this.sys.game.device.input.touch) {
-            this.hintText = this.add.text(190, 45, 'Tap left/right to move • Tap to jump\nHold center for a surprise', {
-                fontSize: '17px',
+            this.hintText = this.add.text(190, 45, 'Tap left/right to move • Tap to jump. Hold\ncenter to enter the pipe and return to the menu', {
+                fontSize: '12px',
                 color: '#ffffff',
                 fontFamily: 'monospace',
                 align: 'right',
                 lineSpacing: 6
             });
         } else {
-            this.hintText = this.add.text(190, 45, '← → Arrows to move ↑ to jump\nB for a surprise', {
-                fontSize: '17px',
+            this.hintText = this.add.text(190, 45, '← → Arrows to move ↑ to jump. Hold B to\nenter the pipe and return to the menu', {
+                fontSize: '15px',
                 color: '#ffffff',
                 fontFamily: 'monospace',
                 align: 'right',
@@ -274,6 +282,39 @@ export class WorldScene extends Phaser.Scene {
                 this.input.setDefaultCursor("default");
             });
         }
+    }
+
+    private checkPipeProximity() {
+        if (!this.pipeSprite || !this.player) return;
+
+        const pipeBody = this.pipeSprite.body as Phaser.Physics.Arcade.Body;
+        const playerBody = this.player.body as Phaser.Physics.Arcade.Body;
+
+        const isAbovePipe = playerBody.bottom <= pipeBody.top + 5;
+        const isOnPipe = playerBody.bottom >= pipeBody.top - 5;
+        const horizontallyAligned =
+            playerBody.center.x > pipeBody.left + 10 &&
+            playerBody.center.x < pipeBody.right - 10;
+        const isTouchingGround = playerBody.touching.down;
+
+        this.isNearPipe = isAbovePipe && isOnPipe && horizontallyAligned && isTouchingGround;
+    }
+
+    private enterPipe() {
+        if (this.inputLocked) return;
+
+        this.inputLocked = true;
+
+        this.tweens.add({
+            targets: this.player,
+            y: this.player.y + 50,
+            alpha: 0,
+            duration: 400,
+            ease: 'Power2',
+            onComplete: () => {
+                this.scene.start("MenuScene");
+            }
+        });
     }
 
 

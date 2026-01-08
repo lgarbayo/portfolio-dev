@@ -98,7 +98,8 @@ export class WorldScene extends Phaser.Scene {
 
         const scaleX = width / bg.width;
         const scaleY = height / bg.height;
-        const scale = Math.max(scaleX, scaleY);
+        const scaleBoost = this.activeWorld?.id === "experience" ? 1.03 : 1;
+        const scale = Math.max(scaleX, scaleY) * scaleBoost;
 
         bg.setScale(scale);
         bg.setScrollFactor(0);

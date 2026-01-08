@@ -64,11 +64,11 @@ export const portfolioWorlds: PortfolioWorld[] = [
             mobilePath: "/assets/tiles/mobile/experience.webp",
         },
         structures: {
-            pipe: { x: 1000000, y: 10000000, width: 0, height: 0 },
+            pipe: { x: 1130, y: 613, width: 78, height: 343 },
             blocks: [
                 { x: 90, y: 460, width: 20, height: 70 },
                 { x: 417, y: 460, width: 275, height: 70 },
-                { x: 415, y: 230, width: 18, height: 70 },
+                { x: 415, y: 220, width: 18, height: 70 },
             ],
         },
     },

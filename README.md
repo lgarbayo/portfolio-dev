@@ -6,6 +6,8 @@
 
 This project was born from the idea of creating something **innovative and entertaining** – a portfolio that doesn't put people to sleep. Instead of another static CV website, visitors can explore my professional journey through a retro-style 2D game. Inspired by the **iconic worlds of Super Mario Bros**, this portfolio features custom-designed character sprites and worlds that blend nostalgia with personal branding. Navigate through different worlds to discover my experience, projects, and contact information while enjoying a simple but playful and nostalgic gaming experience.
 
+<img src="assets/sprites/player.png" alt="Logo de la app" width="300">
+
 ## Tech Stack
 
 Built with **Phaser 3**, **TypeScript**, and **Vite**.

@@ -39,6 +39,36 @@ const overlay = document.querySelector<HTMLElement>("#game-overlay");
 const landingVideo = document.querySelector<HTMLVideoElement>("#landing-video");
 const closeOverlayButton = document.querySelector<HTMLButtonElement>("#close-overlay");
 const heroArea = document.querySelector<HTMLElement>(".artwork-hero");
+const startScreen = document.querySelector<HTMLElement>("#start-screen");
+const startButton = document.querySelector<HTMLButtonElement>("#start-game");
+
+const isStarted = () => !startScreen || startScreen.classList.contains("is-dismissed");
+
+// El vídeo de la landing ya está reproduciéndose en mudo detrás de la portada, así
+// que al pulsar START GAME entra caliente. Ese clic es además el gesto que el
+// navegador exige para permitir audio, de ahí que se active aquí.
+const dismissStartScreen = () => {
+    if (!startScreen || isStarted()) return;
+
+    startScreen.classList.add("is-dismissed");
+    startButton?.blur();
+    enableLandingAudio();
+
+    const remove = () => {
+        startScreen.style.display = "none";
+        startScreen.removeEventListener("transitionend", onFadeEnd);
+    };
+    // transitionend burbujea: sin filtrar, la transición de color del botón al
+    // perder el foco cortaría el fundido a mitad.
+    const onFadeEnd = (event: TransitionEvent) => {
+        if (event.target === startScreen && event.propertyName === "opacity") {
+            remove();
+        }
+    };
+    startScreen.addEventListener("transitionend", onFadeEnd);
+    // Respaldo por si la transición no llega a emitirse (reduced motion, pestaña oculta).
+    setTimeout(remove, 800);
+};
 
 const setTouchBlock = (blocked: boolean) => {
     (window as typeof window & { __blockGameInput?: boolean }).__blockGameInput = blocked;
@@ -84,6 +114,15 @@ const preventKeys = new Set(["Space", "ArrowUp", "ArrowDown", "ArrowLeft", "Arro
 document.addEventListener(
     "keydown",
     (event) => {
+        // Mientras se ve la portada, Enter/Espacio la abren en vez de montar el juego.
+        if (!isStarted()) {
+            if (event.key === "Enter" || event.code === "Space") {
+                event.preventDefault();
+                dismissStartScreen();
+            }
+            return;
+        }
+
         enableLandingAudio();
 
         if (overlay?.classList.contains("is-visible")) {
@@ -113,7 +152,7 @@ document.addEventListener("keyup", (event) => {
 });
 
 const enableLandingAudio = () => {
-    if (!landingVideo || landingAudioEnabled) return;
+    if (!landingVideo || landingAudioEnabled || !isStarted()) return;
     landingVideo.muted = false;
     landingVideo.volume = 0.8;
     landingVideo.play().catch(() => undefined);
@@ -124,6 +163,8 @@ const enableLandingAudio = () => {
 document.addEventListener("pointerdown", () => {
     enableLandingAudio();
 });
+
+startButton?.addEventListener("click", dismissStartScreen);
 
 const stopPointerPropagation = (event: Event) => {
     event.stopPropagation();

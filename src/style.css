@@ -42,6 +42,95 @@ body.loaded {
   }
 }
 
+/* Portada del sitio: pantalla de atracción previa a la landing del juego. */
+.start-screen {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: #000000;
+  z-index: 9999;
+  transition: opacity 0.45s ease-out;
+}
+
+.start-screen::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(to bottom,
+      rgba(0, 0, 0, 0) 0 2px,
+      rgba(0, 0, 0, 0.25) 2px 4px);
+}
+
+.start-screen.is-dismissed {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.start-screen__button {
+  position: relative;
+  z-index: 1;
+  padding: 1.1rem 2.6rem;
+  border: 2px solid #5CE68E;
+  border-radius: 2px;
+  background: transparent;
+  color: #5CE68E;
+  font-family: monospace;
+  font-size: clamp(1.05rem, 4.5vw, 1.75rem);
+  font-weight: 700;
+  letter-spacing: 0.28em;
+  /* Compensa el espaciado sobrante tras la última letra para centrar ópticamente. */
+  text-indent: 0.28em;
+  cursor: pointer;
+  text-shadow: 0 0 12px rgba(92, 230, 142, 0.55);
+  box-shadow: 0 0 18px rgba(92, 230, 142, 0.18), inset 0 0 18px rgba(92, 230, 142, 0.08);
+  animation: start-blink 1.4s steps(1, end) infinite;
+  transition: color 0.18s ease, background-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.start-screen__button:hover,
+.start-screen__button:focus-visible {
+  animation: none;
+  opacity: 1;
+  background: #5CE68E;
+  color: #000000;
+  text-shadow: none;
+  box-shadow: 0 0 26px rgba(92, 230, 142, 0.45);
+}
+
+.start-screen__button:focus-visible {
+  outline: 2px solid #F5DEB3;
+  outline-offset: 4px;
+}
+
+.start-screen__button:active {
+  transform: translateY(1px);
+}
+
+@keyframes start-blink {
+
+  0%,
+  62% {
+    opacity: 1;
+  }
+
+  62.01%,
+  100% {
+    opacity: 0.32;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .start-screen {
+    transition-duration: 0.01ms;
+  }
+
+  .start-screen__button {
+    animation: none;
+  }
+}
+
 :root {
   font-family: "Space Grotesk", "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
     sans-serif;

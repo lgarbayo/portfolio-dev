@@ -26,6 +26,7 @@ export class WorldScene extends Phaser.Scene {
     >();
     private inputLocked = false;
     private backButton?: Phaser.GameObjects.Container;
+    private backButtonPointerId?: number;
     private hintText?: Phaser.GameObjects.Text;
     private pipeSprite?: Phaser.Physics.Arcade.Image;
     private isNearPipe = false;
@@ -195,6 +196,25 @@ export class WorldScene extends Phaser.Scene {
         return distance <= hitRadius;
     }
 
+    private setBackButtonPressed(pressed: boolean) {
+        if (!this.backButton) return;
+
+        const background = this.backButton.getData('background');
+        const border = this.backButton.getData('border');
+        const icon = this.backButton.getData('icon');
+
+        if (background) {
+            background.setAlpha(pressed ? 0.95 : 0.85);
+        }
+        if (border) {
+            border.setStrokeStyle(2.5, 0x5CE68E, pressed ? 1 : 0.85);
+        }
+        if (icon) {
+            const originalScale = icon.getData('originalScale') || 1;
+            icon.setScale(pressed ? originalScale * 0.95 : originalScale);
+        }
+    }
+
     private createHintText() {
         const { width } = this.scale;
         const padding = 20;
@@ -350,20 +370,8 @@ export class WorldScene extends Phaser.Scene {
         if (!pointer.primaryDown) return;
 
         if (this.backButton && this.isTouchingBackButton(pointer.x, pointer.y)) {
-            const background = this.backButton.getData('background');
-            const border = this.backButton.getData('border');
-            const icon = this.backButton.getData('icon');
-
-            if (background) {
-                background.setAlpha(0.95);
-            }
-            if (border) {
-                border.setStrokeStyle(2.5, 0x5CE68E, 1);
-            }
-            if (icon) {
-                const originalScale = icon.getData('originalScale') || 1;
-                icon.setScale(originalScale * 0.95);
-            }
+            this.backButtonPointerId = pointer.id;
+            this.setBackButtonPressed(true);
             return;
         }
 
@@ -387,7 +395,13 @@ export class WorldScene extends Phaser.Scene {
         if (this.inputLocked) return;
         if (!pointer.isDown) return;
 
-        if (this.backButton && this.isTouchingBackButton(pointer.x, pointer.y)) {
+        // Un puntero que nació sobre el botón nunca mueve al jugador; al salir del
+        // botón se cancela la pulsación, como haría un botón nativo.
+        if (this.backButtonPointerId === pointer.id) {
+            if (!this.isTouchingBackButton(pointer.x, pointer.y)) {
+                this.backButtonPointerId = undefined;
+                this.setBackButtonPressed(false);
+            }
             return;
         }
 
@@ -416,21 +430,10 @@ export class WorldScene extends Phaser.Scene {
     private handlePointerUp(pointer: Phaser.Input.Pointer) {
         if (this.inputLocked) return;
 
-        if (this.backButton && this.isTouchingBackButton(pointer.x, pointer.y)) {
-            const background = this.backButton.getData('background');
-            const border = this.backButton.getData('border');
-            const icon = this.backButton.getData('icon');
-
-            if (background) {
-                background.setAlpha(0.85);
-            }
-            if (border) {
-                border.setStrokeStyle(2.5, 0x5CE68E, 0.85);
-            }
-            if (icon) {
-                const originalScale = icon.getData('originalScale') || 1;
-                icon.setScale(originalScale);
-            }
+        // Solo cuenta como pulsación del botón si el dedo también empezó ahí.
+        if (this.backButtonPointerId === pointer.id) {
+            this.backButtonPointerId = undefined;
+            this.setBackButtonPressed(false);
 
             const openModal = document.querySelector('.portfolio-modal.open');
             if (!openModal) {
@@ -506,6 +509,10 @@ export class WorldScene extends Phaser.Scene {
         this.pendingWaveTimer = undefined;
         this.pendingWavePointer = undefined;
         this.touchMeta.clear();
+        if (this.backButtonPointerId !== undefined) {
+            this.backButtonPointerId = undefined;
+            this.setBackButtonPressed(false);
+        }
         if (this.isWaving) {
             this.stopWave();
         }

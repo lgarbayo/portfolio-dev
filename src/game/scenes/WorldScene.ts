@@ -650,9 +650,6 @@ export class WorldScene extends Phaser.Scene {
         block.setData("isHit", true);
 
         const worldId = block.getData("worldId");
-
-        block.setData("isHit", true);
-
         const modalId = `${worldId}Modal`;
         const modal = document.getElementById(modalId);
 

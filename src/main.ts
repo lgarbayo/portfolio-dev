@@ -44,6 +44,12 @@ const setTouchBlock = (blocked: boolean) => {
     (window as typeof window & { __blockGameInput?: boolean }).__blockGameInput = blocked;
 };
 
+// El menú del juego lee este flag para ignorar el Enter que abrió el overlay:
+// si se mantiene pulsado, el auto-repeat del teclado saltaría el menú.
+const setEnterHeld = (held: boolean) => {
+    (window as typeof window & { __enterHeld?: boolean }).__enterHeld = held;
+};
+
 const showOverlay = () => {
     overlay?.classList.add("is-visible");
     overlay?.setAttribute("aria-hidden", "false");
@@ -89,6 +95,7 @@ document.addEventListener(
             }
         } else {
             if (event.key === "Enter") {
+                setEnterHeld(true);
                 mountGame();
             }
             if (preventKeys.has(event.code)) {
@@ -98,6 +105,12 @@ document.addEventListener(
     },
     { passive: false },
 );
+
+document.addEventListener("keyup", (event) => {
+    if (event.key === "Enter") {
+        setEnterHeld(false);
+    }
+});
 
 const enableLandingAudio = () => {
     if (!landingVideo || landingAudioEnabled) return;

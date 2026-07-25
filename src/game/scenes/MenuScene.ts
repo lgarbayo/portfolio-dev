@@ -8,6 +8,7 @@ export class MenuScene extends Phaser.Scene {
     private selectedIndex = 0;
     private entries: Phaser.GameObjects.Container[] = [];
     private tapZones: Phaser.GameObjects.Zone[] = [];
+    private startArmed = true;
 
     constructor() {
         super("MenuScene");
@@ -30,18 +31,22 @@ export class MenuScene extends Phaser.Scene {
         this.createWorldList(width, height);
         this.createHint(width, height);
 
+        // Si se llega aquí con Enter aún pulsado (el que abrió el overlay), se espera
+        // a soltarlo: si no, el auto-repeat lanzaría el mundo sin ver el menú.
+        this.startArmed = !(window as typeof window & { __enterHeld?: boolean }).__enterHeld;
         this.startKey = this.input.keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
-        this.startKey?.once("down", () => this.launchWorld());
+        this.startKey?.on("down", () => {
+            if (this.startArmed) {
+                this.launchWorld();
+            }
+        });
+        this.input.keyboard?.on("keyup-ENTER", () => {
+            this.startArmed = true;
+        });
 
         this.input.keyboard?.on("keydown-UP", () => this.moveSelection(-1));
         this.input.keyboard?.on("keydown-DOWN", () => this.moveSelection(1));
         this.input.keyboard?.on("keydown-SPACE", () => this.launchWorld());
-    }
-
-    update() {
-        if (this.startKey?.isDown) {
-            this.launchWorld();
-        }
     }
 
     private createBackdrop(width: number, height: number) {

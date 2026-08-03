@@ -1,0 +1,78 @@
+---
+import Section from "../Section.astro";
+import ProjectCard from "../ProjectCard.astro";
+import { getLocalizedEntries } from "@/lib/content";
+import { useTranslations, type Locale } from "@/i18n/index";
+
+interface Props {
+    locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = useTranslations(locale);
+
+const projects = await getLocalizedEntries("projects", locale);
+
+// Orden dentro de cada grupo: destacados primero, luego por año descendente.
+// Los proyectos sin año van al final, que es donde acaba lo que no está fechado.
+const byRank = (a: (typeof projects)[number], b: (typeof projects)[number]) => {
+    if (a.data.featured !== b.data.featured) return a.data.featured ? -1 : 1;
+    return (b.data.year ?? 0) - (a.data.year ?? 0);
+};
+
+const categories = [
+    { id: "hackathon", label: t("projects.category.hackathon") },
+    { id: "data", label: t("projects.category.data") },
+    { id: "backend", label: t("projects.category.backend") },
+    { id: "web", label: t("projects.category.web") },
+] as const;
+
+const grouped = categories
+    .map((category) => ({
+        ...category,
+        items: projects.filter((project) => project.data.category === category.id).sort(byRank),
+    }))
+    .filter((group) => group.items.length > 0);
+---
+
+<Section id="projects" title={t("projects.title")}>
+    {
+        grouped.map((group) => (
+            <div class="projects__group">
+                <h3 class="projects__group-title">{group.label}</h3>
+                <div class="projects__grid">
+                    {group.items.map((project) => (
+                        <ProjectCard
+                            locale={locale}
+                            project={project}
+                            isFallback={project.isFallback}
+                        />
+                    ))}
+                </div>
+            </div>
+        ))
+    }
+
+</Section>
+
+<style>
+    .projects__group + .projects__group {
+        margin-block-start: var(--space-7);
+    }
+
+    .projects__group-title {
+        font-size: var(--text-sm);
+        font-family: var(--font-mono);
+        letter-spacing: var(--tracking-wide);
+        text-transform: uppercase;
+        color: var(--color-text-subtle);
+        margin-block-end: var(--space-4);
+    }
+
+    .projects__grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));
+        gap: var(--space-5);
+    }
+
+</style>

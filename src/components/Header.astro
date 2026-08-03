@@ -236,35 +236,42 @@ const sections = [
             order: 2;
         }
 
-        /* Con el menú abierto la cabecera deja de ser translúcida: detrás ya no
-           está la página que se estaba leyendo sino la capa del menú, y el
-           desenfoque dejaba asomar un trozo de la bienvenida. */
+        /* Con el menú abierto la cabecera deja de ser translúcida y toma el
+           gris del panel: dejaba asomar por detrás un trozo de la página, y del
+           mismo color que el panel las dos se leen como una sola pieza en vez
+           de como una franja encima de otra. */
         .header:has(.header__nav[data-open]) {
-            background: var(--color-bg);
+            background: var(--color-surface);
         }
 
         .header__nav {
             position: fixed;
             /*
-             * Empieza por debajo de la cabecera, no en el borde de la pantalla.
-             * Con `inset: 0` la capa tapaba la propia cabecera —está en un
-             * z-index más bajo—, así que el botón que abre el menú quedaba
-             * debajo y no había manera de cerrarlo salvo pulsando un enlace.
+             * Cuelga de la cabecera y mide lo que mide su contenido, en vez de
+             * ocupar la pantalla entera. Dos motivos: con `inset: 0` la capa
+             * tapaba la propia cabecera —está en un z-index más bajo— y el
+             * botón de cerrar quedaba debajo, sin manera de salir; y un panel
+             * que deja ver la página debajo se entiende como lo que es, algo
+             * desplegado encima y no otra pantalla.
              */
-            inset: var(--header-height) 0 0;
-            z-index: var(--z-menu);
-            flex-direction: column;
-            /* `safe` es lo que separa centrar de recortar: si la lista no cabe,
-               un `center` a secas desborda por arriba y los primeros enlaces se
-               vuelven inalcanzables aunque haya scroll. */
-            justify-content: safe center;
-            gap: var(--space-6);
-            padding-block: var(--space-6);
-            /* Pantallas bajas —un móvil en horizontal— o texto muy ampliado: el
-               menú se recorre en vez de cortarse. */
+            inset: var(--header-height) 0 auto;
+            /* Si no cabe —un móvil en horizontal, o el texto muy ampliado— se
+               recorre por dentro en vez de crecer fuera de la pantalla. */
+            max-block-size: calc(100dvh - var(--header-height));
             overflow-y: auto;
             overscroll-behavior: contain;
-            background: var(--color-bg);
+            z-index: var(--z-menu);
+            flex-direction: column;
+            justify-content: flex-start;
+            gap: var(--space-5);
+            padding-block: var(--space-5);
+            padding-inline: var(--gutter);
+            /* Un gris por encima del fondo de la página, más el borde y la
+               sombra: es lo que despega el panel de lo que queda debajo. Del
+               mismo color se leería como parte de la página. */
+            background: var(--color-surface);
+            border-block-end: 1px solid var(--color-border);
+            box-shadow: 0 18px 34px rgba(0, 0, 0, 0.45);
             /* Cerrado no debe ser alcanzable con Tab: visibility lo saca del
                orden de foco, cosa que opacity sola no hace. */
             visibility: hidden;
@@ -281,11 +288,15 @@ const sections = [
 
         .header__list {
             flex-direction: column;
-            gap: var(--space-4);
+            /* Los enlaces ya miden 44 px de alto cada uno por el objetivo
+               táctil, así que la separación puede ser corta sin que se peguen:
+               con `space-4` cada entrada ocupaba 60 px y en un móvil bajo
+               sobraban dos secciones fuera del panel. */
+            gap: var(--space-2);
         }
 
         .header__link {
-            font-size: var(--text-xl);
+            font-size: var(--text-lg);
         }
     }
 </style>

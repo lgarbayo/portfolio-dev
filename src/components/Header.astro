@@ -245,16 +245,26 @@ const sections = [
         }
 
         .header__nav {
-            position: fixed;
             /*
-             * Cuelga de la cabecera y mide lo que mide su contenido, en vez de
-             * ocupar la pantalla entera. Dos motivos: con `inset: 0` la capa
-             * tapaba la propia cabecera —está en un z-index más bajo— y el
-             * botón de cerrar quedaba debajo, sin manera de salir; y un panel
-             * que deja ver la página debajo se entiende como lo que es, algo
-             * desplegado encima y no otra pantalla.
+             * `absolute` colgando de la cabecera, y no `fixed` contra la
+             * ventana.
+             *
+             * La cabecera lleva `backdrop-filter`, y eso la convierte en el
+             * bloque contenedor de sus descendientes posicionados: un `fixed`
+             * aquí dentro no se mide contra la ventana sino contra ella, que
+             * son 68 px de alto. La capa se quedaba en esa franja —pintando el
+             * fondo sólo ahí y soltando los enlaces por fuera— y con
+             * `overflow` puesto, recortada al primer enlace.
+             *
+             * Colgar el panel de la cabecera a propósito sale más barato que
+             * pelearse con eso, y es además lo que se quiere: un desplegable
+             * anclado a la barra, del ancho de la barra, que deja ver la página
+             * por debajo.
              */
-            inset: var(--header-height) 0 auto;
+            position: absolute;
+            inset-block-start: 100%;
+            inset-inline: 0;
+            border-radius: 0 0 var(--radius-md) var(--radius-md);
             /* Si no cabe —un móvil en horizontal, o el texto muy ampliado— se
                recorre por dentro en vez de crecer fuera de la pantalla. */
             max-block-size: calc(100dvh - var(--header-height));

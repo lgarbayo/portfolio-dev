@@ -31,6 +31,25 @@ html:has(.section) {
     scroll-snap-type: y mandatory;
 }
 
+/*
+ * En táctil, no.
+ *
+ * El anclaje obligatorio se pelea con el navegador del móvil: al tocar un enlace
+ * la barra de direcciones se retrae, cambia el alto del viewport y el navegador
+ * vuelve a anclar a la sección más cercana a donde estaba. El salto se deshace
+ * solo. Por eso desde la bienvenida únicamente funcionaba "Sobre mí": era la
+ * única lo bastante cerca como para sobrevivir a la corrección.
+ *
+ * Se pierde poco. El anclaje está para que en un monitor cada sección entre
+ * encajada, y en un móvil casi ninguna cabe en una pantalla: ahí ya se recorren
+ * con scroll normal, que es justo lo que hace esto.
+ */
+@media (pointer: coarse) {
+    html:has(.section) {
+        scroll-snap-type: none;
+    }
+}
+
 /* El pie, abajo del todo.
    Con el documento en columna y el contenido reclamando el espacio sobrante, el
    pie cae al fondo de la ventana cuando la página es corta —el índice del blog

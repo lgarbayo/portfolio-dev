@@ -1,0 +1,35 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import { defaultLocale, localizedPath, useTranslations } from "@/i18n/index";
+
+/*
+ * Una sola 404 para todo el sitio, en el idioma por defecto. También es la que
+ * responde ante un prefijo de idioma que no existe (`/fr/…`): esas rutas no se
+ * generan, así que el host sirve esta página.
+ */
+const locale = defaultLocale;
+const t = useTranslations(locale);
+---
+
+<BaseLayout locale={locale} title={t("notFound.title")} description={t("notFound.description")}>
+    <div class="container notfound">
+        <h1>{t("notFound.title")}</h1>
+        <p>{t("notFound.description")}</p>
+        <a class="button button--primary" href={localizedPath(locale)}>{t("notFound.home")}</a>
+    </div>
+</BaseLayout>
+
+<style>
+    .notfound {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--space-4);
+        padding-block: var(--space-10);
+    }
+
+    .notfound p {
+        color: var(--color-text-muted);
+        max-inline-size: var(--prose-width);
+    }
+</style>

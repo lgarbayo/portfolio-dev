@@ -1,0 +1,204 @@
+---
+import Section from "../Section.astro";
+import EducationEntry from "../EducationEntry.astro";
+import { getLocalizedEntries, getLocalizedEntry } from "@/lib/content";
+import { localeTags, useTranslations, type Locale } from "@/i18n/index";
+
+interface Props {
+    locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = useTranslations(locale);
+
+const entries = (await getLocalizedEntries("education", locale)).sort(
+    (a, b) =>
+        a.data.order - b.data.order || b.data.startDate.getTime() - a.data.startDate.getTime(),
+);
+
+/*
+ * Las certificaciones van en su propio bloque, no mezcladas con las
+ * titulaciones: son otra cosa y se leen de otra manera. El tipo de cada entrada
+ * es lo que decide dónde cae, así que añadir una certificación es crear su
+ * fichero, sin tocar esto.
+ */
+const education = entries.filter((entry) => entry.data.type !== "certification");
+const certifications = entries.filter((entry) => entry.data.type === "certification");
+
+const languages = await getLocalizedEntry("languages", locale);
+
+// Mes y año para las credenciales. Con sólo el año, veinte certificados del
+// mismo curso se leen como si fueran simultáneos.
+const issued = new Intl.DateTimeFormat(localeTags[locale], { month: "short", year: "numeric" });
+---
+
+<Section id="education" title={t("education.title")}>
+    <ul class="education__list" role="list">
+        {education.map((entry) => <EducationEntry locale={locale} entry={entry} />)}
+    </ul>
+
+    {
+        languages && (
+            <div class="education__block" data-reveal>
+                <h3 class="education__block-title">{t("education.languages.title")}</h3>
+                <ul class="education__languages" role="list">
+                    {languages.data.items.map((item) => (
+                        <li class="education__language">
+                            <span class="education__language-name">{item.name}</span>
+                            <span class="education__language-level">
+                                {item.level}
+                                {item.credential && (
+                                    <span class="education__credential">· {item.credential}</span>
+                                )}
+                            </span>
+                        </li>
+                    ))}
+                </ul>
+            </div>
+        )
+    }
+
+    {/*
+        Las certificaciones van en formato corto —nombre, entidad y fecha—, no
+        como las titulaciones. Son veintitantas: con la ficha completa de arriba
+        ocuparían media página cada una y enterrarían los dos grados. El bloque
+        tampoco existe hasta que haya alguna, que un titular sobre una lista
+        vacía se lee como algo roto.
+    */}
+    {
+        certifications.length > 0 && (
+            <div class="education__block">
+                <h3 class="education__block-title" data-reveal>
+                    {t("education.certifications.title")}
+                </h3>
+                <ul class="education__certs" role="list">
+                    {certifications.map((entry) => (
+                        <li class="education__cert" data-reveal>
+                            <p class="education__cert-title">
+                                {entry.data.url ? (
+                                    <a
+                                        class="education__link"
+                                        href={entry.data.url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                    >
+                                        {entry.data.title}
+                                    </a>
+                                ) : (
+                                    entry.data.title
+                                )}
+                            </p>
+                            <p class="education__cert-meta">
+                                {entry.data.institution} ·{" "}
+                                <span class="education__period">
+                                    {issued.format(entry.data.startDate)}
+                                </span>
+                            </p>
+                        </li>
+                    ))}
+                </ul>
+            </div>
+        )
+    }
+</Section>
+
+<style>
+    .education__list {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-6);
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+
+    .education__block {
+        margin-block-start: var(--space-7);
+    }
+
+    .education__block-title {
+        margin-block-end: var(--space-4);
+        font-family: var(--font-mono);
+        font-size: var(--text-sm);
+        letter-spacing: var(--tracking-wide);
+        text-transform: uppercase;
+        color: var(--color-text-subtle);
+    }
+
+    .education__languages {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-2);
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        max-inline-size: var(--prose-width);
+    }
+
+    /* Nombre y nivel en la misma línea mientras quepan, y en dos cuando no: en
+       móvil "Inglés — Intermedio-avanzado · Cambridge (FCE)" no entra de una. */
+    .education__language {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        gap: var(--space-2);
+        font-size: var(--text-sm);
+    }
+
+    .education__language-name {
+        font-weight: var(--weight-medium);
+        color: var(--color-text);
+    }
+
+    .education__language-level {
+        color: var(--color-text-muted);
+    }
+
+    /*
+     * Dos columnas mientras quepan. Veintitantas credenciales en una sola
+     * columna son una pared de texto; en dos, se recorren de un vistazo.
+     */
+    .education__certs {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
+        gap: var(--space-4) var(--space-6);
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+
+    .education__cert-title {
+        font-size: var(--text-sm);
+        font-weight: var(--weight-medium);
+        color: var(--color-text);
+    }
+
+    .education__cert-meta {
+        margin-block-start: var(--space-1);
+        font-size: var(--text-xs);
+        color: var(--color-text-muted);
+    }
+
+    .education__link {
+        color: inherit;
+        text-decoration: none;
+    }
+
+    .education__link:hover,
+    .education__link:focus-visible {
+        text-decoration: underline;
+        text-underline-offset: 0.2em;
+    }
+
+    .education__period {
+        font-family: var(--font-mono);
+        color: var(--color-text-subtle);
+    }
+
+    .education__credential {
+        margin-inline-start: var(--space-2);
+        font-family: var(--font-mono);
+        font-size: var(--text-xs);
+        color: var(--color-text-subtle);
+    }
+</style>

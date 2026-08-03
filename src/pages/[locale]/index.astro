@@ -1,0 +1,39 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import Hero from "@/components/sections/Hero.astro";
+import About from "@/components/sections/About.astro";
+import Projects from "@/components/sections/Projects.astro";
+import Stack from "@/components/sections/Stack.astro";
+import Experience from "@/components/sections/Experience.astro";
+import Education from "@/components/sections/Education.astro";
+import Contact from "@/components/sections/Contact.astro";
+import PersonSchema from "@/components/PersonSchema.astro";
+import { hasPublishedPosts } from "@/lib/content";
+import { locales, useTranslations, type Locale } from "@/i18n/index";
+
+export function getStaticPaths() {
+    return locales.map((locale) => ({ params: { locale } }));
+}
+
+const locale = Astro.params.locale as Locale;
+const t = useTranslations(locale);
+const showBlog = await hasPublishedPosts(locale);
+---
+
+<BaseLayout
+    locale={locale}
+    title={`${t("site.title")} — ${t("site.tagline")}`}
+    description={t("site.description")}
+    showBlog={showBlog}
+    onHome
+>
+    <PersonSchema slot="head" locale={locale} />
+
+    <Hero locale={locale} />
+    <About locale={locale} />
+    <Projects locale={locale} />
+    <Stack locale={locale} />
+    <Experience locale={locale} />
+    <Education locale={locale} />
+    <Contact locale={locale} />
+</BaseLayout>

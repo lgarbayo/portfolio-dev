@@ -54,11 +54,10 @@ export class WorldScene extends Phaser.Scene {
 
     update() {
         const modalOpen = Boolean(document.querySelector(".portfolio-modal.open"));
-        const globalBlock =
-            typeof window !== "undefined"
-                ? Boolean((window as typeof window & { __blockGameInput?: boolean }).__blockGameInput)
-                : false;
-        const shouldLock = modalOpen || globalBlock;
+        // Lo pone la página vía `handle.setInputBlocked()` mientras dura una
+        // interacción suya —un toque que empieza en el botón de cerrar.
+        const hostBlock = Boolean(this.registry.get("inputBlocked"));
+        const shouldLock = modalOpen || hostBlock;
         if (shouldLock && !this.inputLocked) {
             this.resetTouchInputs();
         }

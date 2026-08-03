@@ -1,0 +1,127 @@
+---
+import BaseHead from "@/components/BaseHead.astro";
+import Header from "@/components/Header.astro";
+import Footer from "@/components/Footer.astro";
+import GameLauncher from "@/components/GameLauncher.astro";
+import GameOverlay from "@/components/GameOverlay.astro";
+import PageTransition from "@/components/PageTransition.astro";
+import { ClientRouter } from "astro:transitions";
+import { useTranslations, type Locale } from "@/i18n/index";
+import "@/styles/global.css";
+
+interface Props {
+    locale: Locale;
+    title: string;
+    description: string;
+    image?: string;
+    canonicalOverride?: string;
+    type?: "website" | "article";
+    showBlog?: boolean;
+    onHome?: boolean;
+    counterpartPaths?: Partial<Record<Locale, string>>;
+}
+
+const {
+    locale,
+    title,
+    description,
+    image,
+    canonicalOverride,
+    type,
+    showBlog = false,
+    onHome = false,
+    counterpartPaths,
+} = Astro.props;
+
+const t = useTranslations(locale);
+---
+
+<!doctype html>
+<html lang={locale}>
+    <head>
+        <BaseHead
+            locale={locale}
+            title={title}
+            description={description}
+            image={image}
+            canonicalOverride={canonicalOverride}
+            type={type}
+        />
+        <slot name="head" />
+        <ClientRouter />
+    </head>
+    <body>
+        <a class="skip-link" href="#main">{t("nav.skipToContent")}</a>
+
+        <Header
+            locale={locale}
+            showBlog={showBlog}
+            onHome={onHome}
+            counterpartPaths={counterpartPaths}
+        />
+
+        <main id="main">
+            <slot />
+        </main>
+
+        <Footer locale={locale} />
+
+        <GameLauncher locale={locale} />
+        <GameOverlay locale={locale} />
+        <PageTransition />
+
+        <slot name="after-body" />
+
+        <script>
+            import { initReveal, destroyReveal } from "@/lib/reveal";
+            import { initGameMode } from "@/lib/game-mode";
+            import { initPageTransition } from "@/lib/page-transition";
+            import { initSectionTransition } from "@/lib/section-transition";
+            import { initShortcuts } from "@/lib/shortcuts";
+            import { initLocaleLinks } from "@/lib/locale-links";
+            import { initAvatar, destroyAvatar } from "@/lib/avatar";
+
+            const boot = () => {
+                void initReveal();
+                initGameMode();
+                initShortcuts();
+                initLocaleLinks();
+                void initPageTransition();
+                initSectionTransition();
+                void initAvatar();
+            };
+
+            boot();
+            document.addEventListener("astro:page-load", boot);
+            // Los ScrollTrigger apuntan a nodos que el swap sustituye: si no se
+            // matan aquí, quedan observando elementos que ya no existen.
+            document.addEventListener("astro:before-swap", () => {
+                destroyReveal();
+                destroyAvatar();
+            });
+        </script>
+    </body>
+</html>
+
+<style>
+    /* Primera parada del Tab en cualquier página: invisible hasta que recibe
+       foco, y entonces bien visible. */
+    .skip-link {
+        position: absolute;
+        inset-block-start: var(--space-2);
+        inset-inline-start: var(--space-2);
+        z-index: var(--z-transition);
+        padding: var(--space-3) var(--space-4);
+        background: var(--color-accent);
+        color: var(--color-bg);
+        font-weight: var(--weight-semibold);
+        border-radius: var(--radius-sm);
+        text-decoration: none;
+        transform: translateY(-200%);
+        transition: transform var(--duration-fast) var(--ease-out);
+    }
+
+    .skip-link:focus-visible {
+        transform: translateY(0);
+    }
+</style>

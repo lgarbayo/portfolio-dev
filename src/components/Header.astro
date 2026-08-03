@@ -1,0 +1,270 @@
+---
+import LanguageSelector from "./LanguageSelector.astro";
+import { publicAssetExists } from "@/lib/assets";
+import { localizedPath, useTranslations, type Locale } from "@/i18n/index";
+
+interface Props {
+    locale: Locale;
+    /** El blog sólo aparece si ese idioma tiene algún post publicado. */
+    showBlog?: boolean;
+    /** Fuera de la home las anclas necesitan la ruta completa por delante. */
+    onHome?: boolean;
+    counterpartPaths?: Partial<Record<Locale, string>>;
+}
+
+const { locale, showBlog = false, onHome = true, counterpartPaths } = Astro.props;
+const t = useTranslations(locale);
+
+// El memoji hace de logo. Si el fichero no está, la marca vuelve a las
+// iniciales: la cabecera nunca se queda sin nada donde pinchar para volver.
+const MEMOJI = "/assets/ui/memoji.webp";
+const memoji = publicAssetExists(MEMOJI) ? MEMOJI : null;
+
+const home = localizedPath(locale);
+
+/*
+ * El enlace del blog se marca aquí y no en el cliente: quien resalta la sección
+ * activa en la home es un IntersectionObserver sobre las propias secciones, y en
+ * las páginas del blog esas secciones no existen. Sin esto, el blog es el único
+ * sitio del que estás dentro sin que la navegación lo diga.
+ */
+const onBlog = Astro.url.pathname.includes("/blog");
+const anchor = (id: string) => (onHome ? `#${id}` : `${home}#${id}`);
+
+const sections = [
+    { id: "about", label: t("nav.about") },
+    { id: "projects", label: t("nav.projects") },
+    { id: "stack", label: t("nav.stack") },
+    { id: "experience", label: t("nav.experience") },
+    { id: "education", label: t("nav.education") },
+    { id: "contact", label: t("nav.contact") },
+];
+---
+
+<header class="header">
+    <a class="header__brand" href={home}>
+        {/* `width` y `height` son las medidas de pintado, no las del fichero: así el
+            logo ocupa lo que debe aunque la regla de abajo no llegue a aplicarse
+            —pasa en el servidor de desarrollo tras una navegación— en vez de
+            reventar la cabecera con la imagen a tamaño natural. */}
+        {
+            memoji ? (
+                <img class="header__brand-memoji" src={memoji} alt="" width="30" height="40" />
+            ) : (
+                <span class="header__brand-mark" aria-hidden="true">LG</span>
+            )
+        }
+        <span class="visually-hidden">Luis Garbayo Fernández</span>
+    </a>
+
+    <button
+        class="header__toggle"
+        type="button"
+        aria-expanded="false"
+        aria-controls="primary-nav"
+        data-menu-toggle
+    >
+        <span class="visually-hidden" data-menu-label-open={t("nav.menu.open")}
+            data-menu-label-close={t("nav.menu.close")}>{t("nav.menu.open")}</span>
+        <span class="header__toggle-bars" aria-hidden="true"></span>
+    </button>
+
+    <nav class="header__nav" id="primary-nav" aria-label={t("nav.primary")} data-menu>
+        <ul class="header__list" role="list">
+            {
+                sections.map((section) => (
+                    <li>
+                        <a class="header__link" href={anchor(section.id)} data-nav-section={section.id}>
+                            {section.label}
+                        </a>
+                    </li>
+                ))
+            }
+            {
+                showBlog && (
+                    <li>
+                        <a
+                            class="header__link"
+                            href={localizedPath(locale, "blog")}
+                            {...onBlog ? { "data-active": "" } : {}}
+                        >
+                            {t("nav.blog")}
+                        </a>
+                    </li>
+                )
+            }
+        </ul>
+        <div class="header__lang">
+            <LanguageSelector locale={locale} counterpartPaths={counterpartPaths} />
+        </div>
+    </nav>
+</header>
+
+<script>
+    import { initHeader } from "@/lib/header";
+    initHeader();
+    document.addEventListener("astro:page-load", () => initHeader());
+</script>
+
+<style>
+    .header {
+        position: sticky;
+        inset-block-start: 0;
+        z-index: var(--z-sticky);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--space-4);
+        inline-size: min(100% - var(--gutter) * 2, var(--content-width));
+        margin-inline: auto;
+        padding-block: var(--space-3);
+        /* El fondo translúcido evita que el texto de la página se lea a través
+           del header al hacer scroll. */
+        background: color-mix(in srgb, var(--color-bg) 88%, transparent);
+        backdrop-filter: blur(12px);
+    }
+
+    .header__brand {
+        display: inline-flex;
+        align-items: center;
+        min-block-size: var(--tap-target);
+        font-family: var(--font-mono);
+        font-size: var(--text-lg);
+        font-weight: var(--weight-bold);
+        color: var(--color-accent);
+        text-decoration: none;
+        letter-spacing: var(--tracking-tight);
+    }
+
+    .header__brand-memoji {
+        /* Alto fijo y ancho libre: manda la altura de la cabecera, y el recorte
+           es más alto que ancho. */
+        block-size: 2.5rem;
+        inline-size: auto;
+        transition: scale var(--duration-fast) var(--ease-out);
+    }
+
+    .header__brand:hover .header__brand-memoji,
+    .header__brand:focus-visible .header__brand-memoji {
+        scale: 1.08;
+    }
+
+    .header__nav {
+        display: flex;
+        align-items: center;
+        gap: var(--space-5);
+    }
+
+    .header__list {
+        display: flex;
+        align-items: center;
+        gap: var(--space-4);
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+
+    .header__link {
+        display: inline-flex;
+        align-items: center;
+        min-block-size: var(--tap-target);
+        font-size: var(--text-sm);
+        color: var(--color-text-muted);
+        text-decoration: none;
+        transition: color var(--duration-fast) var(--ease-out);
+    }
+
+    .header__link:hover,
+    .header__link[data-active] {
+        color: var(--color-accent);
+    }
+
+    .header__link[data-active] {
+        font-weight: var(--weight-medium);
+    }
+
+    .header__toggle {
+        display: none;
+        align-items: center;
+        justify-content: center;
+        inline-size: var(--tap-target);
+        min-block-size: var(--tap-target);
+        background: none;
+        border: 0;
+        cursor: pointer;
+    }
+
+    .header__toggle-bars,
+    .header__toggle-bars::before,
+    .header__toggle-bars::after {
+        display: block;
+        inline-size: 22px;
+        block-size: 2px;
+        background: var(--color-text);
+        transition: transform var(--duration-fast) var(--ease-out);
+    }
+
+    .header__toggle-bars::before,
+    .header__toggle-bars::after {
+        content: "";
+        position: relative;
+    }
+
+    .header__toggle-bars::before {
+        inset-block-start: -7px;
+    }
+
+    .header__toggle-bars::after {
+        inset-block-start: 5px;
+    }
+
+    .header__toggle[aria-expanded="true"] .header__toggle-bars {
+        background: transparent;
+    }
+
+    .header__toggle[aria-expanded="true"] .header__toggle-bars::before {
+        transform: translateY(7px) rotate(45deg);
+    }
+
+    .header__toggle[aria-expanded="true"] .header__toggle-bars::after {
+        transform: translateY(-5px) rotate(-45deg);
+    }
+
+    @media (max-width: 48rem) {
+        .header__toggle {
+            display: inline-flex;
+            order: 2;
+        }
+
+        .header__nav {
+            position: fixed;
+            inset: 0;
+            z-index: var(--z-menu);
+            flex-direction: column;
+            justify-content: center;
+            gap: var(--space-6);
+            background: var(--color-bg);
+            /* Cerrado no debe ser alcanzable con Tab: visibility lo saca del
+               orden de foco, cosa que opacity sola no hace. */
+            visibility: hidden;
+            opacity: 0;
+            transition:
+                opacity var(--duration-base) var(--ease-out),
+                visibility var(--duration-base);
+        }
+
+        .header__nav[data-open] {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .header__list {
+            flex-direction: column;
+            gap: var(--space-4);
+        }
+
+        .header__link {
+            font-size: var(--text-xl);
+        }
+    }
+</style>

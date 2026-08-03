@@ -1,0 +1,175 @@
+---
+import type { CollectionEntry } from "astro:content";
+import { localeTags, useTranslations, type Locale } from "@/i18n/index";
+
+/**
+ * Una entrada de Formación.
+ *
+ * Vive aparte porque la sección la pinta dos veces —titulaciones arriba,
+ * certificaciones abajo— y son exactamente la misma ficha. Duplicarla era
+ * garantizar que las dos copias acabaran divergiendo.
+ */
+interface Props {
+    locale: Locale;
+    entry: CollectionEntry<"education">;
+}
+
+const { locale, entry } = Astro.props;
+const t = useTranslations(locale);
+const { data } = entry;
+
+const formatter = new Intl.DateTimeFormat(localeTags[locale], { year: "numeric" });
+const typeLabel = {
+    degree: t("education.type.degree"),
+    scholarship: t("education.type.scholarship"),
+    certification: t("education.type.certification"),
+    program: t("education.type.program"),
+};
+---
+
+<li class="education__item" data-reveal>
+    <span class="education__type">{typeLabel[data.type]}</span>
+    <h3 class="education__title">{data.title}</h3>
+    <p class="education__institution">
+        {
+            data.url ? (
+                <a
+                    class="education__link"
+                    href={data.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                >
+                    {data.institution}
+                </a>
+            ) : (
+                data.institution
+            )
+        }{" "}
+        ·{" "}
+        <span class="education__period">
+            {formatter.format(data.startDate)}
+            {data.endDate ? `–${formatter.format(data.endDate)}` : ""}
+        </span>
+    </p>
+
+    {data.description.map((paragraph) => <p class="education__description">{paragraph}</p>)}
+
+    {
+        data.repoUrl && (
+            <a
+                class="education__repo"
+                href={data.repoUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+            >
+                {t("projects.viewRepo")} <span aria-hidden="true">→</span>
+            </a>
+        )
+    }
+
+    {/* Las fotos van después del texto y en carga diferida: son el recuerdo de
+        lo que se cuenta arriba, no la información. */}
+    {
+        data.images.length > 0 && (
+            <ul class="education__gallery" role="list">
+                {data.images.map((image) => (
+                    <li>
+                        <img
+                            class="education__photo"
+                            src={image.src}
+                            alt={image.alt}
+                            loading="lazy"
+                            decoding="async"
+                        />
+                    </li>
+                ))}
+            </ul>
+        )
+    }
+</li>
+
+<style>
+    .education__type {
+        display: inline-block;
+        font-family: var(--font-mono);
+        font-size: var(--text-xs);
+        letter-spacing: var(--tracking-wide);
+        text-transform: uppercase;
+        color: var(--color-text-subtle);
+        margin-block-end: var(--space-1);
+    }
+
+    .education__title {
+        font-size: var(--text-lg);
+        color: var(--color-text);
+    }
+
+    .education__institution {
+        margin-block-start: var(--space-1);
+        font-size: var(--text-sm);
+        color: var(--color-accent);
+    }
+
+    /* Igual que en Experiencia: el subrayado sólo al apuntar, para que dentro de
+       la línea del centro no compita con la propia titulación. */
+    .education__link {
+        color: inherit;
+        text-decoration: none;
+    }
+
+    .education__link:hover,
+    .education__link:focus-visible {
+        text-decoration: underline;
+        text-underline-offset: 0.2em;
+    }
+
+    .education__period {
+        font-family: var(--font-mono);
+        color: var(--color-text-subtle);
+    }
+
+    .education__description {
+        margin-block-start: var(--space-2);
+        font-size: var(--text-sm);
+        color: var(--color-text-muted);
+    }
+
+    .education__repo {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--space-2);
+        margin-block-start: var(--space-3);
+        font-size: var(--text-sm);
+        text-decoration: none;
+    }
+
+    .education__repo:hover {
+        text-decoration: underline;
+        text-underline-offset: 0.2em;
+    }
+
+    /*
+     * Las fotos comparten fila mientras quepan y se apilan cuando no. El
+     * `auto-fit` con mínimo evita decidir a mano cuántas caben: valen dos, y
+     * valdrían cuatro el día que se añadan.
+     */
+    .education__gallery {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
+        gap: var(--space-3);
+        margin-block-start: var(--space-4);
+        max-inline-size: var(--prose-width);
+        padding: 0;
+        list-style: none;
+    }
+
+    .education__photo {
+        inline-size: 100%;
+        /* Recorte a una proporción común: dos fotos de encuadres distintos
+           puestas al lado se ven desparejadas si cada una manda sobre su alto. */
+        aspect-ratio: 16 / 9;
+        object-fit: cover;
+        border-radius: var(--radius-md);
+        border: 1px solid var(--color-border);
+    }
+</style>

@@ -1,0 +1,51 @@
+---
+import { defaultLocale, locales } from "@/i18n/config";
+
+/*
+ * La raíz no tiene contenido propio: resuelve idioma y redirige.
+ *
+ * Todas las páginas reales llevan prefijo (`/en/…`, `/es/…`), lo que evita tener
+ * dos URLs para la misma página y hace triviales los `hreflang`. El precio es
+ * este salto, y se paga con una redirección que ocurre antes de pintar nada.
+ *
+ * Orden: preferencia guardada → idioma del navegador → inglés.
+ */
+const fallback = `/${defaultLocale}/`;
+---
+
+<html lang={defaultLocale}>
+    <head>
+        <meta charset="utf-8" />
+        <title>Luis Garbayo Fernández</title>
+        <!-- Sin JS el meta refresh lleva al idioma por defecto igualmente. -->
+        <meta http-equiv="refresh" content={`0; url=${fallback}`} />
+        <link rel="canonical" href={new URL(fallback, Astro.site).href} />
+        <meta name="robots" content="noindex" />
+        <script is:inline define:vars={{ locales, fallback }}>
+            (() => {
+                const pick = () => {
+                    try {
+                        const stored = localStorage.getItem("preferred-locale");
+                        if (stored && locales.includes(stored)) return `/${stored}/`;
+                    } catch {
+                        // Almacenamiento bloqueado: seguimos con el navegador.
+                    }
+
+                    for (const tag of navigator.languages ?? [navigator.language]) {
+                        const code = tag.split("-")[0];
+                        if (locales.includes(code)) return `/${code}/`;
+                    }
+
+                    return fallback;
+                };
+
+                // `replace` en vez de `assign`: la raíz no debe quedarse en el
+                // historial, o el botón atrás rebotaría contra la redirección.
+                location.replace(pick());
+            })();
+        </script>
+    </head>
+    <body>
+        <p><a href={fallback}>Luis Garbayo Fernández</a></p>
+    </body>
+</html>

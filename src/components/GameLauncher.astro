@@ -1,0 +1,130 @@
+---
+import Kbd from "./Kbd.astro";
+import { useTranslations, type Locale } from "@/i18n/index";
+
+interface Props {
+    locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = useTranslations(locale);
+---
+
+<div class="launcher" data-game-launcher>
+    <button class="launcher__button" type="button" aria-label={t("game.launch")} data-open-game>
+        <!--
+          El vídeo de la landing ya no es el hero: aquí hace de tráiler del modo
+          juego. Siempre mudo, y sólo se reproduce cuando el puntero está encima
+          o el launcher entra en pantalla en táctil.
+        -->
+        <video
+            class="launcher__preview"
+            data-launcher-preview
+            data-src-desktop="/assets/ui/landing_V2.mp4"
+            data-src-mobile="/assets/ui/landing_mobile_V2.mp4"
+            muted
+            loop
+            playsinline
+            preload="none"
+            aria-hidden="true"
+            width="160"
+            height="120"></video>
+
+        <span class="launcher__label">
+            <span class="launcher__icon" aria-hidden="true">▸</span>
+            <span class="launcher__text">{t("game.launcher.label")}</span>
+            <span class="launcher__kbd"><Kbd key="G" /></span>
+        </span>
+    </button>
+</div>
+
+<style>
+    .launcher {
+        position: fixed;
+        inset-block-end: var(--space-4);
+        inset-inline-end: var(--space-4);
+        z-index: var(--z-launcher);
+    }
+
+    .launcher__button {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        inline-size: auto;
+        min-inline-size: var(--tap-target);
+        min-block-size: var(--tap-target);
+        padding: 0;
+        background: var(--color-surface);
+        border: 1px solid var(--color-border-strong);
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        transition:
+            border-color var(--duration-fast) var(--ease-out),
+            transform var(--duration-fast) var(--ease-out);
+    }
+
+    .launcher__button:hover {
+        border-color: var(--color-accent);
+        transform: translateY(-2px);
+    }
+
+    .launcher__preview {
+        position: absolute;
+        inset: 0;
+        inline-size: 100%;
+        block-size: 100%;
+        object-fit: cover;
+        opacity: 0;
+        transition: opacity var(--duration-base) var(--ease-out);
+    }
+
+    .launcher__preview[data-playing] {
+        opacity: 0.55;
+    }
+
+    .launcher__label {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        gap: var(--space-2);
+        padding: var(--space-3) var(--space-4);
+        font-family: var(--font-mono);
+        font-size: var(--text-xs);
+        letter-spacing: var(--tracking-wide);
+        text-transform: uppercase;
+        color: var(--color-text);
+    }
+
+    .launcher__icon {
+        color: var(--color-accent);
+    }
+
+    /* La pista de tecla sólo tiene sentido donde hay teclado. */
+    @media (hover: none) {
+        .launcher__kbd {
+            display: none;
+        }
+    }
+
+    @media (max-width: 36rem) {
+        .launcher__kbd {
+            display: none;
+        }
+
+        .launcher__text {
+            /* En pantallas estrechas se queda sólo el símbolo: el botón sigue
+               midiendo 44px, pero no se come el ancho del pie. */
+            position: absolute;
+            inline-size: 1px;
+            block-size: 1px;
+            overflow: hidden;
+            clip-path: inset(50%);
+        }
+
+        .launcher__label {
+            padding: var(--space-3);
+        }
+    }
+</style>

@@ -1,0 +1,37 @@
+---
+import { useTranslations, type Locale } from "@/i18n/index";
+
+interface Props {
+    locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = useTranslations(locale);
+
+// Datos estructurados para que los buscadores sepan de quién es este sitio.
+// `sameAs` es lo que ata los perfiles dispersos a una misma persona.
+const person = {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    name: "Luis Garbayo Fernández",
+    givenName: "Luis",
+    familyName: "Garbayo Fernández",
+    jobTitle: t("hero.role"),
+    description: t("site.description"),
+    url: new URL(`/${locale}/`, Astro.site).href,
+    image: new URL("/assets/ui/me.jpg", Astro.site).href,
+    email: "mailto:lugarbayo@gmail.com",
+    alumniOf: {
+        "@type": "CollegeOrUniversity",
+        name: "University of Vigo",
+    },
+    knowsLanguage: ["es", "en", "gl"],
+    sameAs: [
+        "https://github.com/lgarbayo",
+        "https://linkedin.com/in/luis-garbayo",
+        "https://devpost.com/lgarbayo",
+    ],
+};
+---
+
+<script type="application/ld+json" set:html={JSON.stringify(person)} is:inline />

@@ -1,0 +1,59 @@
+---
+interface Props {
+    id: string;
+    title?: string;
+    description?: string;
+    /** Las secciones se revelan al entrar en viewport; el hero no, ya está ahí. */
+    reveal?: boolean;
+}
+
+const { id, title, description, reveal = true } = Astro.props;
+---
+
+<section class="section" id={id} aria-labelledby={title ? `${id}-title` : undefined}>
+    <div class="container">
+        {
+            title && (
+                <header class="section__head" {...reveal ? { "data-reveal": "" } : {}}>
+                    <h2 class="section__title" id={`${id}-title`}>
+                        {title}
+                    </h2>
+                    {description && <p class="section__description">{description}</p>}
+                </header>
+            )
+        }
+        <slot />
+    </div>
+</section>
+
+<style>
+    .section {
+        /* Cada sección ocupa la pantalla que queda bajo el header, y su
+           contenido va centrado en ella. Las que no caben —Proyectos,
+           Experiencia— crecen hacia abajo con normalidad: el alto es un mínimo,
+           no un tope. */
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        min-block-size: calc(100svh - var(--header-height));
+        padding-block: var(--section-gap);
+        scroll-snap-align: start;
+    }
+
+    .section__head {
+        margin-block-end: var(--space-6);
+    }
+
+    .section__title {
+        font-family: var(--font-mono);
+        font-size: var(--text-2xl);
+        color: var(--color-accent);
+        letter-spacing: var(--tracking-tight);
+    }
+
+    .section__description {
+        margin-block-start: var(--space-3);
+        max-inline-size: var(--prose-width);
+        color: var(--color-text-muted);
+    }
+</style>

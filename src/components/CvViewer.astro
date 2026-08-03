@@ -1,0 +1,279 @@
+---
+import { publicAssetExists } from "@/lib/assets";
+import { localeNames, useTranslations, type Locale } from "@/i18n/index";
+
+/**
+ * Los dos CV, con vista previa y visor en modal.
+ *
+ * Los PDF están en los dos idiomas en los que existen —inglés y castellano— y se
+ * ofrecen los dos en las tres versiones del sitio: quien lee en gallego querrá
+ * elegir en cuál se lo lleva, no que se lo elijan.
+ *
+ * Cada tarjeta sólo se pinta si su PDF está de verdad en `public/`. Una vista
+ * previa que abre un visor vacío es peor que no ofrecerla.
+ */
+interface Props {
+    locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = useTranslations(locale);
+
+const CV_LOCALES = ["en", "es"] as const satisfies readonly Locale[];
+
+const files = CV_LOCALES.map((code) => ({ code, href: `/cv-${code}.pdf` })).filter(({ href }) =>
+    publicAssetExists(href),
+);
+---
+
+{
+    files.length > 0 && (
+        <div class="cv" data-reveal>
+            <h3 class="cv__title">{t("cv.title")}</h3>
+
+            <ul class="cv__list" role="list">
+                {files.map(({ code, href }) => (
+                    <li>
+                        <button
+                            class="cv__card"
+                            type="button"
+                            data-cv-open={href}
+                            data-cv-label={localeNames[code]}
+                            aria-label={t("cv.open", { language: localeNames[code] })}
+                        >
+                            {/*
+                                La previa es el propio PDF a escala. Sin ratón encima
+                                —`pointer-events: none`— para que el clic sea del
+                                botón y no del visor incrustado, que se comería el
+                                gesto y haría scroll dentro de la miniatura.
+                            */}
+                            <span class="cv__preview" aria-hidden="true">
+                                {/*
+                                    Debajo del visor va una portada dibujada. No todos
+                                    los navegadores pintan un PDF dentro de un iframe
+                                    —iOS no lo hace—, y sin esto la tarjeta sería un
+                                    rectángulo vacío justo donde se promete una vista
+                                    previa. Si el PDF sí se pinta, lo tapa.
+                                */}
+                                <span class="cv__placeholder">
+                                    <span class="cv__placeholder-ext">PDF</span>
+                                </span>
+                                <iframe
+                                    src={`${href}#toolbar=0&navpanes=0&view=FitH`}
+                                    title=""
+                                    tabindex="-1"
+                                    loading="lazy"
+                                />
+                            </span>
+                            <span class="cv__label">{localeNames[code]}</span>
+                        </button>
+                    </li>
+                ))}
+            </ul>
+
+            {/*
+                Un solo diálogo para los dos: al abrirlo se le pone el PDF que toca.
+                `<dialog>` nativo trae de serie el fondo modal, Escape y la
+                devolución del foco al botón — tres cosas que a mano se hacen mal.
+            */}
+            <dialog class="cv__dialog" data-cv-dialog aria-label={t("cv.title")}>
+                <div class="cv__dialog-bar">
+                    <p class="cv__dialog-title" data-cv-title />
+                    <div class="cv__dialog-actions">
+                        <a class="cv__action" data-cv-download download>
+                            {t("cv.download")}
+                        </a>
+                        <a class="cv__action" data-cv-tab target="_blank" rel="noopener noreferrer">
+                            {t("cv.newTab")}
+                        </a>
+                        <button class="cv__action cv__close" type="button" data-cv-close>
+                            {t("cv.close")}
+                        </button>
+                    </div>
+                </div>
+                <iframe class="cv__frame" data-cv-frame title={t("cv.title")} />
+            </dialog>
+        </div>
+    )
+}
+
+<script>
+    import { initCvViewer } from "@/lib/cv-viewer";
+    initCvViewer();
+    document.addEventListener("astro:page-load", () => initCvViewer());
+    document.addEventListener("astro:before-swap", () => initCvViewer());
+</script>
+
+<style>
+    .cv {
+        margin-block-start: var(--space-7);
+    }
+
+    .cv__title {
+        margin-block-end: var(--space-4);
+        font-family: var(--font-mono);
+        font-size: var(--text-sm);
+        letter-spacing: var(--tracking-wide);
+        text-transform: uppercase;
+        color: var(--color-text-subtle);
+    }
+
+    .cv__list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--space-4);
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+
+    .cv__card {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-2);
+        padding: 0;
+        background: none;
+        border: 0;
+        cursor: pointer;
+        color: var(--color-text-muted);
+        font-size: var(--text-sm);
+        transition: color var(--duration-fast) var(--ease-out);
+    }
+
+    .cv__card:hover,
+    .cv__card:focus-visible {
+        color: var(--color-accent);
+    }
+
+    .cv__preview {
+        display: block;
+        position: relative;
+        /* Proporción de un A4: la previa tiene que parecerse a lo que abre. */
+        inline-size: 11rem;
+        aspect-ratio: 1 / 1.414;
+        overflow: hidden;
+        border: 1px solid var(--color-border-strong);
+        border-radius: var(--radius-md);
+        background: var(--color-surface-raised);
+        transition: border-color var(--duration-fast) var(--ease-out);
+    }
+
+    .cv__card:hover .cv__preview,
+    .cv__card:focus-visible .cv__preview {
+        border-color: var(--color-accent-border);
+    }
+
+    .cv__placeholder {
+        position: absolute;
+        inset: 0;
+        display: grid;
+        place-items: center;
+        background: repeating-linear-gradient(
+            var(--color-surface-raised) 0 1.1rem,
+            var(--color-surface) 1.1rem 1.15rem
+        );
+    }
+
+    .cv__placeholder-ext {
+        font-family: var(--font-mono);
+        font-size: var(--text-lg);
+        letter-spacing: var(--tracking-wide);
+        color: var(--color-text-subtle);
+    }
+
+    .cv__preview iframe {
+        position: absolute;
+        inset-block-start: 0;
+        inset-inline-start: 0;
+        /* Se pinta a tamaño de lectura y se encoge: a 11rem de ancho, un visor
+           de PDF enseña la primera página ilegible o directamente en blanco. */
+        inline-size: 794px;
+        block-size: 1123px;
+        border: 0;
+        transform: scale(0.222);
+        transform-origin: 0 0;
+        pointer-events: none;
+    }
+
+    .cv__label {
+        font-family: var(--font-mono);
+        font-size: var(--text-xs);
+    }
+
+    .cv__dialog {
+        /* El centrado del diálogo modal lo hace el `margin: auto` de la hoja del
+           navegador, y fijar tamaño aquí lo pisa: sin esto se pega al borde. */
+        margin: auto;
+        inline-size: min(100vw - var(--space-5) * 2, 60rem);
+        block-size: min(100dvh - var(--space-5) * 2, 52rem);
+        padding: 0;
+        border: 1px solid var(--color-border-strong);
+        border-radius: var(--radius-lg);
+        background: var(--color-surface);
+        color: var(--color-text);
+        overflow: hidden;
+    }
+
+    .cv__dialog::backdrop {
+        background: rgba(0, 0, 0, 0.7);
+        backdrop-filter: blur(4px);
+    }
+
+    .cv__dialog-bar {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--space-3);
+        padding: var(--space-3) var(--space-4);
+        border-block-end: 1px solid var(--color-border);
+    }
+
+    .cv__dialog-title {
+        font-family: var(--font-mono);
+        font-size: var(--text-sm);
+        color: var(--color-text);
+    }
+
+    .cv__dialog-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--space-3);
+    }
+
+    .cv__action {
+        display: inline-flex;
+        align-items: center;
+        min-block-size: var(--tap-target);
+        background: none;
+        border: 0;
+        padding: 0;
+        color: var(--color-text-muted);
+        font-family: var(--font-mono);
+        font-size: var(--text-xs);
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+    .cv__action:hover,
+    .cv__action:focus-visible {
+        color: var(--color-accent);
+    }
+
+    .cv__frame {
+        inline-size: 100%;
+        /* Lo que queda bajo la barra: sin esto el visor se sale del diálogo y el
+           final del PDF queda inalcanzable. */
+        block-size: calc(100% - 4rem);
+        border: 0;
+    }
+
+    @media (max-width: 48rem) {
+        .cv__dialog {
+            inline-size: 100vw;
+            block-size: 100dvh;
+            border: 0;
+            border-radius: 0;
+        }
+    }
+</style>

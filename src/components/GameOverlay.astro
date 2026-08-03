@@ -1,0 +1,113 @@
+---
+import GameModals from "./GameModals.astro";
+import { useTranslations, type Locale } from "@/i18n/index";
+
+interface Props {
+    locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = useTranslations(locale);
+---
+
+<div
+    class="overlay"
+    id="game-overlay"
+    role="dialog"
+    aria-modal="true"
+    aria-label={t("game.overlay.label")}
+    aria-hidden="true"
+    data-game-overlay
+>
+    <button
+        class="overlay__close"
+        type="button"
+        aria-label={t("game.close")}
+        data-game-close
+    >✕</button>
+
+    <div class="overlay__stage" data-game-stage></div>
+
+    <p class="overlay__status" data-game-loading hidden>{t("game.loading")}</p>
+
+    <div class="overlay__status" data-game-error hidden>
+        <p>{t("game.error")}</p>
+        <button class="button" type="button" data-game-retry>{t("game.retry")}</button>
+    </div>
+
+    <GameModals locale={locale} />
+</div>
+
+<style>
+    .overlay {
+        position: fixed;
+        inset: 0;
+        z-index: var(--z-overlay);
+        display: grid;
+        place-items: center;
+        background: var(--color-bg);
+        visibility: hidden;
+        opacity: 0;
+        transition:
+            opacity var(--duration-base) var(--ease-out),
+            visibility var(--duration-base);
+    }
+
+    .overlay[data-open] {
+        visibility: visible;
+        opacity: 1;
+    }
+
+    .overlay__stage {
+        inline-size: 100%;
+        block-size: 100%;
+        display: grid;
+        place-items: center;
+        /* El canvas del juego gestiona sus propios gestos; que el navegador no
+           intente hacer scroll ni zoom encima. */
+        touch-action: none;
+    }
+
+    .overlay__stage :global(canvas) {
+        touch-action: none !important;
+        max-inline-size: 100%;
+        max-block-size: 100%;
+    }
+
+    .overlay__close {
+        position: absolute;
+        inset-block-start: var(--space-4);
+        inset-inline-end: var(--space-4);
+        /* Por encima del canvas: si el lienzo lo tapase, el toque que empieza
+           aquí acabaría en el juego. */
+        z-index: 2;
+        inline-size: var(--tap-target);
+        block-size: var(--tap-target);
+        background: rgba(1, 4, 9, 0.7);
+        border: 1px solid var(--color-border-strong);
+        border-radius: var(--radius-full);
+        color: var(--color-text);
+        font-size: var(--text-lg);
+        cursor: pointer;
+    }
+
+    .overlay__close:hover {
+        border-color: var(--color-accent);
+        color: var(--color-accent);
+    }
+
+    .overlay__status {
+        position: absolute;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: var(--space-4);
+        font-family: var(--font-mono);
+        font-size: var(--text-sm);
+        color: var(--color-text-muted);
+    }
+
+    .overlay__status[hidden] {
+        display: none;
+    }
+</style>

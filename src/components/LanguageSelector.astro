@@ -1,0 +1,99 @@
+---
+import {
+    localeLabels,
+    localeNames,
+    otherLocales,
+    translatePath,
+    useTranslations,
+    type Locale,
+} from "@/i18n/index";
+
+interface Props {
+    locale: Locale;
+    /**
+     * Rutas equivalentes en los otros idiomas cuando la página sabe calcularlas
+     * mejor que una traducción de segmentos — por ejemplo un post cuyo slug
+     * traducido no existe, que debe apuntar al índice del blog en vez de a una
+     * URL rota. Lo que no venga aquí se traduce por segmentos.
+     */
+    counterpartPaths?: Partial<Record<Locale, string>>;
+}
+
+const { locale, counterpartPaths } = Astro.props;
+const t = useTranslations(locale);
+
+const targets = otherLocales(locale).map((target) => ({
+    code: target,
+    href: counterpartPaths?.[target] ?? translatePath(Astro.url.pathname, target),
+}));
+---
+
+<div class="lang" role="group" aria-label={t("lang.selector")}>
+    <span class="lang__current" aria-current="true" title={localeNames[locale]}>
+        {localeLabels[locale]}
+    </span>
+    {
+        targets.map(({ code, href }) => (
+            <>
+                <span class="lang__sep" aria-hidden="true">
+                    /
+                </span>
+                <a class="lang__link" href={href} hreflang={code} data-set-locale={code}>
+                    <span class="visually-hidden">
+                        {t("lang.switchTo", { language: t(`lang.name.${code}`) })}
+                    </span>
+                    <span aria-hidden="true">{localeLabels[code]}</span>
+                </a>
+            </>
+        ))
+    }
+</div>
+
+<script>
+    // Elegir idioma es una decisión que el visitante no debería repetir: se
+    // guarda para que `/` le lleve directo la próxima vez.
+    document.addEventListener("click", (event) => {
+        const link = (event.target as HTMLElement | null)?.closest<HTMLElement>("[data-set-locale]");
+        if (!link) return;
+        try {
+            localStorage.setItem("preferred-locale", link.dataset.setLocale!);
+        } catch {
+            // Modo privado o almacenamiento bloqueado: la navegación sigue
+            // funcionando, sólo que sin recordar la preferencia.
+        }
+    });
+</script>
+
+<style>
+    .lang {
+        display: flex;
+        align-items: center;
+        gap: var(--space-1);
+        font-family: var(--font-mono);
+        font-size: var(--text-xs);
+        letter-spacing: var(--tracking-wide);
+    }
+
+    .lang__current {
+        color: var(--color-accent);
+        font-weight: var(--weight-medium);
+    }
+
+    .lang__sep {
+        color: var(--color-text-subtle);
+    }
+
+    .lang__link {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-inline-size: var(--tap-target);
+        min-block-size: var(--tap-target);
+        color: var(--color-text-subtle);
+        text-decoration: none;
+    }
+
+    .lang__link:hover {
+        color: var(--color-text);
+    }
+</style>

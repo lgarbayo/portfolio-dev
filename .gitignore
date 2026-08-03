@@ -12,6 +12,15 @@ dist
 dist-ssr
 *.local
 
+# Generado por Astro en cada build (tipos de content collections, env)
+.astro/
+*.tsbuildinfo
+
+# Secretos: nunca al repo, aunque hoy no exista ninguno
+.env
+.env.*
+!.env.example
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
@@ -23,3 +32,10 @@ dist-ssr
 *.sln
 *.sw?
 .claude/
+.gstack/
+openspec/
+
+# Fuentes pesadas de los modelos 3D: lo que despliega la web es el GLB
+# optimizado de `public/`, y estos originales suman 11,7 MB que se quedarían
+# en el historial para siempre.
+assets-src/

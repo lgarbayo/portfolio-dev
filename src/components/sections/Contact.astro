@@ -1,0 +1,125 @@
+---
+import Section from "../Section.astro";
+import CvViewer from "../CvViewer.astro";
+import { useTranslations, type Locale } from "@/i18n/index";
+
+interface Props {
+    locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = useTranslations(locale);
+
+const channels = [
+    {
+        href: "mailto:lugarbayo@gmail.com",
+        label: t("contact.email"),
+        icon: "/assets/ui/mail-svgrepo-com.svg",
+        name: "Email",
+    },
+    {
+        href: "https://linkedin.com/in/luis-garbayo",
+        label: t("contact.linkedin"),
+        icon: "/assets/ui/linkedin-svgrepo-com.svg",
+        name: "LinkedIn",
+    },
+    {
+        href: "https://github.com/lgarbayo",
+        label: t("contact.github"),
+        icon: "/assets/ui/github-mark-white.svg",
+        name: "GitHub",
+    },
+    {
+        href: "https://devpost.com/lgarbayo",
+        label: t("contact.devpost"),
+        icon: "/assets/ui/devpost-svgrepo-com.svg",
+        name: "Devpost",
+    },
+];
+---
+
+<Section id="contact" title={t("contact.title")}>
+    <p class="contact__description prose" data-reveal>{t("contact.description")}</p>
+
+    <ul class="contact__list" role="list" data-reveal>
+        {
+            channels.map((channel) => (
+                <li>
+                    <a
+                        class="contact__link"
+                        href={channel.href}
+                        aria-label={channel.label}
+                        {...channel.href.startsWith("http")
+                            ? { target: "_blank", rel: "noopener noreferrer" }
+                            : {}}
+                    >
+                        <span
+                            class="contact__icon"
+                            aria-hidden="true"
+                            style={`--icon: url(${channel.icon})`}
+                        />
+                        <span class="contact__name">{channel.name}</span>
+                    </a>
+                </li>
+            ))
+        }
+    </ul>
+
+    <CvViewer locale={locale} />
+</Section>
+
+<style>
+    .contact__description {
+        color: var(--color-text-muted);
+        font-size: var(--text-lg);
+        line-height: var(--leading-relaxed);
+    }
+
+    .contact__list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--space-3);
+        margin-block-start: var(--space-6);
+        padding: 0;
+        list-style: none;
+    }
+
+    .contact__link {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--space-3);
+        min-block-size: var(--tap-target);
+        padding-inline: var(--space-5);
+        border: 1px solid var(--color-border-strong);
+        border-radius: var(--radius-full);
+        color: var(--color-text);
+        text-decoration: none;
+        font-size: var(--text-sm);
+        transition:
+            border-color var(--duration-fast) var(--ease-out),
+            color var(--duration-fast) var(--ease-out);
+    }
+
+    .contact__link:hover {
+        border-color: var(--color-accent);
+        color: var(--color-accent);
+    }
+
+    /*
+     * Los iconos van como máscara, no como imagen.
+     *
+     * Los cuatro SVG vienen con el color metido dentro y no coinciden: el de
+     * GitHub es blanco y los otros tres negros, que sobre este fondo no se ven.
+     * Usando la silueta como máscara el color lo pone el CSS, así que todos
+     * salen del color del texto y cambian con él al pasar por encima — y da
+     * igual de qué color venga el fichero que se añada mañana.
+     */
+    .contact__icon {
+        inline-size: 1.25rem;
+        block-size: 1.25rem;
+        background-color: currentColor;
+        -webkit-mask: var(--icon) center / contain no-repeat;
+        mask: var(--icon) center / contain no-repeat;
+        opacity: 0.9;
+    }
+</style>

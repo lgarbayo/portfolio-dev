@@ -1,0 +1,72 @@
+---
+import { locales, ogLocales, translatePath, type Locale } from "@/i18n/index";
+
+interface Props {
+    locale: Locale;
+    title: string;
+    description: string;
+    /** Imagen de previsualización social; se resuelve a absoluta contra `site`. */
+    image?: string;
+    /** Para artículos republicados: canonical apuntando fuera. */
+    canonicalOverride?: string;
+    type?: "website" | "article";
+}
+
+const {
+    locale,
+    title,
+    description,
+    image = "/og-image.png",
+    canonicalOverride,
+    type = "website",
+} = Astro.props;
+
+const canonical = canonicalOverride ?? new URL(Astro.url.pathname, Astro.site).href;
+const imageUrl = new URL(image, Astro.site).href;
+
+// Cada página se referencia a sí misma y a su equivalente en el otro idioma.
+// x-default apunta a inglés, que es el idioma por defecto.
+const alternates = locales.map((code) => ({
+    code,
+    href: new URL(translatePath(Astro.url.pathname, code), Astro.site).href,
+}));
+const defaultHref = alternates.find((alt) => alt.code === "en")!.href;
+---
+
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="generator" content={Astro.generator} />
+
+<title>{title}</title>
+<meta name="description" content={description} />
+<link rel="canonical" href={canonical} />
+
+{alternates.map(({ code, href }) => <link rel="alternate" hreflang={code} href={href} />)}
+<link rel="alternate" hreflang="x-default" href={defaultHref} />
+
+<meta property="og:type" content={type} />
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:url" content={canonical} />
+<meta property="og:image" content={imageUrl} />
+<meta property="og:locale" content={ogLocales[locale]} />
+<meta property="og:site_name" content="Luis Garbayo Fernández" />
+
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content={title} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={imageUrl} />
+
+{/* El memoji recortado a cuadrado. Se dan las dos medidas en vez de una sola
+    imagen grande: a 16 px el navegador reduce por su cuenta y la cara se
+    empasta, mientras que un 16 hecho aparte conserva algo de contraste. */}
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png" />
+<link rel="apple-touch-icon" href="/favicon-180.png" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link
+    rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+/>

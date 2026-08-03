@@ -117,6 +117,13 @@ const tiles = [
             }
         </ul>
     </div>
+
+    {/*
+      Aviso sólo para pantallas estrechas: ahí no se monta la figura 3D ni el
+      teclado de Stack, y quien llegue desde el móvil no tiene manera de saber
+      que se está perdiendo la mitad de la gracia. En escritorio no se pinta.
+    */}
+    <p class="hero__desktop-note">{t("hero.desktopNote")}</p>
 </section>
 
 <style>
@@ -284,6 +291,30 @@ const tiles = [
     .hero__tile-link:hover .hero__tile-label,
     .hero__tile-link:focus-visible .hero__tile-label {
         opacity: 1;
+    }
+
+    .hero__desktop-note {
+        display: none;
+        margin-block-start: var(--space-6);
+        margin-inline: auto;
+        max-inline-size: 36ch;
+        text-align: center;
+        text-wrap: balance;
+        font-family: var(--font-mono);
+        font-size: var(--text-xs);
+        line-height: var(--leading-relaxed);
+        color: var(--color-text-subtle);
+    }
+
+    /*
+     * La condición es la misma que usa `avatar.ts` para no montar la figura:
+     * pantalla estrecha o puntero grueso. Así el aviso aparece exactamente
+     * cuando hay algo que avisar, y no en un portátil con la ventana a medias.
+     */
+    @media (max-width: 56rem), (pointer: coarse) {
+        .hero__desktop-note {
+            display: block;
+        }
     }
 
     /*

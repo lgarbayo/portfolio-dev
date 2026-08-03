@@ -23,6 +23,7 @@
     "hero.greeting": "Hi, I'm Luis",
     "hero.role": "Software developer & STEM educator",
     "hero.statement": "I build structured, efficient software — and I care as much about explaining it as about shipping it. Currently finishing Computer Engineering at the University of Vigo, working across backend, cloud and AI.",
+    "hero.desktopNote": "This site is best on a computer: the 3D figure and the interactive keyboard only run there.",
     "hero.cta.projects": "See my projects",
     "hero.cta.cv": "Download CV",
     "hero.cta.contact": "Get in touch",

@@ -4,15 +4,25 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc && vite build",
-    "preview": "vite preview"
+    "dev": "node scripts/clean-cache.mjs --dev && astro dev",
+    "build": "node scripts/clean-cache.mjs && astro check && astro build && node scripts/translation-coverage.mjs && node scripts/check-assets.mjs && node scripts/assert-bundle-budget.mjs",
+    "preview": "astro preview",
+    "check": "astro check",
+    "coverage:i18n": "node scripts/translation-coverage.mjs"
   },
   "devDependencies": {
-    "typescript": "~5.9.3",
-    "vite": "^7.2.4"
+    "@astrojs/check": "^0.9.10",
+    "@types/three": "^0.185.1",
+    "typescript": "~5.9.3"
   },
   "dependencies": {
-    "phaser": "^3.90.0"
+    "@astrojs/mdx": "^7.0.4",
+    "@astrojs/rss": "^4.0.19",
+    "@astrojs/sitemap": "^3.7.3",
+    "astro": "^7.1.4",
+    "gsap": "^3.15.0",
+    "phaser": "^3.90.0",
+    "simple-icons": "^16.27.1",
+    "three": "^0.185.1"
   }
 }

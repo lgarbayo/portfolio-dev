@@ -1,0 +1,81 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import PostList from "@/components/PostList.astro";
+import { getPublishedPosts } from "@/lib/content";
+import { locales, localizedPath, useTranslations, type Locale } from "@/i18n/index";
+
+export function getStaticPaths() {
+    return locales.map((locale) => ({ params: { locale } }));
+}
+
+const locale = Astro.params.locale as Locale;
+const t = useTranslations(locale);
+const posts = await getPublishedPosts(locale);
+---
+
+<BaseLayout
+    locale={locale}
+    title={`${t("blog.title")} — ${t("site.title")}`}
+    description={t("blog.description")}
+    showBlog={posts.length > 0}
+>
+    <link
+        slot="head"
+        rel="alternate"
+        type="application/rss+xml"
+        title={`${t("blog.title")} — ${t("site.title")}`}
+        href={`/${locale}/rss.xml`}
+    />
+
+    <div class="container blog">
+        <header class="blog__head">
+            <h1>{t("blog.title")}</h1>
+            <p class="blog__description">{t("blog.description")}</p>
+        </header>
+
+        <PostList locale={locale} posts={posts} emptyMessage={t("blog.empty")} />
+
+        {
+            posts.length > 0 && (
+                <a class="blog__feed" href={`/${locale}/rss.xml`}>
+                    {t("blog.feed")}
+                </a>
+            )
+        }
+
+        <a class="blog__back" href={localizedPath(locale)}>← {t("site.title")}</a>
+    </div>
+</BaseLayout>
+
+<style>
+    .blog {
+        padding-block: var(--space-8) var(--section-gap);
+    }
+
+    .blog__head {
+        margin-block-end: var(--space-7);
+    }
+
+    .blog__description {
+        margin-block-start: var(--space-3);
+        max-inline-size: var(--prose-width);
+        color: var(--color-text-muted);
+        font-size: var(--text-lg);
+    }
+
+    .blog__feed,
+    .blog__back {
+        display: inline-flex;
+        align-items: center;
+        min-block-size: var(--tap-target);
+        margin-block-start: var(--space-6);
+        font-size: var(--text-sm);
+        font-family: var(--font-mono);
+    }
+
+    /* El feed va antes que la vuelta atrás, así que la separación cuelga de este
+       y no del anterior; con `end` los dos enlaces se tocaban. */
+    .blog__back {
+        margin-inline-start: var(--space-5);
+    }
+</style>

@@ -1,0 +1,141 @@
+---
+import type { CollectionEntry } from "astro:content";
+import { localeTags, localizedPath, useTranslations, type Locale } from "@/i18n/index";
+
+interface Props {
+    locale: Locale;
+    posts: CollectionEntry<"posts">[];
+    emptyMessage: string;
+}
+
+const { locale, posts, emptyMessage } = Astro.props;
+const t = useTranslations(locale);
+
+const formatter = new Intl.DateTimeFormat(localeTags[locale], {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+});
+---
+
+{
+    posts.length === 0 ? (
+        // Un índice vacío dice que todavía no hay nada, en vez de enseñar una
+        // lista vacía que parece un fallo.
+        <p class="postlist__empty">{emptyMessage}</p>
+    ) : (
+        <ul class="postlist" role="list">
+            {posts.map((post) => (
+                <li class="postlist__item" data-reveal>
+                    <a
+                        class="postlist__link"
+                        href={localizedPath(post.data.locale, `blog/${post.data.slug}`)}
+                    >
+                        <time class="postlist__date" datetime={post.data.pubDate.toISOString()}>
+                            {formatter.format(post.data.pubDate)}
+                        </time>
+                        <h2 class="postlist__title">
+                            {post.data.title}
+                            {post.data.draft && <span class="postlist__draft">{t("blog.draft")}</span>}
+                        </h2>
+                        <p class="postlist__description">{post.data.description}</p>
+                        {post.data.locale !== locale && (
+                            <p class="postlist__fallback">{t("content.fallbackNotice")}</p>
+                        )}
+                    </a>
+                    {post.data.tags.length > 0 && (
+                        <ul class="postlist__tags" role="list">
+                            {post.data.tags.map((tag) => (
+                                <li>
+                                    <a class="tag" href={localizedPath(locale, `blog/tag/${tag}`)}>
+                                        {tag}
+                                    </a>
+                                </li>
+                            ))}
+                        </ul>
+                    )}
+                </li>
+            ))}
+        </ul>
+    )
+}
+
+<style>
+    .postlist {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-6);
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+
+    .postlist__empty {
+        color: var(--color-text-muted);
+        font-size: var(--text-lg);
+    }
+
+    .postlist__link {
+        display: block;
+        color: inherit;
+        text-decoration: none;
+    }
+
+    .postlist__date {
+        font-family: var(--font-mono);
+        font-size: var(--text-xs);
+        letter-spacing: var(--tracking-wide);
+        text-transform: uppercase;
+        color: var(--color-text-subtle);
+    }
+
+    .postlist__title {
+        margin-block-start: var(--space-2);
+        font-size: var(--text-xl);
+        color: var(--color-text);
+        transition: color var(--duration-fast) var(--ease-out);
+    }
+
+    .postlist__link:hover .postlist__title {
+        color: var(--color-accent);
+    }
+
+    /* El aviso de idioma va con la entrada, no dentro del título: quien lee en
+       español tiene que saber antes de entrar que el artículo está en inglés. */
+    .postlist__fallback {
+        margin-block-start: var(--space-2);
+        font-family: var(--font-mono);
+        font-size: var(--text-xs);
+        color: var(--color-text-subtle);
+    }
+
+    .postlist__draft {
+        margin-inline-start: var(--space-3);
+        padding: var(--space-1) var(--space-2);
+        border: 1px dashed var(--color-border-strong);
+        border-radius: var(--radius-sm);
+        font-family: var(--font-mono);
+        font-size: var(--text-xs);
+        color: var(--color-text-subtle);
+        vertical-align: middle;
+    }
+
+    .postlist__description {
+        margin-block-start: var(--space-2);
+        max-inline-size: var(--prose-width);
+        color: var(--color-text-muted);
+    }
+
+    .postlist__tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--space-2);
+        margin-block-start: var(--space-3);
+        padding: 0;
+        list-style: none;
+    }
+
+    .postlist__tags a {
+        text-decoration: none;
+    }
+</style>

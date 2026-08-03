@@ -1,0 +1,59 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import PostList from "@/components/PostList.astro";
+import { getPublishedPosts } from "@/lib/content";
+import { locales, localizedPath, useTranslations, type Locale } from "@/i18n/index";
+
+export async function getStaticPaths() {
+    const paths = [];
+
+    // Las etiquetas se recorren por idioma: cada uno lista sólo sus artículos,
+    // así que una etiqueta puede existir en inglés y no en español.
+    for (const locale of locales) {
+        const posts = await getPublishedPosts(locale);
+        const tags = new Set(posts.flatMap((post) => post.data.tags));
+
+        for (const tag of tags) {
+            paths.push({
+                params: { locale, tag },
+                props: { posts: posts.filter((post) => post.data.tags.includes(tag)), tag },
+            });
+        }
+    }
+
+    return paths;
+}
+
+const { posts, tag } = Astro.props;
+const locale = Astro.params.locale as Locale;
+const t = useTranslations(locale);
+const title = t("blog.tag.title", { tag });
+---
+
+<BaseLayout locale={locale} title={`${title} — ${t("site.title")}`} description={title} showBlog>
+    <div class="container tagpage">
+        <h1>{title}</h1>
+        <PostList locale={locale} posts={posts} emptyMessage={t("blog.empty")} />
+        <a class="tagpage__back" href={localizedPath(locale, "blog")}>← {t("blog.backToIndex")}</a>
+    </div>
+</BaseLayout>
+
+<style>
+    .tagpage {
+        padding-block: var(--space-8) var(--section-gap);
+    }
+
+    .tagpage h1 {
+        font-size: var(--text-2xl);
+        margin-block-end: var(--space-6);
+    }
+
+    .tagpage__back {
+        display: inline-flex;
+        align-items: center;
+        min-block-size: var(--tap-target);
+        margin-block-start: var(--space-7);
+        font-family: var(--font-mono);
+        font-size: var(--text-sm);
+    }
+</style>

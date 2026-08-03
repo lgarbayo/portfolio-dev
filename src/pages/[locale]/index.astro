@@ -18,11 +18,15 @@ export function getStaticPaths() {
 const locale = Astro.params.locale as Locale;
 const t = useTranslations(locale);
 const showBlog = await hasPublishedPosts(locale);
+
+// Sólo el nombre en la pestaña: se corta a los pocos caracteres y el oficio ya
+// va en la descripción, que es lo que se lee en los resultados de búsqueda.
+const title = t("site.title");
 ---
 
 <BaseLayout
     locale={locale}
-    title={`${t("site.title")} — ${t("site.tagline")}`}
+    title={title}
     description={t("site.description")}
     showBlog={showBlog}
     onHome

@@ -30,5 +30,9 @@ export async function GET(context: APIContext) {
             categories: post.data.tags,
         })),
         customData: `<language>${locale}</language>`,
+        /* Hoja de estilos para quien abra el feed en el navegador: sin ella
+           Firefox enseña el XML en crudo y parece que algo se ha roto. Los
+           lectores de feeds la ignoran. */
+        stylesheet: "/rss/styles.xsl",
     });
 }

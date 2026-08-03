@@ -39,7 +39,9 @@ const channels = [
 ---
 
 <Section id="contact" title={t("contact.title")}>
-    <p class="contact__description prose" data-reveal>{t("contact.description")}</p>
+    {/* Sin `prose`: aquí es una línea suelta, no un texto largo que leer, y el
+        tope de 50rem la dejaba cortada a media sección. */}
+    <p class="contact__description" data-reveal>{t("contact.description")}</p>
 
     <ul class="contact__list" role="list" data-reveal>
         {

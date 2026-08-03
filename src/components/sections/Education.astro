@@ -1,0 +1,38 @@
+---
+import Section from "../Section.astro";
+import EducationEntry from "../EducationEntry.astro";
+import { getLocalizedEntries } from "@/lib/content";
+import { useTranslations, type Locale } from "@/i18n/index";
+
+interface Props {
+    locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = useTranslations(locale);
+
+const education = (await getLocalizedEntries("education", locale)).sort(
+    (a, b) =>
+        a.data.order - b.data.order || b.data.startDate.getTime() - a.data.startDate.getTime(),
+);
+
+---
+
+<Section id="education" title={t("education.title")}>
+    <ul class="education__list" role="list">
+        {education.map((entry) => <EducationEntry locale={locale} entry={entry} />)}
+    </ul>
+
+</Section>
+
+<style>
+    .education__list {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-6);
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+
+</style>

@@ -1,0 +1,235 @@
+---
+import { byCurrentThenRecent, getLocalizedEntries, getLocalizedEntry } from "@/lib/content";
+import { localeTags, useTranslations, type Locale } from "@/i18n/index";
+import "@/styles/game-modals.css";
+
+interface Props {
+    locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = useTranslations(locale);
+
+/*
+ * Los paneles que abre el juego al golpear un bloque.
+ *
+ * El marcado reproduce EXACTAMENTE la estructura y las clases del `index.html`
+ * original, porque `game-modals.css` es el CSS original sin tocar y la mitad de
+ * sus reglas cuelgan de esas clases (`.modal-content--about`, `.project-card`,
+ * `.experience-item`…). Lo único que cambia respecto a antes es de dónde sale el
+ * texto: de las colecciones en vez de estar escrito a mano, para no mantener la
+ * misma información en dos sitios.
+ *
+ * Los ids (`aboutModal`, `projectsModal`…) son el contrato con `WorldScene`, que
+ * los busca por `${worldId}Modal`.
+ */
+
+const about = await getLocalizedEntry("about", locale);
+const projects = await getLocalizedEntries("projects", locale);
+const experience = (await getLocalizedEntries("experience", locale)).sort(byCurrentThenRecent);
+
+const categories = [
+    { id: "hackathon", label: t("projects.category.hackathon") },
+    { id: "data", label: t("projects.category.data") },
+    { id: "backend", label: t("projects.category.backend") },
+    { id: "web", label: t("projects.category.web") },
+] as const;
+
+const columns = categories
+    .map((category) => ({
+        ...category,
+        items: projects
+            .filter((project) => project.data.category === category.id)
+            .sort((a, b) =>
+                a.data.featured !== b.data.featured
+                    ? a.data.featured
+                        ? -1
+                        : 1
+                    : (b.data.year ?? 0) - (a.data.year ?? 0),
+            ),
+    }))
+    .filter((column) => column.items.length > 0);
+
+const formatter = new Intl.DateTimeFormat(localeTags[locale], {
+    month: "short",
+    year: "numeric",
+});
+const period = (start: Date, end?: Date) =>
+    `${formatter.format(start)} – ${end ? formatter.format(end) : t("experience.present")}`;
+
+const contactChannels = [
+    { href: "mailto:lugarbayo@gmail.com", label: t("contact.email"), icon: "/assets/ui/mail-svgrepo-com.svg", alt: "Email" },
+    { href: "https://linkedin.com/in/luis-garbayo", label: t("contact.linkedin"), icon: "/assets/ui/linkedin-svgrepo-com.svg", alt: "LinkedIn" },
+    { href: "https://github.com/lgarbayo", label: t("contact.github"), icon: "/assets/ui/github-mark-white.svg", alt: "GitHub" },
+    { href: "https://devpost.com/lgarbayo", label: t("contact.devpost"), icon: "/assets/ui/devpost-svgrepo-com.svg", alt: "Devpost" },
+];
+---
+
+<div id="aboutModal" class="portfolio-modal">
+    <div class="modal-content modal-content--about">
+        <button class="modal-close" data-close="aboutModal" aria-label={t("game.close")}>✕</button>
+        <h2 class="about-title">{(about?.data.title ?? t("about.title")).toUpperCase()}</h2>
+
+        <div class="about-container">
+            <div class="about-content">
+                {
+                    about?.data.blocks.map((block) => (
+                        <div class="about-section">
+                            <h3 class="about-section-title">{block.title}</h3>
+                            <p class="about-text">{block.body}</p>
+                        </div>
+                    ))
+                }
+            </div>
+
+            {
+                about && (
+                    <div class="about-profile">
+                        <img
+                            src={about.data.profileImage}
+                            alt={about.data.profileImageAlt}
+                            class="about-profile-image"
+                        />
+                    </div>
+                )
+            }
+        </div>
+    </div>
+</div>
+
+<div id="projectsModal" class="portfolio-modal">
+    <div class="modal-content modal-content--projects">
+        <button class="modal-close" data-close="projectsModal" aria-label={t("game.close")}>✕</button>
+        <h2 class="projects-title">{t("projects.title").toUpperCase()}</h2>
+
+        <div class="projects-grid">
+            {
+                columns.map((column) => (
+                    <div class="projects-column">
+                        <h3 class="projects-column-title">{column.label}</h3>
+                        {column.items.map((project) => (
+                            <div class="project-card">
+                                <h3>
+                                    {project.data.context
+                                        ? `${project.data.title} - ${project.data.context}`
+                                        : project.data.title}
+                                </h3>
+                                <p class="project-description">{project.data.description}</p>
+                                <div class="tech-badges">
+                                    {project.data.tags.map((tag) => (
+                                        <span class="tech-badge">{tag}</span>
+                                    ))}
+                                </div>
+                                {project.data.highlights.length > 0 && (
+                                    <p class="project-features">
+                                        {project.data.highlights.join(" • ")}
+                                    </p>
+                                )}
+                                {/*
+                                  Cada enlace en su propia línea. En el HTML
+                                  original los separaba el salto de línea del
+                                  fuente; aquí los nodos quedan pegados y salían
+                                  como "GitHub →View on Devpost →".
+                                */}
+                                {[
+                                    project.data.repoUrl && {
+                                        href: project.data.repoUrl,
+                                        label: t("projects.viewRepo"),
+                                    },
+                                    project.data.devpostUrl && {
+                                        href: project.data.devpostUrl,
+                                        label: t("projects.viewDevpost"),
+                                    },
+                                    project.data.demoUrl && {
+                                        href: project.data.demoUrl,
+                                        label: t("projects.viewDemo"),
+                                    },
+                                ]
+                                    .filter((link): link is { href: string; label: string } =>
+                                        Boolean(link),
+                                    )
+                                    .map((link) => (
+                                        <div>
+                                            <a
+                                                href={link.href}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                class="project-link"
+                                            >
+                                                {link.label} →
+                                            </a>
+                                        </div>
+                                    ))}
+                            </div>
+                        ))}
+                    </div>
+                ))
+            }
+        </div>
+    </div>
+</div>
+
+<div id="experienceModal" class="portfolio-modal">
+    <div class="modal-content modal-content--experience">
+        <button class="modal-close" data-close="experienceModal" aria-label={t("game.close")}>✕</button>
+        <h2 class="experience-title">{t("experience.title").toUpperCase()}</h2>
+
+        {
+            experience.map((item) => (
+                <div class="experience-item">
+                    <div class="experience-header">
+                        <h3 class="experience-role">
+                            {item.data.role} @ {item.data.organization}
+                        </h3>
+                        {item.data.logo && (
+                            <img
+                                src={item.data.logo}
+                                alt={t("experience.logoAlt", { organization: item.data.organization })}
+                                class="experience-logo experience-logo--inline"
+                            />
+                        )}
+                    </div>
+                    {item.data.startDate && (
+                        <p class="experience-period">{period(item.data.startDate, item.data.endDate)}</p>
+                    )}
+                    <ul class="experience-description">
+                        {item.data.responsibilities.map((line) => (
+                            <li>{line}</li>
+                        ))}
+                    </ul>
+                    {item.data.stack.length > 0 && (
+                        <div class="tech-stack">
+                            {item.data.stack.map((tech) => (
+                                <span class="tech-badge">{tech}</span>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            ))
+        }
+    </div>
+</div>
+
+<div id="contactModal" class="portfolio-modal">
+    <div class="modal-content modal-content--contact">
+        <button class="modal-close" data-close="contactModal" aria-label={t("game.close")}>✕</button>
+        <h2 class="contact-title">{t("contact.title").toUpperCase()}</h2>
+        <p class="contact-description">{t("contact.description")}</p>
+        <div class="contact-buttons">
+            {
+                contactChannels.map((channel) => (
+                    <a
+                        href={channel.href}
+                        class="contact-btn"
+                        aria-label={channel.label}
+                        {...channel.href.startsWith("http")
+                            ? { target: "_blank", rel: "noopener noreferrer" }
+                            : {}}
+                    >
+                        <img src={channel.icon} alt={channel.alt} class="contact-btn__icon" />
+                    </a>
+                ))
+            }
+        </div>
+    </div>
+</div>

@@ -33,7 +33,8 @@ export class MenuScene extends Phaser.Scene {
 
         // Si se llega aquí con Enter aún pulsado (el que abrió el overlay), se espera
         // a soltarlo: si no, el auto-repeat lanzaría el mundo sin ver el menú.
-        this.startArmed = !(window as typeof window & { __enterHeld?: boolean }).__enterHeld;
+        // La página lo indica al montar, vía `mountGame({ suppressInitialEnter })`.
+        this.startArmed = !this.registry.get("suppressInitialEnter");
         this.startKey = this.input.keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
         this.startKey?.on("down", () => {
             if (this.startArmed) {

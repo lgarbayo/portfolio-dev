@@ -1,0 +1,635 @@
+/*
+ * Estilos de los paneles de información del juego.
+ *
+ * Copiado VERBATIM del `src/style.css` original. No se toca ni se "mejora":
+ * el juego tiene que verse exactamente como se veía antes de la migración, y
+ * cualquier reescritura por bonita que sea rompe esa promesa. Si algo hay que
+ * cambiar aquí, que sea una decisión deliberada, no un efecto colateral.
+ *
+ * El marcado que lo acompaña (GameModals.astro) reproduce las mismas clases:
+ * .modal-content--about, .project-card, .experience-item, .contact-btn…
+ */
+
+.portfolio-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.9);
+  backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+  z-index: 100;
+}
+
+.portfolio-modal.open {
+  opacity: 1;
+  visibility: visible;
+}
+
+.modal-content {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 2rem;
+  max-width: 600px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+  position: relative;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  transform: scale(0.9);
+  transition: transform 0.3s ease;
+}
+
+.portfolio-modal.open .modal-content {
+  transform: scale(1);
+}
+
+.modal-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: white;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  font-size: 1.5rem;
+  cursor: pointer;
+  transition: background 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  -webkit-user-select: none;
+  z-index: 1000;
+}
+
+.modal-close::before {
+  content: '';
+  position: absolute;
+  top: -10px;
+  left: -10px;
+  right: -10px;
+  bottom: -10px;
+  border-radius: 50%;
+}
+
+@media (hover: hover) {
+  .modal-close:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: rotate(90deg);
+  }
+}
+
+.modal-close:active {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(0.95);
+}
+
+.modal-content h2 {
+  margin-top: 0;
+  color: #fff;
+  font-size: 2rem;
+}
+
+.projects-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  align-items: start;
+}
+
+.projects-column {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.projects-column-title {
+  font-family: monospace;
+  font-size: 1.5rem;
+  color: #5CE68E;
+  margin: 0 0 1.5rem 0;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid rgba(92, 230, 142, 0.3);
+  font-weight: 600;
+  letter-spacing: 1px;
+}
+
+@media (max-width: 1024px) {
+  .projects-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.project-card {
+  margin-bottom: 2.5rem;
+  padding: 1.5rem;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 12px;
+  border-left: 3px solid #5CE68E;
+}
+
+.project-card h3 {
+  font-family: monospace;
+  font-size: 1.4rem;
+  color: #5CE68E;
+  margin: 0 0 1rem 0;
+  font-weight: 600;
+}
+
+.project-description {
+  color: rgba(255, 255, 255, 0.9);
+  line-height: 1.7;
+  font-size: clamp(1rem, 0.95rem + 0.35vw, 1.05rem);
+  margin-bottom: 1rem;
+}
+
+.tech-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 1rem 0;
+}
+
+.tech-badge {
+  background: rgba(92, 230, 142, 0.15);
+  color: #5CE68E;
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  border: 1px solid rgba(92, 230, 142, 0.3);
+}
+
+.project-features {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.9rem;
+  margin: 1rem 0;
+  font-style: italic;
+}
+
+.project-link {
+  display: inline-block;
+  color: #5CE68E;
+  text-decoration: none;
+  font-weight: 600;
+  margin-top: 0.5rem;
+  transition: all 0.2s ease;
+}
+
+.project-link:hover {
+  color: #7EF4A9;
+  transform: translateX(5px);
+}
+
+
+.modal-content h2.contact-title,
+.modal-content h2.about-title,
+.modal-content h2.experience-title,
+.modal-content h2.projects-title {
+  color: #5CE68E;
+}
+
+.modal-content p {
+  color: rgba(255, 255, 255, 0.8);
+  line-height: 1.6;
+}
+
+.modal-content ul {
+  list-style: none;
+  padding: 0;
+}
+
+.modal-content li {
+  padding: 0.5rem 0;
+  color: rgba(255, 255, 255, 0.8);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.modal-content li:last-child {
+  border-bottom: none;
+}
+
+.modal-content--about {
+  max-width: 1500px;
+}
+
+.about-title {
+  font-family: monospace;
+  font-size: clamp(2rem, 3vw, 3rem);
+  color: #5CE68E;
+  margin-bottom: 2rem;
+  text-align: center;
+  font-weight: normal;
+  letter-spacing: 2px;
+  animation: titleGlow 0.6s ease-in-out infinite alternate;
+}
+
+.about-container {
+  display: flex;
+  gap: 3rem;
+  align-items: center;
+}
+
+.about-content {
+  flex: 1;
+}
+
+.about-profile {
+  flex-shrink: 0;
+}
+
+.about-profile-image {
+  width: 400px;
+  height: 500px;
+  border-radius: 8px;
+  object-fit: cover;
+  object-position: center 20%;
+  border: 4px solid #5CE68E;
+  transition: all 0.3s ease;
+}
+
+.about-profile-image:hover {
+  transform: scale(1.02);
+}
+
+@media (max-width: 900px) {
+  .about-container {
+    flex-direction: column;
+  }
+
+  .about-profile {
+    align-self: center;
+    position: static;
+  }
+
+  .about-profile-image {
+    width: 200px;
+    height: 200px;
+  }
+}
+
+.about-section {
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 12px;
+  border-left: 3px solid #5CE68E;
+}
+
+.about-section-title {
+  font-family: monospace;
+  font-size: 1.3rem;
+  color: #5CE68E;
+  margin-top: 0;
+  margin-bottom: 1rem;
+  font-weight: 600;
+}
+
+.about-text {
+  color: rgba(255, 255, 255, 0.9);
+  line-height: 1.8;
+  font-size: clamp(1rem, 0.95rem + 0.4vw, 1.1rem);
+  margin: 0;
+}
+
+.about-text strong {
+  color: #5CE68E;
+  font-weight: 600;
+}
+
+.modal-content--experience {
+  max-width: 2000px;
+}
+
+.modal-content--projects {
+  max-width: 2000px;
+}
+
+.projects-title {
+  font-family: monospace;
+  font-size: clamp(2rem, 3vw, 3rem);
+  color: #5CE68E;
+  margin: 0 0 2rem 0;
+  text-align: center;
+  font-weight: normal;
+  letter-spacing: 2px;
+  animation: titleGlow 0.6s ease-in-out infinite alternate;
+}
+
+.experience-title {
+  font-family: monospace;
+  font-size: clamp(2rem, 3vw, 3rem);
+  color: #5CE68E;
+  margin: 0 0 2rem 0;
+  text-align: center;
+  font-weight: normal;
+  letter-spacing: 2px;
+  animation: titleGlow 0.6s ease-in-out infinite alternate;
+}
+
+.experience-item {
+  margin-bottom: 2.5rem;
+  padding: 1.5rem;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 12px;
+  border-left: 3px solid #5CE68E;
+}
+
+.experience-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.experience-role {
+  font-family: monospace;
+  font-size: 1.4rem;
+  color: #5CE68E;
+  margin: 0;
+  font-weight: 600;
+}
+
+.experience-company {
+  font-family: monospace;
+  font-size: 1.1rem;
+  color: rgba(92, 230, 142, 0.8);
+  font-weight: 500;
+}
+
+.experience-period {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.95rem;
+  margin: 0 0 1rem 0;
+  font-style: italic;
+}
+
+.experience-description {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.experience-description li {
+  color: rgba(255, 255, 255, 0.9);
+  line-height: 1.7;
+  font-size: clamp(1rem, 0.95rem + 0.35vw, 1.05rem);
+  margin-bottom: 0.75rem;
+  padding-left: 1.5rem;
+  position: relative;
+}
+
+.experience-description li:before {
+  content: "•";
+  color: #5CE68E;
+  font-size: 1.2rem;
+  position: absolute;
+  left: 0;
+}
+
+.experience-description li strong {
+  color: #5CE68E;
+  font-weight: 600;
+}
+
+.experience-logo {
+  height: 45px;
+  width: auto;
+  object-fit: contain;
+}
+
+.experience-logo--inline {
+  height: 65px;
+}
+
+.experience-tech {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(92, 230, 142, 0.2);
+}
+
+.tech-badge {
+  display: inline-block;
+  padding: 0.4rem 0.8rem;
+  background: rgba(92, 230, 142, 0.1);
+  border: 1px solid rgba(92, 230, 142, 0.3);
+  border-radius: 6px;
+  color: #5CE68E;
+  font-size: 0.85rem;
+  font-family: monospace;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.tech-badge:hover {
+  background: rgba(92, 230, 142, 0.2);
+  border-color: rgba(92, 230, 142, 0.5);
+  transform: translateY(-2px);
+}
+
+.tech-stack {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.modal-content--contact {
+  text-align: center;
+}
+
+.contact-title {
+  font-family: monospace;
+  font-size: 56px;
+  color: #5CE68E;
+  margin-bottom: 1.5rem;
+  font-weight: normal;
+  letter-spacing: 2px;
+  animation: titleGlow 1.2s ease-in-out infinite alternate;
+}
+
+@keyframes titleGlow {
+  0% {
+    opacity: 0.35;
+  }
+
+  100% {
+    opacity: 1;
+  }
+}
+
+.contact-description {
+  color: rgba(255, 255, 255, 0.9);
+  line-height: 1.8;
+  margin-bottom: 2rem;
+  font-size: 1.3rem;
+}
+
+.contact-buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.contact-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 1rem;
+  background: rgba(92, 230, 142, 0.1);
+  border: 2px solid #5CE68E;
+  border-radius: 50%;
+  color: #5CE68E;
+  text-decoration: none;
+  font-family: monospace;
+  font-size: 16px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  width: 60px;
+  height: 60px;
+}
+
+.contact-btn:hover {
+  background: rgba(92, 230, 142, 0.2);
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(92, 230, 142, 0.3);
+}
+
+.contact-btn:active {
+  transform: translateY(-2px);
+}
+
+.contact-btn__icon {
+  width: 2rem;
+  height: 2rem;
+  filter: brightness(0) saturate(100%) invert(81%) sepia(18%) saturate(1154%) hue-rotate(83deg) brightness(96%) contrast(91%);
+}
+
+.contact-btn:hover .contact-btn__icon {
+  filter: brightness(0) saturate(100%) invert(81%) sepia(18%) saturate(1154%) hue-rotate(83deg) brightness(110%) contrast(91%);
+}
+
+@media (max-width: 768px) {
+  .modal-content {
+    width: 95%;
+    padding: 1.25rem;
+  }
+
+  .modal-content h2 {
+    font-size: 1.5rem;
+  }
+
+  .about-title,
+  .experience-title {
+    font-size: clamp(1.5rem, 5vw, 2rem) !important;
+    margin-bottom: 1.5rem;
+  }
+
+  .contact-title {
+    font-size: 36px !important;
+    margin-bottom: 1rem;
+  }
+
+  .contact-description {
+    font-size: 0.7rem;
+    line-height: 1.5;
+  }
+
+  .about-container {
+    flex-direction: column;
+    gap: 1.5rem;
+    align-items: center;
+  }
+
+  .about-content,
+  .about-profile {
+    width: 100%;
+  }
+
+  .about-profile-image {
+    width: min(260px, 70vw);
+    height: min(320px, 75vw);
+    margin: 0 auto;
+    display: block;
+  }
+
+  .about-section {
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .about-section-title {
+    font-size: 0.8rem;
+  }
+
+  .about-text {
+    font-size: 0.65rem !important;
+    line-height: 1.5;
+  }
+
+  .experience-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .experience-logo--inline {
+    align-self: flex-start;
+    margin-top: 0.5rem;
+    height: 50px;
+  }
+
+  .experience-role {
+    font-size: 1.1rem;
+  }
+
+  .experience-period {
+    font-size: 0.8rem;
+  }
+
+  .experience-description li {
+    font-size: 0.65rem;
+    line-height: 1.5;
+  }
+
+  .tech-badge {
+    font-size: 0.7rem;
+    padding: 0.3rem 0.5rem;
+  }
+
+  .experience-item {
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .project-card h3 {
+    font-size: 1.2rem;
+  }
+
+  .project-description {
+    font-size: 0.65rem;
+    line-height: 1.5;
+  }
+
+  .project-features {
+    font-size: 0.75rem;
+  }
+}

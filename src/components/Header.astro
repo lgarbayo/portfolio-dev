@@ -236,13 +236,34 @@ const sections = [
             order: 2;
         }
 
+        /* Con el menú abierto la cabecera deja de ser translúcida: detrás ya no
+           está la página que se estaba leyendo sino la capa del menú, y el
+           desenfoque dejaba asomar un trozo de la bienvenida. */
+        .header:has(.header__nav[data-open]) {
+            background: var(--color-bg);
+        }
+
         .header__nav {
             position: fixed;
-            inset: 0;
+            /*
+             * Empieza por debajo de la cabecera, no en el borde de la pantalla.
+             * Con `inset: 0` la capa tapaba la propia cabecera —está en un
+             * z-index más bajo—, así que el botón que abre el menú quedaba
+             * debajo y no había manera de cerrarlo salvo pulsando un enlace.
+             */
+            inset: var(--header-height) 0 0;
             z-index: var(--z-menu);
             flex-direction: column;
-            justify-content: center;
+            /* `safe` es lo que separa centrar de recortar: si la lista no cabe,
+               un `center` a secas desborda por arriba y los primeros enlaces se
+               vuelven inalcanzables aunque haya scroll. */
+            justify-content: safe center;
             gap: var(--space-6);
+            padding-block: var(--space-6);
+            /* Pantallas bajas —un móvil en horizontal— o texto muy ampliado: el
+               menú se recorre en vez de cortarse. */
+            overflow-y: auto;
+            overscroll-behavior: contain;
             background: var(--color-bg);
             /* Cerrado no debe ser alcanzable con Tab: visibility lo saca del
                orden de foco, cosa que opacity sola no hace. */

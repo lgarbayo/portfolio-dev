@@ -334,6 +334,51 @@ const tiles = [
         .hero__center {
             position: static;
             translate: none;
+            display: flex;
+            flex-direction: column;
+            /* Sin esto un hijo flexible no puede encoger por debajo de su
+               contenido, que es justo lo que hace falta aquí. */
+            min-block-size: 0;
+            flex: 1;
+        }
+
+        /*
+         * En escritorio la figura se mide contra la ventana y las fichas flotan
+         * a su alrededor. Aquí van debajo, y con el aviso al final son tres
+         * cosas repartiéndose el alto: medir la figura en `vh` obligaba a
+         * adivinar cuánto dejan libre las otras dos, y en cuanto el móvil era
+         * bajo o el texto grande la bienvenida desbordaba.
+         *
+         * Así que deja de pedir un tamaño y se queda con lo que sobre: el
+         * saludo, las fichas y el aviso cogen lo suyo, y la figura ocupa el
+         * hueco restante, sea el que sea. El mínimo evita que en una pantalla
+         * muy baja se quede en una lasca.
+         */
+        .hero__stage {
+            flex: 1;
+        }
+
+        .hero__figure {
+            flex: 1;
+            block-size: auto;
+            min-block-size: 8.5rem;
+        }
+
+        /* Posicionado contra la caja de la figura en vez de con un alto en
+           porcentaje: el alto de la caja lo decide el reparto flexible, y un
+           `100%` que no resuelva devolvería la imagen a su tamaño real —900 px
+           de alto— reventando la pantalla. Así no depende de eso. */
+        .hero__figure-poster {
+            position: absolute;
+            inset: 0;
+            margin: auto;
+            block-size: 100%;
+            inline-size: auto;
+            max-inline-size: 100%;
+        }
+
+        .hero__desktop-note {
+            margin-block-start: var(--space-5);
         }
 
         .hero__tiles {

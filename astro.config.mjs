@@ -8,7 +8,7 @@ import { keycapIconsPlugin } from "./scripts/keycap-icons-plugin.mjs";
 // El `site` alimenta canonical, hreflang, sitemap y las URLs absolutas de Open
 // Graph. Sin él Astro emite hosts equivocados en silencio.
 export default defineConfig({
-    site: "https://lgarbayo.dev",
+    site: "https://lgarbayo.com",
 
     // La barra flotante de Astro sólo existe en `astro dev` —nunca sale en el
     // build—, pero se planta encima de la esquina inferior y estorba para ver

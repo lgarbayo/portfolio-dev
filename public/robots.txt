@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://lgarbayo.dev/sitemap-index.xml
+Sitemap: https://lgarbayo.com/sitemap-index.xml

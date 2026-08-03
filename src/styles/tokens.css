@@ -1,0 +1,148 @@
+/*
+ * Capa de tokens. Cambiar un valor aquí debe propagarse a todo el sitio sin
+ * tocar ni un componente — si algún componente necesita un literal, es que
+ * falta un token.
+ *
+ * La web va en escala de grises: gris oscuro de fondo y blancos como acento. Sin
+ * matiz que valga —los canales R, G y B valen lo mismo en cada tono—, porque un
+ * gris con una pizca de azul deja de leerse como neutro en cuanto se pone al
+ * lado de uno que no la tiene.
+ *
+ * Sin color con el que marcar jerarquía, la marca el brillo: el acento es lo más
+ * claro de la página, el texto corriente queda un escalón por debajo, y de ahí
+ * hacia abajo los apagados. Por eso `--color-text` no es blanco: si lo fuese, un
+ * título en acento y un párrafo se verían igual.
+ *
+ * El modo juego no pasa por aquí: conserva su paleta en `game-modals.css` y en
+ * las escenas de Phaser.
+ */
+
+:root {
+    /* --- Color: superficies --- */
+    --color-bg: #171717;
+    --color-surface: #202020;
+    --color-surface-raised: #2b2b2b;
+    --color-border: rgba(255, 255, 255, 0.08);
+    --color-border-strong: rgba(255, 255, 255, 0.16);
+
+    /* --- Color: texto --- */
+    --color-text: #d8d8d8;
+    --color-text-muted: rgba(216, 216, 216, 0.68);
+    --color-text-subtle: rgba(216, 216, 216, 0.45);
+
+    /* --- Color: acento --- */
+    --color-accent: #f5f5f5;
+    --color-accent-bright: #ffffff;
+    --color-accent-dim: rgba(245, 245, 245, 0.12);
+    --color-accent-border: rgba(245, 245, 245, 0.32);
+
+    /* --- Color: acentos secundarios (heredados de los mundos del juego) --- */
+    --color-world-about: #cfcfcf;
+    --color-world-projects: #b4b4b4;
+    --color-world-experience: #9a9a9a;
+    --color-world-contact: #808080;
+
+    --color-focus: #ffffff;
+
+    /* --- Tipografía --- */
+    --font-sans: "Space Grotesk", "Inter", system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    --font-mono: "JetBrains Mono", "SFMono-Regular", ui-monospace, "Cascadia Mono", monospace;
+
+    /* Escala fluida: cada paso interpola entre móvil y escritorio, así que no
+       hacen falta breakpoints tipográficos. */
+    --text-xs: clamp(0.75rem, 0.73rem + 0.1vw, 0.8rem);
+    --text-sm: clamp(0.875rem, 0.85rem + 0.12vw, 0.925rem);
+    --text-base: clamp(1rem, 0.95rem + 0.25vw, 1.075rem);
+    --text-lg: clamp(1.125rem, 1.05rem + 0.35vw, 1.25rem);
+    --text-xl: clamp(1.375rem, 1.25rem + 0.6vw, 1.625rem);
+    --text-2xl: clamp(1.75rem, 1.5rem + 1.1vw, 2.25rem);
+    --text-3xl: clamp(2.25rem, 1.8rem + 2.1vw, 3.25rem);
+    --text-4xl: clamp(2.75rem, 2rem + 3.4vw, 4.5rem);
+
+    --leading-tight: 1.15;
+    --leading-snug: 1.35;
+    --leading-normal: 1.6;
+    --leading-relaxed: 1.75;
+
+    --tracking-tight: -0.02em;
+    --tracking-normal: 0;
+    --tracking-wide: 0.08em;
+
+    --weight-normal: 400;
+    --weight-medium: 500;
+    --weight-semibold: 600;
+    --weight-bold: 700;
+
+    /* --- Espaciado (escala de 4px) --- */
+    --space-1: 0.25rem;
+    --space-2: 0.5rem;
+    --space-3: 0.75rem;
+    --space-4: 1rem;
+    --space-5: 1.5rem;
+    --space-6: 2rem;
+    --space-7: 3rem;
+    --space-8: 4rem;
+    --space-9: 6rem;
+    --space-10: 8rem;
+
+    /* Ritmo vertical entre secciones de la home. */
+    --section-gap: clamp(4rem, 3rem + 5vw, 8rem);
+
+    /* --- Layout ---
+       En una pantalla ancha, 68rem dejaba el contenido en una columna estrecha
+       con medio monitor vacío a cada lado. 88rem aprovecha ese sitio sin pasarse:
+       probado también a 104rem, y ahí el hueco entre el texto y la foto de
+       "Sobre mí" se abre tanto que las dos mitades dejan de leerse juntas.
+       Por debajo de ~1150px no cambia nada: manda el `min()` de `.container`. */
+    --content-width: 88rem;
+    --prose-width: 50rem;
+    /*
+     * Lo que ocupa el header pegajoso. Se descuenta del alto de cada sección y
+     * sirve de `scroll-padding`, para que una sección a pantalla completa mida
+     * exactamente el hueco que queda debajo del header y no un pelo más: si
+     * midiera 100svh, asomaría por abajo el principio de la siguiente.
+     */
+    --header-height: 4.25rem;
+    --gutter: clamp(1.25rem, 0.9rem + 1.8vw, 2.5rem);
+
+    /* --- Radios --- */
+    --radius-sm: 6px;
+    --radius-md: 12px;
+    --radius-lg: 20px;
+    --radius-full: 9999px;
+
+    /* --- Sombras --- */
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+    --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.45);
+    --shadow-lg: 0 24px 60px rgba(0, 0, 0, 0.55);
+
+    /* --- Movimiento ---
+       Las duraciones son tokens para que la política de reduced-motion pueda
+       ponerlas a cero de una vez, en global.css, sin perseguir componentes. */
+    --duration-instant: 80ms;
+    --duration-fast: 160ms;
+    --duration-base: 260ms;
+    --duration-slow: 420ms;
+    --duration-slower: 700ms;
+
+    --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+    --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+    --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+    /* --- Capas ---
+       Declaradas juntas porque el z-index se descontrola justo cuando cada
+       componente inventa el suyo. */
+    --z-base: 0;
+    --z-raised: 10;
+    --z-sticky: 100;
+    --z-launcher: 200;
+    --z-menu: 300;
+    --z-overlay: 400;
+    --z-transition: 500;
+
+    /* --- Objetivos táctiles ---
+       44px es el mínimo accesible; los componentes lo aplican vía min-block-size
+       en vez de repetir el número. */
+    --tap-target: 44px;
+}

@@ -1,0 +1,213 @@
+@import "./tokens.css";
+
+/* --- Reset --- */
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+* {
+    margin: 0;
+}
+
+html {
+    /* El header pegajoso taparía el destino de cada ancla sin esto. */
+    scroll-padding-block-start: var(--header-height);
+    -webkit-text-size-adjust: 100%;
+}
+
+/* --- Una sección por pantalla ---
+   Sólo en la home, que es donde existen esas secciones: el `:has()` deja fuera
+   al blog y al 404, donde encajar el contenido en pantallas no tendría sentido.
+
+   `mandatory` asusta menos de lo que parece con secciones largas —Proyectos o
+   Experiencia no caben en una pantalla—: cuando un área de anclaje es más alta
+   que el viewport, la especificación deja parar en cualquier punto dentro de
+   ella. Así las cortas se encajan de una en una y las largas se recorren
+   normal, y el anclaje vuelve a actuar al salir. */
+html:has(.section) {
+    scroll-snap-type: y mandatory;
+}
+
+body {
+    min-block-size: 100vh;
+    background: var(--color-bg);
+    color: var(--color-text);
+    font-family: var(--font-sans);
+    font-size: var(--text-base);
+    line-height: var(--leading-normal);
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    /* Ninguna página debe poder desplazarse en horizontal: el contenido ancho
+       (tablas, código, filas de tags) scrollea dentro de su propio contenedor. */
+    overflow-x: hidden;
+}
+
+img,
+picture,
+video,
+canvas,
+svg {
+    display: block;
+    max-inline-size: 100%;
+    block-size: auto;
+}
+
+input,
+button,
+textarea,
+select {
+    font: inherit;
+    color: inherit;
+}
+
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    overflow-wrap: break-word;
+}
+
+ul[role="list"],
+ol[role="list"] {
+    list-style: none;
+    padding: 0;
+}
+
+/* --- Tipografía base --- */
+
+h1,
+h2,
+h3,
+h4 {
+    line-height: var(--leading-tight);
+    letter-spacing: var(--tracking-tight);
+    font-weight: var(--weight-semibold);
+    text-wrap: balance;
+}
+
+h1 {
+    font-size: var(--text-4xl);
+}
+h2 {
+    font-size: var(--text-3xl);
+}
+h3 {
+    font-size: var(--text-xl);
+}
+
+p {
+    text-wrap: pretty;
+}
+
+a {
+    color: var(--color-accent);
+    text-decoration-color: var(--color-accent-border);
+    text-underline-offset: 0.2em;
+    transition: color var(--duration-fast) var(--ease-out);
+}
+
+a:hover {
+    color: var(--color-accent-bright);
+}
+
+code,
+kbd,
+pre,
+samp {
+    font-family: var(--font-mono);
+    font-size: 0.925em;
+}
+
+/* --- Foco ---
+   Visible siempre, en cualquier elemento interactivo. Un anillo que no se ve es
+   un sitio que no se puede recorrer con teclado. */
+
+:focus-visible {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 3px;
+    border-radius: var(--radius-sm);
+}
+
+/* --- Utilidades --- */
+
+.visually-hidden:not(:focus):not(:active) {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+}
+
+.container {
+    inline-size: min(100% - var(--gutter) * 2, var(--content-width));
+    margin-inline: auto;
+}
+
+.prose {
+    max-inline-size: var(--prose-width);
+}
+
+/* Contenedor de escape para lo que sí puede ser más ancho que la pantalla. */
+.scroll-x {
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+}
+
+/* --- Bloqueo de scroll ---
+   Lo usa el overlay del juego; vive aquí porque es estado global del documento,
+   no de un componente. */
+body[data-scroll-locked] {
+    overflow: hidden;
+}
+
+/* --- Revelado al hacer scroll ---
+   El estado inicial sólo se aplica si JS ha marcado el documento: sin JS, o si
+   el script falla, el contenido nace visible en vez de quedarse invisible para
+   siempre. */
+html[data-reveal-enabled] [data-reveal] {
+    opacity: 0;
+    transform: translateY(1.5rem);
+    transition:
+        opacity var(--duration-slow) var(--ease-out),
+        transform var(--duration-slow) var(--ease-out);
+}
+
+html[data-reveal-enabled] [data-reveal][data-revealed] {
+    opacity: 1;
+    transform: none;
+}
+
+/* --- Política de movimiento reducido ---
+   No es "quitar animaciones": es la ruta de renderizado que cada feature tiene
+   que soportar. Aquí se neutraliza lo declarativo; lo que corre en JS consulta
+   el mismo media query desde prefers-reduced-motion.ts. */
+@media (prefers-reduced-motion: reduce) {
+    :root {
+        --duration-instant: 0.01ms;
+        --duration-fast: 0.01ms;
+        --duration-base: 0.01ms;
+        --duration-slow: 0.01ms;
+        --duration-slower: 0.01ms;
+    }
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+
+    html[data-reveal-enabled] [data-reveal] {
+        opacity: 1;
+        transform: none;
+    }
+}

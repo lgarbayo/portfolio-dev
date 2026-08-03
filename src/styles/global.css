@@ -31,8 +31,17 @@ html:has(.section) {
     scroll-snap-type: y mandatory;
 }
 
+/* El pie, abajo del todo.
+   Con el documento en columna y el contenido reclamando el espacio sobrante, el
+   pie cae al fondo de la ventana cuando la página es corta —el índice del blog
+   con un artículo, el 404— y se comporta como siempre cuando es larga. Sin esto
+   se quedaba flotando a media pantalla con un vacío debajo.
+   `dvh` y no `vh`: en el móvil la barra del navegador se retrae, y con `vh` el
+   pie acababa empujado por debajo del borde. */
 body {
-    min-block-size: 100vh;
+    display: flex;
+    flex-direction: column;
+    min-block-size: 100dvh;
     background: var(--color-bg);
     color: var(--color-text);
     font-family: var(--font-sans);
@@ -43,6 +52,12 @@ body {
     /* Ninguna página debe poder desplazarse en horizontal: el contenido ancho
        (tablas, código, filas de tags) scrollea dentro de su propio contenedor. */
     overflow-x: hidden;
+}
+
+/* El contenido se queda con todo el espacio que sobre; es lo que empuja al pie
+   contra el borde inferior. */
+main {
+    flex: 1;
 }
 
 img,

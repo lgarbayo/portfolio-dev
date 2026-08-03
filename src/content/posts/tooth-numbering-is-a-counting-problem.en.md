@@ -8,6 +8,9 @@ tags:
   - machine-learning
   - 3d
   - healthcare
+motion: /blog/arm-for-a-leg.mp4
+motionAlt: "Two Simpsons characters greet each other: 'Well if it isn't my old friend Mr. McCraig, with a leg for an arm, and an arm for a leg!'"
+motionPoster: /blog/arm-for-a-leg.webp
 ---
 
 An intraoral scanner produces a 3D mesh of the mouth: roughly 117,000 points per

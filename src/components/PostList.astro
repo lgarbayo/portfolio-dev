@@ -27,32 +27,54 @@ const formatter = new Intl.DateTimeFormat(localeTags[locale], {
         <ul class="postlist" role="list">
             {posts.map((post) => (
                 <li class="postlist__item" data-reveal>
-                    <a
-                        class="postlist__link"
-                        href={localizedPath(post.data.locale, `blog/${post.data.slug}`)}
-                    >
-                        <time class="postlist__date" datetime={post.data.pubDate.toISOString()}>
-                            {formatter.format(post.data.pubDate)}
-                        </time>
-                        <h2 class="postlist__title">
-                            {post.data.title}
-                            {post.data.draft && <span class="postlist__draft">{t("blog.draft")}</span>}
-                        </h2>
-                        <p class="postlist__description">{post.data.description}</p>
-                        {post.data.locale !== locale && (
-                            <p class="postlist__fallback">{t("content.fallbackNotice")}</p>
+                    <div class="postlist__text">
+                        <a
+                            class="postlist__link"
+                            href={localizedPath(post.data.locale, `blog/${post.data.slug}`)}
+                        >
+                            <time class="postlist__date" datetime={post.data.pubDate.toISOString()}>
+                                {formatter.format(post.data.pubDate)}
+                            </time>
+                            <h2 class="postlist__title">
+                                {post.data.title}
+                                {post.data.draft && <span class="postlist__draft">{t("blog.draft")}</span>}
+                            </h2>
+                            <p class="postlist__description">{post.data.description}</p>
+                            {post.data.locale !== locale && (
+                                <p class="postlist__fallback">{t("content.fallbackNotice")}</p>
+                            )}
+                        </a>
+                        {post.data.tags.length > 0 && (
+                            <ul class="postlist__tags" role="list">
+                                {post.data.tags.map((tag) => (
+                                    <li>
+                                        <a class="tag" href={localizedPath(locale, `blog/tag/${tag}`)}>
+                                            {tag}
+                                        </a>
+                                    </li>
+                                ))}
+                            </ul>
                         )}
-                    </a>
-                    {post.data.tags.length > 0 && (
-                        <ul class="postlist__tags" role="list">
-                            {post.data.tags.map((tag) => (
-                                <li>
-                                    <a class="tag" href={localizedPath(locale, `blog/tag/${tag}`)}>
-                                        {tag}
-                                    </a>
-                                </li>
-                            ))}
-                        </ul>
+                    </div>
+
+                    {/*
+                      El clip no se reproduce solo desde el marcado: lo arranca
+                      `post-motion`, que respeta el movimiento reducido y sólo
+                      toca los que están en pantalla. Sin JS se queda el póster,
+                      que es exactamente su primer fotograma.
+                    */}
+                    {post.data.motion && (
+                        <video
+                            class="postlist__motion"
+                            src={post.data.motion}
+                            poster={post.data.motionPoster}
+                            aria-label={post.data.motionAlt}
+                            muted
+                            loop
+                            playsinline
+                            preload="none"
+                            data-post-motion
+                        />
                     )}
                 </li>
             ))}
@@ -68,6 +90,38 @@ const formatter = new Intl.DateTimeFormat(localeTags[locale], {
         margin: 0;
         padding: 0;
         list-style: none;
+    }
+
+    /* Texto a la izquierda, clip a la derecha. El clip se dimensiona por sí
+       mismo y el texto se queda con lo que sobra; `minmax(0, 1fr)` es lo que
+       evita que un título largo empuje al clip fuera de la fila. */
+    .postlist__item {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: start;
+        gap: var(--space-6);
+    }
+
+    .postlist__motion {
+        inline-size: clamp(9rem, 20vw, 15rem);
+        aspect-ratio: 476 / 346;
+        object-fit: cover;
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-md);
+        background: var(--color-surface);
+    }
+
+    /* En estrecho el clip pasa debajo del texto y a lo ancho: al lado se
+       quedaría en una miniatura ilegible y le robaría sitio al titular. */
+    @media (max-width: 48rem) {
+        .postlist__item {
+            grid-template-columns: 1fr;
+        }
+
+        .postlist__motion {
+            inline-size: 100%;
+            max-inline-size: 20rem;
+        }
     }
 
     .postlist__empty {

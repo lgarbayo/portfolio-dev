@@ -80,6 +80,7 @@ const t = useTranslations(locale);
             import { initShortcuts } from "@/lib/shortcuts";
             import { initLocaleLinks } from "@/lib/locale-links";
             import { initAvatar, destroyAvatar } from "@/lib/avatar";
+            import { initPostMotion, destroyPostMotion } from "@/lib/post-motion";
 
             const boot = () => {
                 void initReveal();
@@ -89,6 +90,7 @@ const t = useTranslations(locale);
                 void initPageTransition();
                 initSectionTransition();
                 void initAvatar();
+                initPostMotion();
             };
 
             boot();
@@ -98,6 +100,7 @@ const t = useTranslations(locale);
             document.addEventListener("astro:before-swap", () => {
                 destroyReveal();
                 destroyAvatar();
+                destroyPostMotion();
             });
         </script>
     </body>

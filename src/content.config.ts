@@ -239,11 +239,28 @@ const posts = defineCollection({
         slug: z.string(),
         cover: z.string().optional(),
         coverAlt: z.string().optional(),
+        /**
+         * Clip que acompaña a la entrada en el índice: un vídeo corto y sin
+         * sonido, del tamaño de un gif y con una décima parte de su peso.
+         *
+         * Es adorno, pero adorno que ocupa sitio en la lista, así que necesita
+         * su `motionAlt`: quien no lo ve tiene que poder saber qué se está
+         * perdiendo. El póster es el fotograma que se enseña quieto cuando el
+         * clip todavía no juega —sin JS, o con el movimiento desactivado en el
+         * sistema—.
+         */
+        motion: z.string().optional(),
+        motionAlt: z.string().optional(),
+        motionPoster: z.string().optional(),
         /** Para artículos republicados: canonical apuntando al original. */
         canonicalUrl: z.url().optional(),
-    }).refine((entry) => !entry.cover || entry.coverAlt, {
-        message: "Una portada necesita coverAlt.",
-    }),
+    })
+        .refine((entry) => !entry.cover || entry.coverAlt, {
+            message: "Una portada necesita coverAlt.",
+        })
+        .refine((entry) => !entry.motion || entry.motionAlt, {
+            message: "Un clip necesita motionAlt.",
+        }),
 });
 
 export const collections = {

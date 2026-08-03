@@ -1,12 +1,41 @@
 import Phaser from "phaser";
 import { portfolioWorlds } from "../data/portfolioWorlds";
 
+/**
+ * Tiempo mínimo en pantalla.
+ *
+ * La carga real dura décimas —los fondos son pocos y el navegador los cachea a
+ * la segunda partida—, así que sin este suelo la pantalla aparecería y
+ * desaparecería en un parpadeo, que se lee como un fallo y no como un arranque.
+ */
+const MIN_VISIBLE_MS = 800;
+const FADE_MS = 240;
+
+const BAR_WIDTH = 420;
+const BAR_HEIGHT = 18;
+
 export class BootScene extends Phaser.Scene {
+    private startedAt = 0;
+    private bar?: Phaser.GameObjects.Graphics;
+    private percentText?: Phaser.GameObjects.Text;
+    private barX = 0;
+    private barY = 0;
+
     constructor() {
         super("BootScene");
     }
 
+    init() {
+        this.startedAt = performance.now();
+    }
+
     preload() {
+        // Antes de encolar nada: lo que se pinte aquí es lo que se ve mientras
+        // el cargador trabaja, y esta escena no tenía nada, así que el modo juego
+        // parecía entrar directo al menú.
+        this.createLoadingScreen();
+        this.load.on(Phaser.Loader.Events.PROGRESS, (value: number) => this.drawProgress(value));
+
         this.load.spritesheet("player", "/assets/sprites/player.png", {
             frameWidth: 640,
             frameHeight: 640,
@@ -39,7 +68,70 @@ export class BootScene extends Phaser.Scene {
     create() {
         this.createPlayerAnimations();
         this.registry.set("portfolioWorlds", portfolioWorlds);
-        this.scene.start("MenuScene");
+
+        // La barra llega al 100% aquí: el evento de progreso se queda en 0.99
+        // cuando el último fichero sale de caché en lugar de la red.
+        this.drawProgress(1);
+
+        const shown = performance.now() - this.startedAt;
+        this.time.delayedCall(Math.max(MIN_VISIBLE_MS - shown, 0), () => {
+            // Se funde a negro antes de entregar el mando al menú, que también
+            // arranca en negro: el corte queda como un cambio de pantalla y no
+            // como un salto.
+            this.cameras.main.fadeOut(FADE_MS, 0, 0, 0);
+            this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
+                this.scene.start("MenuScene");
+            });
+        });
+    }
+
+    /** Título, barra y porcentaje, con la paleta del menú. */
+    private createLoadingScreen() {
+        const { width, height } = this.scale;
+        this.cameras.main.setBackgroundColor(0x000000);
+
+        this.add
+            .text(width / 2, height * 0.34, "PORTFOLIO QUEST", {
+                fontFamily: "monospace",
+                fontSize: "48px",
+                color: "#5CE68E",
+            })
+            .setOrigin(0.5);
+
+        this.add
+            .text(width / 2, height * 0.44, "CARGANDO", {
+                fontFamily: "monospace",
+                fontSize: "18px",
+                color: "#8DA0BF",
+            })
+            .setOrigin(0.5);
+
+        this.barX = (width - BAR_WIDTH) / 2;
+        this.barY = height * 0.55;
+
+        const frame = this.add.graphics();
+        frame.lineStyle(2, 0x8da0bf, 1);
+        frame.strokeRect(this.barX - 4, this.barY - 4, BAR_WIDTH + 8, BAR_HEIGHT + 8);
+
+        this.bar = this.add.graphics();
+
+        this.percentText = this.add
+            .text(width / 2, this.barY + BAR_HEIGHT + 32, "0%", {
+                fontFamily: "monospace",
+                fontSize: "20px",
+                color: "#F5DEB3",
+            })
+            .setOrigin(0.5);
+
+        this.drawProgress(0);
+    }
+
+    private drawProgress(value: number) {
+        const clamped = Phaser.Math.Clamp(value, 0, 1);
+        this.bar?.clear();
+        this.bar?.fillStyle(0x5ce68e, 1);
+        this.bar?.fillRect(this.barX, this.barY, BAR_WIDTH * clamped, BAR_HEIGHT);
+        this.percentText?.setText(`${Math.round(clamped * 100)}%`);
     }
 
     private createSolidTexture(

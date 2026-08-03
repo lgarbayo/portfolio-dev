@@ -1,7 +1,7 @@
 ---
 import Section from "../Section.astro";
 import EducationEntry from "../EducationEntry.astro";
-import { getLocalizedEntries } from "@/lib/content";
+import { getLocalizedEntries, getLocalizedEntry } from "@/lib/content";
 import { localeTags, useTranslations, type Locale } from "@/i18n/index";
 
 interface Props {
@@ -25,6 +25,8 @@ const entries = (await getLocalizedEntries("education", locale)).sort(
 const education = entries.filter((entry) => entry.data.type !== "certification");
 const certifications = entries.filter((entry) => entry.data.type === "certification");
 
+const languages = await getLocalizedEntry("languages", locale);
+
 // Mes y año para las credenciales. Con sólo el año, veinte certificados del
 // mismo curso se leen como si fueran simultáneos.
 const issued = new Intl.DateTimeFormat(localeTags[locale], { month: "short", year: "numeric" });
@@ -34,6 +36,27 @@ const issued = new Intl.DateTimeFormat(localeTags[locale], { month: "short", yea
     <ul class="education__list" role="list">
         {education.map((entry) => <EducationEntry locale={locale} entry={entry} />)}
     </ul>
+
+    {
+        languages && (
+            <div class="education__block" data-reveal>
+                <h3 class="education__block-title">{t("education.languages.title")}</h3>
+                <ul class="education__languages" role="list">
+                    {languages.data.items.map((item) => (
+                        <li class="education__language">
+                            <span class="education__language-name">{item.name}</span>
+                            <span class="education__language-level">
+                                {item.level}
+                                {item.credential && (
+                                    <span class="education__credential">· {item.credential}</span>
+                                )}
+                            </span>
+                        </li>
+                    ))}
+                </ul>
+            </div>
+        )
+    }
 
     {/*
         Las certificaciones van en formato corto —nombre, entidad y fecha—, no
@@ -102,6 +125,35 @@ const issued = new Intl.DateTimeFormat(localeTags[locale], { month: "short", yea
         color: var(--color-text-subtle);
     }
 
+    .education__languages {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-2);
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        max-inline-size: var(--prose-width);
+    }
+
+    /* Nombre y nivel en la misma línea mientras quepan, y en dos cuando no: en
+       móvil "Inglés — Intermedio-avanzado · Cambridge (FCE)" no entra de una. */
+    .education__language {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        gap: var(--space-2);
+        font-size: var(--text-sm);
+    }
+
+    .education__language-name {
+        font-weight: var(--weight-medium);
+        color: var(--color-text);
+    }
+
+    .education__language-level {
+        color: var(--color-text-muted);
+    }
+
     /*
      * Dos columnas mientras quepan. Veintitantas credenciales en una sola
      * columna son una pared de texto; en dos, se recorren de un vistazo.
@@ -143,4 +195,10 @@ const issued = new Intl.DateTimeFormat(localeTags[locale], { month: "short", yea
         color: var(--color-text-subtle);
     }
 
+    .education__credential {
+        margin-inline-start: var(--space-2);
+        font-family: var(--font-mono);
+        font-size: var(--text-xs);
+        color: var(--color-text-subtle);
+    }
 </style>

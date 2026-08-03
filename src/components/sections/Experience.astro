@@ -1,0 +1,181 @@
+---
+import Section from "../Section.astro";
+import { byCurrentThenRecent, getLocalizedEntries } from "@/lib/content";
+import { localeTags, useTranslations, type Locale } from "@/i18n/index";
+
+interface Props {
+    locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = useTranslations(locale);
+
+const experience = (await getLocalizedEntries("experience", locale)).sort(byCurrentThenRecent);
+
+const formatter = new Intl.DateTimeFormat(localeTags[locale], {
+    month: "short",
+    year: "numeric",
+});
+
+// Sin fecha de fin significa "en curso": se escribe así en vez de dejar el
+// periodo cojo.
+const formatPeriod = (start: Date, end?: Date) =>
+    `${formatter.format(start)} – ${end ? formatter.format(end) : t("experience.present")}`;
+---
+
+<Section id="experience" title={t("experience.title")}>
+    <ol class="timeline" role="list">
+        {
+            experience.map((item) => (
+                <li class="timeline__item" data-reveal>
+                    <div class="timeline__head">
+                        <h3 class="timeline__role">
+                            {item.data.role}
+                            <span class="timeline__org">
+                                {" @ "}
+                                {item.data.url ? (
+                                    <a
+                                        class="timeline__org-link"
+                                        href={item.data.url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                    >
+                                        {item.data.organization}
+                                    </a>
+                                ) : (
+                                    item.data.organization
+                                )}
+                            </span>
+                        </h3>
+                        {item.data.logo && (
+                            <img
+                                class="timeline__logo"
+                                src={item.data.logo}
+                                alt={t("experience.logoAlt", { organization: item.data.organization })}
+                                width="96"
+                                height="32"
+                                loading="lazy"
+                                decoding="async"
+                            />
+                        )}
+                    </div>
+
+                    {item.data.startDate && (
+                        <p class="timeline__period">
+                            <time datetime={item.data.startDate.toISOString().slice(0, 10)}>
+                                {formatPeriod(item.data.startDate, item.data.endDate)}
+                            </time>
+                        </p>
+                    )}
+
+                    <ul class="timeline__list" role="list">
+                        {item.data.responsibilities.map((line) => (
+                            <li>{line}</li>
+                        ))}
+                    </ul>
+
+                    {item.data.stack.length > 0 && (
+                        <ul class="timeline__stack scroll-x" role="list">
+                            {item.data.stack.map((tech) => (
+                                <li class="tag">{tech}</li>
+                            ))}
+                        </ul>
+                    )}
+                </li>
+            ))
+        }
+    </ol>
+</Section>
+
+<style>
+    .timeline {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-6);
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        border-inline-start: 1px solid var(--color-border);
+    }
+
+    .timeline__item {
+        position: relative;
+        padding-inline-start: var(--space-5);
+    }
+
+    .timeline__item::before {
+        content: "";
+        position: absolute;
+        inset-inline-start: -5px;
+        inset-block-start: 0.6em;
+        inline-size: 9px;
+        block-size: 9px;
+        border-radius: var(--radius-full);
+        background: var(--color-accent);
+    }
+
+    .timeline__head {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: var(--space-3);
+    }
+
+    .timeline__role {
+        font-size: var(--text-lg);
+        color: var(--color-text);
+    }
+
+    .timeline__org {
+        color: var(--color-accent);
+        font-weight: var(--weight-normal);
+    }
+
+    /* El subrayado sólo aparece al apuntar: dentro de un título, permanente
+       compite con el propio puesto y el titular deja de leerse de un vistazo. */
+    .timeline__org-link {
+        color: inherit;
+        text-decoration: none;
+    }
+
+    .timeline__org-link:hover,
+    .timeline__org-link:focus-visible {
+        text-decoration: underline;
+        text-underline-offset: 0.2em;
+    }
+
+    .timeline__logo {
+        block-size: 1.75rem;
+        inline-size: auto;
+        opacity: 0.85;
+    }
+
+    .timeline__period {
+        margin-block: var(--space-1) var(--space-3);
+        font-family: var(--font-mono);
+        font-size: var(--text-xs);
+        color: var(--color-text-subtle);
+        letter-spacing: var(--tracking-wide);
+    }
+
+    .timeline__list {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-2);
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        color: var(--color-text-muted);
+        font-size: var(--text-sm);
+        line-height: var(--leading-relaxed);
+    }
+
+    .timeline__stack {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--space-2);
+        margin-block-start: var(--space-4);
+        padding: 0;
+        list-style: none;
+    }
+</style>

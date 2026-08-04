@@ -94,6 +94,8 @@
     "shortcuts.sections": "Ir a unha sección",
     "footer.copyright": "© 2026 Luis Garbayo Fernández",
     "footer.builtWith": "Feito con Astro, TypeScript e Phaser",
+    "footer.source": "Código",
+    "footer.sourceLabel": "Mira o código deste portfolio en GitHub",
     "notFound.title": "Páxina non atopada",
     "notFound.description": "Ese enderezo non leva a ningures. O portfolio, en cambio, si.",
     "notFound.home": "Ir á páxina principal"

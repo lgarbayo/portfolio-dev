@@ -2,7 +2,7 @@
 name: "Java"
 category: languages
 keycap: "JAV"
-icon: "openjdk"
+icon: "java"
 key: "j"
 order: 1
 ---

@@ -13,14 +13,19 @@
  * La lista no se escribe a mano: sale del `icon:` de los ficheros de
  * `src/content/stack`. Añadir una tecla con logo es tocar su markdown y nada
  * más.
+ *
+ * El grueso de los logos sale de `simple-icons`. Los que esa librería no
+ * distribuye —el de Java, por ejemplo, que Oracle no licencia libremente— se
+ * guardan como SVG en `src/assets/keycap-icons` y ganan al paquete.
  */
-import { readFileSync, readdirSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 
 const MODULE_ID = "virtual:keycap-icons";
 const RESOLVED_ID = `\0${MODULE_ID}`;
 
 const STACK_DIR = "src/content/stack";
+const LOCAL_DIR = "src/assets/keycap-icons";
 
 /** Los slugs `icon:` declarados en el contenido del stack. */
 function declaredSlugs() {
@@ -41,6 +46,30 @@ function exportName(slug) {
     return `si${slug.charAt(0).toUpperCase()}${slug.slice(1)}`;
 }
 
+/**
+ * Lee un logo de `src/assets/keycap-icons`, si es que ese slug tiene uno.
+ *
+ * La tecla se pinta de un solo color, así que los trazos del SVG se concatenan
+ * en un único `d` y del `fill` sólo interesa el primero, como color de marca
+ * del que sale luego el gris.
+ */
+function localIcon(slug) {
+    const file = join(LOCAL_DIR, `${slug}.svg`);
+    if (!existsSync(file)) return null;
+
+    const source = readFileSync(file, "utf8");
+    const path = [...source.matchAll(/\sd="([^"]+)"/g)].map((match) => match[1]).join(" ");
+    if (!path) throw new Error(`El logo local "${slug}" no tiene ningún trazo.`);
+
+    return {
+        path,
+        color: source.match(/\sfill="(#[0-9a-fA-F]+)"/)?.[1] ?? "#000000",
+        title: source.match(/<title>([^<]+)<\/title>/)?.[1] ?? slug,
+        // Los SVG de marca no vienen todos en la caja de 24 de Simple Icons.
+        size: Number(source.match(/viewBox="0 0 (\d+(?:\.\d+)?) /)?.[1] ?? 24),
+    };
+}
+
 export function keycapIconsPlugin() {
     return {
         name: "keycap-icons",
@@ -57,16 +86,27 @@ export function keycapIconsPlugin() {
             const icons = {};
 
             for (const slug of declaredSlugs()) {
+                const local = localIcon(slug);
+                if (local) {
+                    icons[slug] = local;
+                    continue;
+                }
+
                 const icon = simpleIcons[exportName(slug)];
                 if (!icon) {
                     // Parar el build es el fallo barato. El caro es una tecla en
                     // blanco en producción, que no se ve hasta que alguien mira.
                     throw new Error(
-                        `Icono desconocido en el stack: "${slug}". Mira el slug en https://simpleicons.org, o quita el campo \`icon\` para que la tecla se quede con su texto.`,
+                        `Icono desconocido en el stack: "${slug}". Mira el slug en https://simpleicons.org, deja el SVG en ${LOCAL_DIR}/${slug}.svg, o quita el campo \`icon\` para que la tecla se quede con su texto.`,
                     );
                 }
 
-                icons[slug] = { path: icon.path, color: `#${icon.hex}`, title: icon.title };
+                icons[slug] = {
+                    path: icon.path,
+                    color: `#${icon.hex}`,
+                    title: icon.title,
+                    size: 24,
+                };
             }
 
             return `export const KEYCAP_ICONS = ${JSON.stringify(icons)};\n`;

@@ -682,12 +682,12 @@ function iconTexture(icon: KeycapIcon): THREE.CanvasTexture {
     const ctx = canvas.getContext("2d")!;
     ctx.clearRect(0, 0, size, size);
 
-    // Los iconos de Simple Icons vienen en una caja de 24x24: se escala a algo
-    // menos de dos tercios de la tecla y se centra.
-    const scale = Math.round(size * 0.62) / 24;
+    // Cada logo trae la caja en la que está dibujado —24 los de Simple Icons—:
+    // se escala a algo menos de dos tercios de la tecla y se centra.
+    const scale = Math.round(size * 0.62) / icon.size;
     ctx.translate(size / 2, size / 2);
     ctx.scale(scale, scale);
-    ctx.translate(-12, -12);
+    ctx.translate(-icon.size / 2, -icon.size / 2);
     ctx.fillStyle = grayOf(icon.color);
     ctx.fill(new Path2D(icon.path));
 

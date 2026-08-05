@@ -6,15 +6,17 @@
  */
 
 declare module "virtual:keycap-icons" {
-    /** Logos de las teclas del stack, por slug de Simple Icons. */
+    /** Logos de las teclas del stack, por slug del campo `icon:` del stack. */
     export const KEYCAP_ICONS: Record<
         string,
         {
-            /** El `d` de un SVG de 24x24. */
+            /** El `d` del SVG, ya con todos sus trazos concatenados. */
             path: string;
             /** Color de marca, con almohadilla. */
             color: string;
             title: string;
+            /** Lado de la caja del SVG: 24 en Simple Icons, lo que toque en los locales. */
+            size: number;
         }
     >;
 }

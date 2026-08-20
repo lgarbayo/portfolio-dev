@@ -14,8 +14,10 @@ import {
  * peana. Con esqueleto se giraría sólo la cabeza; sin él, girar el conjunto es
  * lo único honesto: mover un trozo de una malla continua la rompería.
  *
- * Tampoco trae materiales, así que se le pone uno de barro claro. Si algún día
- * el GLB llega texturizado, esta escena respeta lo que traiga.
+ * El GLB llega con sus materiales —los pinta `scripts/paint-figure.blender.py`
+ * proyectando sobre la malla el render del que salió—, así que esta escena se
+ * limita a iluminarlo. El barro claro de más abajo sigue ahí por si algún día
+ * el modelo se sustituye por uno sin materiales.
  */
 
 /** Giro máximo hacia el cursor, en radianes. */
@@ -54,14 +56,18 @@ export async function createAvatarScene(
         cameraPosition: [0, 0, 4],
     });
 
-    scene.add(new THREE.HemisphereLight(0xffffff, 0x1c1c1c, 1.5));
+    // Relleno bajo a propósito: con el modelo en gris daba igual, pero sobre
+    // albedo de color tanta luz ambiente lava los tonos y deja la figura plana.
+    scene.add(new THREE.HemisphereLight(0xffffff, 0x1c1c1c, 0.95));
 
-    const key = new THREE.DirectionalLight(0xffffff, 2.6);
+    const key = new THREE.DirectionalLight(0xffffff, 2.4);
     key.position.set(2.4, 3.2, 3);
     scene.add(key);
 
-    // Contorno desde atrás: despega la figura del fondo, que es del mismo gris.
-    const rim = new THREE.DirectionalLight(0xffffff, 1.4);
+    // Contorno desde atrás: despega la figura del fondo. Pesa más que antes
+    // porque ahora la ropa es casi negra y, sin él, el torso y las piernas se
+    // funden con el `--color-bg` de la página.
+    const rim = new THREE.DirectionalLight(0xffffff, 2);
     rim.position.set(-2, 1.8, -2.6);
     scene.add(rim);
 
@@ -81,8 +87,8 @@ export async function createAvatarScene(
 
     const model = gltf.scene;
 
-    // Sin materiales en el fichero, Three pone el del estándar: metálico del
-    // todo y negro. El barro claro es lo que encaja con la web en grises.
+    // Respaldo: sin materiales en el fichero, Three pone el del estándar,
+    // metálico del todo y negro. El barro claro al menos se deja ver.
     const untextured = !(gltf.parser.json.materials?.length > 0);
     if (untextured) {
         const clay = new THREE.MeshStandardMaterial({

@@ -9,7 +9,7 @@ import type { AvatarHandle } from "./three/avatar-scene";
  * llega, sustituye a la imagen, y si no llega —móvil, sin WebGL, el modelo no
  * carga— la imagen se queda y no se nota que faltaba nada.
  *
- * En móvil no se monta a propósito: son 108 KB de modelo más el motor, y el
+ * En móvil no se monta a propósito: son 127 KB de modelo más el motor, y el
  * giro hacia el cursor no existe sin cursor.
  */
 

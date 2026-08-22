@@ -8,38 +8,34 @@ interface Props {
 const { locale } = Astro.props;
 const t = useTranslations(locale);
 
-const links = [
-    { href: "mailto:lugarbayo@gmail.com", label: t("contact.email"), text: "Email" },
-    { href: "https://linkedin.com/in/luis-garbayo", label: t("contact.linkedin"), text: "LinkedIn" },
-    { href: "https://github.com/lgarbayo", label: t("contact.github"), text: "GitHub" },
-    { href: "https://devpost.com/lgarbayo", label: t("contact.devpost"), text: "Devpost" },
-    {
-        href: "https://github.com/lgarbayo/portfolio-dev",
-        label: t("footer.sourceLabel"),
-        text: t("footer.source"),
-    },
-];
+/*
+ * En el pie sólo queda el código fuente.
+ *
+ * Los cuatro canales de contacto estaban aquí repetidos, y con la página de
+ * enlaces del QR pasaban a ser la tercera copia de la misma lista. El sitio
+ * donde se pregunta "¿cómo te escribo?" ya existe; el pie es el sitio donde se
+ * pregunta "¿cómo está hecho esto?", que es otra cosa.
+ */
+const SOURCE = "https://github.com/lgarbayo/portfolio-dev";
+const GITHUB_ICON = "/assets/ui/github-mark-white.svg";
 ---
 
 <footer class="footer">
     <div class="footer__inner container">
-        <ul class="footer__links" role="list">
-            {
-                links.map((link) => (
-                    <li>
-                        <a
-                            href={link.href}
-                            aria-label={link.label}
-                            {...link.href.startsWith("http")
-                                ? { target: "_blank", rel: "noopener noreferrer" }
-                                : {}}
-                        >
-                            {link.text}
-                        </a>
-                    </li>
-                ))
-            }
-        </ul>
+        <a
+            class="footer__source"
+            href={SOURCE}
+            aria-label={t("footer.sourceLabel")}
+            target="_blank"
+            rel="noopener noreferrer"
+        >
+            <span
+                class="footer__source-icon"
+                aria-hidden="true"
+                style={`--icon: url(${GITHUB_ICON})`}
+            />
+            {t("footer.source")}
+        </a>
         <div class="footer__meta">
             <p>{t("footer.copyright")}</p>
             <p class="footer__built">{t("footer.builtWith")}</p>
@@ -68,21 +64,24 @@ const links = [
         gap: var(--space-5);
     }
 
-    .footer__links {
-        display: flex;
-        flex-wrap: wrap;
-        gap: var(--space-4);
-        margin: 0;
-        padding: 0;
-        list-style: none;
-    }
-
-    .footer__links a {
+    .footer__source {
         display: inline-flex;
         align-items: center;
+        gap: var(--space-2);
         min-block-size: var(--tap-target);
         font-size: var(--text-sm);
         text-decoration: none;
+    }
+
+    /* El icono es una máscara sobre el color del texto, no una imagen suelta:
+       así sigue al enlace cuando cambia de color. */
+    .footer__source-icon {
+        inline-size: 1rem;
+        block-size: 1rem;
+        background-color: currentColor;
+        -webkit-mask: var(--icon) center / contain no-repeat;
+        mask: var(--icon) center / contain no-repeat;
+        opacity: 0.9;
     }
 
     .footer__meta {

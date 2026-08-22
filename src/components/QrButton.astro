@@ -1,0 +1,161 @@
+---
+import { publicAssetExists } from "@/lib/assets";
+import { useTranslations, type Locale } from "@/i18n/index";
+
+/**
+ * El botón de la cabecera que enseña el QR de la página de enlaces.
+ *
+ * Existe para un momento concreto: estás delante de alguien y no vas a
+ * deletrearle una URL. Se pulsa, sale el código a pantalla completa y la otra
+ * persona lo escanea.
+ *
+ * Si el SVG no está generado, el botón no se pinta. Un botón que abre un modal
+ * vacío es peor que no ofrecerlo, y el QR se genera a mano con
+ * `scripts/make-links-qr.mjs`, así que puede faltar en un clon recién hecho.
+ */
+interface Props {
+    locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = useTranslations(locale);
+
+const QR = "/assets/ui/links-qr.svg";
+const qr = publicAssetExists(QR) ? QR : null;
+const LINKS = "/links/";
+---
+
+{
+    qr && (
+        <>
+            <button class="qr__trigger" type="button" data-qr-open aria-label={t("qr.open")}>
+                {/* Un QR estilizado: los tres ojos y unos módulos sueltos. El
+                    código de verdad tiene 33 módulos por lado y a 20 px no se
+                    leería nada, así que el icono sugiere la forma en vez de
+                    intentar reproducirla. */}
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4z" />
+                    <path d="M14 14h2v2h-2zM18 14h2v2h-2zM16 16h2v2h-2zM14 18h2v2h-2zM18 18h2v2h-2z" />
+                </svg>
+            </button>
+
+            <dialog class="qr__dialog" data-qr-dialog aria-label={t("qr.title")}>
+                <div class="qr__panel">
+                    <p class="qr__title">{t("qr.title")}</p>
+                    {/* Sin `lazy`: dentro de un diálogo cerrado el navegador
+                        podría no llegar a pedirlo nunca, y entonces el hueco
+                        aparece justo cuando alguien ya está apuntando con la
+                        cámara. */}
+                    <img class="qr__code" src={qr} alt={t("qr.alt")} width="220" height="220" />
+                    {/* La URL escrita, para quien prefiera teclearla o esté
+                        mirando la misma pantalla en la que saldría el QR. */}
+                    <a class="qr__url" href={LINKS}>lgarbayo.com/links</a>
+                    <button class="qr__close" type="button" data-qr-close>
+                        {t("qr.close")}
+                    </button>
+                </div>
+            </dialog>
+        </>
+    )
+}
+
+<script>
+    import { initQrDialog } from "@/lib/qr-dialog";
+    initQrDialog();
+    document.addEventListener("astro:page-load", () => initQrDialog());
+    document.addEventListener("astro:before-swap", () => initQrDialog());
+</script>
+
+<style>
+    .qr__trigger {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        inline-size: var(--tap-target);
+        min-block-size: var(--tap-target);
+        padding: 0;
+        background: none;
+        border: 0;
+        color: var(--color-text-muted);
+        cursor: pointer;
+        transition: color var(--duration-fast) var(--ease-out);
+    }
+
+    .qr__trigger:hover,
+    .qr__trigger:focus-visible {
+        color: var(--color-accent);
+    }
+
+    .qr__trigger svg {
+        inline-size: 20px;
+        block-size: 20px;
+        fill: currentColor;
+    }
+
+    .qr__dialog {
+        margin: auto;
+        padding: 0;
+        background: none;
+        border: 0;
+    }
+
+    .qr__dialog::backdrop {
+        background: rgba(0, 0, 0, 0.72);
+        backdrop-filter: blur(4px);
+    }
+
+    .qr__panel {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: var(--space-4);
+        padding: var(--space-6);
+        background: var(--color-surface);
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-md);
+        box-shadow: 0 24px 48px rgba(0, 0, 0, 0.5);
+    }
+
+    .qr__title {
+        font-family: var(--font-mono);
+        font-size: var(--text-sm);
+        letter-spacing: var(--tracking-wide);
+        text-transform: uppercase;
+        color: var(--color-text-subtle);
+    }
+
+    /* Blanco y con aire alrededor aunque el sitio sea oscuro: bastantes
+       lectores rechazan un QR invertido, y la zona en blanco del borde es parte
+       del código, no decoración. */
+    .qr__code {
+        display: block;
+        background: #fff;
+        border-radius: var(--radius-sm);
+    }
+
+    .qr__url {
+        font-family: var(--font-mono);
+        font-size: var(--text-sm);
+        color: var(--color-text);
+    }
+
+    .qr__close {
+        min-block-size: var(--tap-target);
+        padding-inline: var(--space-5);
+        background: none;
+        border: 1px solid var(--color-border-strong);
+        border-radius: var(--radius-full);
+        color: var(--color-text);
+        font-size: var(--text-sm);
+        cursor: pointer;
+        transition:
+            border-color var(--duration-fast) var(--ease-out),
+            color var(--duration-fast) var(--ease-out);
+    }
+
+    .qr__close:hover,
+    .qr__close:focus-visible {
+        border-color: var(--color-accent);
+        color: var(--color-accent);
+    }
+</style>

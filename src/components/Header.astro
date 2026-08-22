@@ -1,5 +1,6 @@
 ---
 import LanguageSelector from "./LanguageSelector.astro";
+import QrButton from "./QrButton.astro";
 import { publicAssetExists } from "@/lib/assets";
 import { localizedPath, useTranslations, type Locale } from "@/i18n/index";
 
@@ -57,17 +58,25 @@ const sections = [
         <span class="visually-hidden">Luis Garbayo Fernández</span>
     </a>
 
-    <button
-        class="header__toggle"
-        type="button"
-        aria-expanded="false"
-        aria-controls="primary-nav"
-        data-menu-toggle
-    >
-        <span class="visually-hidden" data-menu-label-open={t("nav.menu.open")}
-            data-menu-label-close={t("nav.menu.close")}>{t("nav.menu.open")}</span>
-        <span class="header__toggle-bars" aria-hidden="true"></span>
-    </button>
+    {/* El QR va aquí y no dentro de la navegación a propósito: en móvil el
+        menú se pliega tras el botón de hamburguesa, y este es justo el botón
+        que se pulsa con prisa delante de alguien. Fuera del panel se alcanza
+        de un toque en cualquier tamaño de pantalla. */}
+    <div class="header__actions">
+        <QrButton locale={locale} />
+
+        <button
+            class="header__toggle"
+            type="button"
+            aria-expanded="false"
+            aria-controls="primary-nav"
+            data-menu-toggle
+        >
+            <span class="visually-hidden" data-menu-label-open={t("nav.menu.open")}
+                data-menu-label-close={t("nav.menu.close")}>{t("nav.menu.open")}</span>
+            <span class="header__toggle-bars" aria-hidden="true"></span>
+        </button>
+    </div>
 
     <nav class="header__nav" id="primary-nav" aria-label={t("nav.primary")} data-menu>
         <ul class="header__list" role="list">
@@ -149,10 +158,21 @@ const sections = [
         scale: 1.08;
     }
 
+    /* Se va al final de la barra para que la navegación conserve su sitio a la
+       derecha: el grupo de acciones se coloca detrás con `order`, y el margen
+       automático de la navegación empuja a los dos contra el borde. */
+    .header__actions {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--space-2);
+        order: 3;
+    }
+
     .header__nav {
         display: flex;
         align-items: center;
         gap: var(--space-5);
+        margin-inline-start: auto;
     }
 
     .header__list {
@@ -233,7 +253,6 @@ const sections = [
     @media (max-width: 48rem) {
         .header__toggle {
             display: inline-flex;
-            order: 2;
         }
 
         /* Con el menú abierto la cabecera deja de ser translúcida y toma el

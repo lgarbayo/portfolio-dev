@@ -37,7 +37,9 @@ export default defineConfig({
             },
             i18n: {
                 defaultLocale: "en",
-                locales: { en: "en-US", es: "es-ES" },
+                // Los tres idiomas del sitio. Faltaba el gallego, y sin él sus
+                // páginas iban al sitemap sin alternativas de idioma.
+                locales: { en: "en-US", es: "es-ES", gl: "gl-ES" },
             },
         }),
     ],

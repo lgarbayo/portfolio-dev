@@ -16,6 +16,8 @@ interface Props {
     image?: string;
     canonicalOverride?: string;
     type?: "website" | "article";
+    /** Idiomas en los que existe esta página; por defecto, todos. */
+    alternateLocales?: readonly Locale[];
     showBlog?: boolean;
     onHome?: boolean;
     counterpartPaths?: Partial<Record<Locale, string>>;
@@ -28,6 +30,7 @@ const {
     image,
     canonicalOverride,
     type,
+    alternateLocales,
     showBlog = false,
     onHome = false,
     counterpartPaths,
@@ -46,6 +49,7 @@ const t = useTranslations(locale);
             image={image}
             canonicalOverride={canonicalOverride}
             type={type}
+            alternateLocales={alternateLocales}
         />
         <slot name="head" />
         <ClientRouter />

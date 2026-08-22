@@ -24,19 +24,29 @@ const { Content } = await render(post);
 // blog de ese idioma. Los posts no caen a otro idioma: media traducción es peor
 // que nada, así que el enlace lleva a donde sí hay algo que leer.
 const all = await getCollection("posts");
-const counterpartPaths = Object.fromEntries(
-    otherLocales(locale).map((target) => {
-        const counterpart = all.find(
-            (entry) => entry.data.slug === post.data.slug && entry.data.locale === target,
-        );
-        return [
-            target,
-            counterpart
-                ? localizedPath(target, `blog/${counterpart.data.slug}`)
-                : localizedPath(target, "blog"),
-        ];
-    }),
+const translatedInto = otherLocales(locale).filter((target) =>
+    all.some((entry) => entry.data.slug === post.data.slug && entry.data.locale === target),
 );
+const counterpartPaths = Object.fromEntries(
+    otherLocales(locale).map((target) => [
+        target,
+        translatedInto.includes(target)
+            ? localizedPath(target, `blog/${post.data.slug}`)
+            : localizedPath(target, "blog"),
+    ]),
+);
+
+/*
+ * Los idiomas que se anuncian con `hreflang` son sólo aquellos en los que este
+ * artículo existe.
+ *
+ * Antes se anunciaban los tres siempre, y como los posts no caen a otro idioma,
+ * dos de esas tres URLs devolvían 404 en cada artículo. El selector de idioma
+ * de arriba sí puede llevar al índice del blog cuando no hay traducción —es una
+ * ayuda para quien navega—, pero `hreflang` no admite ese apaño: declara que
+ * dos URLs son la misma página en otro idioma, y el índice del blog no lo es.
+ */
+const alternateLocales = [locale, ...translatedInto];
 
 const formatter = new Intl.DateTimeFormat(localeTags[locale], {
     day: "numeric",
@@ -53,6 +63,7 @@ const formatter = new Intl.DateTimeFormat(localeTags[locale], {
     canonicalOverride={post.data.canonicalUrl}
     type="article"
     counterpartPaths={counterpartPaths}
+    alternateLocales={alternateLocales}
     showBlog
 >
     <article class="container post">

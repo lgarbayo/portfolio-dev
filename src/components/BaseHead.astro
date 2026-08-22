@@ -1,5 +1,5 @@
 ---
-import { locales, ogLocales, translatePath, type Locale } from "@/i18n/index";
+import { defaultLocale, locales, ogLocales, translatePath, type Locale } from "@/i18n/index";
 
 interface Props {
     locale: Locale;
@@ -10,6 +10,18 @@ interface Props {
     /** Para artículos republicados: canonical apuntando fuera. */
     canonicalOverride?: string;
     type?: "website" | "article";
+    /**
+     * Idiomas en los que esta página existe de verdad. Por defecto, todos.
+     *
+     * Hace falta porque `hreflang` se calculaba traduciendo la ruta por
+     * segmentos, y eso da por hecho que cada página existe en los tres idiomas.
+     * No es cierto en dos sitios: un post sólo escrito en inglés no tiene
+     * versión en gallego, y la página de enlaces no tiene prefijo de idioma
+     * ninguno. Anunciar alternativas que devuelven 404 no es un detalle: Google
+     * descarta el grupo entero de idiomas cuando los enlaces de vuelta fallan,
+     * así que la etiqueta rota es peor que no ponerla.
+     */
+    alternateLocales?: readonly Locale[];
 }
 
 const {
@@ -19,18 +31,26 @@ const {
     image = "/og-image.png",
     canonicalOverride,
     type = "website",
+    alternateLocales = locales,
 } = Astro.props;
 
 const canonical = canonicalOverride ?? new URL(Astro.url.pathname, Astro.site).href;
 const imageUrl = new URL(image, Astro.site).href;
 
-// Cada página se referencia a sí misma y a su equivalente en el otro idioma.
-// x-default apunta a inglés, que es el idioma por defecto.
-const alternates = locales.map((code) => ({
-    code,
-    href: new URL(translatePath(Astro.url.pathname, code), Astro.site).href,
-}));
-const defaultHref = alternates.find((alt) => alt.code === "en")!.href;
+// Cada página se referencia a sí misma y a sus equivalentes reales. Con una
+// sola versión no se anuncia nada: `hreflang` describe variantes de idioma, y
+// sin variantes no hay nada que describir.
+const alternates =
+    alternateLocales.length > 1
+        ? alternateLocales.map((code) => ({
+              code,
+              href: new URL(translatePath(Astro.url.pathname, code), Astro.site).href,
+          }))
+        : [];
+// x-default va al idioma por defecto si esta página existe en él; si no, a la
+// primera alternativa, que es la única manera de no dejarlo apuntando a nada.
+const defaultHref =
+    alternates.find((alt) => alt.code === defaultLocale)?.href ?? alternates[0]?.href;
 ---
 
 <meta charset="utf-8" />
@@ -42,7 +62,7 @@ const defaultHref = alternates.find((alt) => alt.code === "en")!.href;
 <link rel="canonical" href={canonical} />
 
 {alternates.map(({ code, href }) => <link rel="alternate" hreflang={code} href={href} />)}
-<link rel="alternate" hreflang="x-default" href={defaultHref} />
+{defaultHref && <link rel="alternate" hreflang="x-default" href={defaultHref} />}
 
 <meta property="og:type" content={type} />
 <meta property="og:title" content={title} />

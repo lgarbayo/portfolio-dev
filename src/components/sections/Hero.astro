@@ -1,13 +1,15 @@
 ---
 import { getLocalizedEntry } from "@/lib/content";
 import { publicAssetExists } from "@/lib/assets";
-import { useTranslations, type Locale } from "@/i18n/index";
+import { localizedPath, useTranslations, type Locale } from "@/i18n/index";
 
 interface Props {
     locale: Locale;
+    /** El blog sólo tiene ficha si ese idioma tiene algún post publicado. */
+    showBlog?: boolean;
 }
 
-const { locale } = Astro.props;
+const { locale, showBlog = false } = Astro.props;
 const t = useTranslations(locale);
 
 const hero = await getLocalizedEntry("hero", locale);
@@ -26,22 +28,37 @@ const poster = publicAssetExists(FIGURE_POSTER) ? FIGURE_POSTER : null;
 const model = publicAssetExists(FIGURE_MODEL) ? FIGURE_MODEL : null;
 
 /*
- * Las fichas que flotan alrededor, una por sección.
+ * Las fichas que flotan alrededor: una por sección, más el blog.
  *
  * `x` e `y` son su sitio en el escenario, en porcentaje. Están todas fuera de la
  * banda central —del 35% al 65%— porque ahí es donde viven el saludo y la
  * figura, y una ficha encima la taparía.
  *
- * `float` y `delay` los desincronizan: con el mismo periodo las seis subirían y
+ * `float` y `delay` los desincronizan: con el mismo periodo todas subirían y
  * bajarían a la vez, y eso no flota, late.
+ *
+ * El blog es el único destino que no es un ancla de esta misma página, así que
+ * cada ficha lleva su `href` en vez de construirlo a partir del `id`.
  */
 const tiles = [
-    { id: "about", label: t("nav.about"), x: 20, y: 26, float: 7.5, delay: -0.5 },
-    { id: "projects", label: t("nav.projects"), x: 79, y: 19, float: 8.5, delay: -2.5 },
-    { id: "stack", label: t("nav.stack"), x: 11, y: 58, float: 6.5, delay: -4 },
-    { id: "experience", label: t("nav.experience"), x: 87, y: 54, float: 9, delay: -1.5 },
-    { id: "education", label: t("nav.education"), x: 25, y: 84, float: 7, delay: -3 },
-] as const;
+    { id: "about", label: t("nav.about"), href: "#about", x: 20, y: 26, float: 7.5, delay: -0.5 },
+    { id: "projects", label: t("nav.projects"), href: "#projects", x: 79, y: 19, float: 8.5, delay: -2.5 },
+    { id: "stack", label: t("nav.stack"), href: "#stack", x: 11, y: 58, float: 6.5, delay: -4 },
+    { id: "experience", label: t("nav.experience"), href: "#experience", x: 87, y: 54, float: 9, delay: -1.5 },
+    { id: "education", label: t("nav.education"), href: "#education", x: 25, y: 84, float: 7, delay: -3 },
+    // Hueco de abajo a la derecha, el que dejó libre la ficha de Contacto.
+    ...(showBlog
+        ? [{
+              id: "blog",
+              label: t("nav.blog"),
+              href: localizedPath(locale, "blog"),
+              x: 73,
+              y: 86,
+              float: 8,
+              delay: -5.5,
+          }]
+        : []),
+];
 ---
 
 <section class="hero" id="hero">
@@ -71,7 +88,7 @@ const tiles = [
                         class="hero__tile"
                         style={`--x:${tile.x}%; --y:${tile.y}%; --float:${tile.float}s; --delay:${tile.delay}s`}
                     >
-                        <a class="hero__tile-link" href={`#${tile.id}`}>
+                        <a class="hero__tile-link" href={tile.href}>
                             <span class="hero__tile-icon" aria-hidden="true">
                                 {tile.id === "about" && (
                                     <svg viewBox="0 0 24 24" focusable="false">
@@ -100,6 +117,13 @@ const tiles = [
                                     <svg viewBox="0 0 24 24" focusable="false">
                                         <path d="M12 4 2.5 9 12 14l9.5-5z" />
                                         <path d="M6.5 11.4V16c0 1.6 2.5 2.9 5.5 2.9s5.5-1.3 5.5-2.9v-4.6" />
+                                    </svg>
+                                )}
+                                {tile.id === "blog" && (
+                                    <svg viewBox="0 0 24 24" focusable="false">
+                                        <path d="M6 3.5h7.5L19 9v11.5H6z" />
+                                        <path d="M13.2 3.7V9H18.6" />
+                                        <path d="M9 13h6M9 16.5h4" />
                                     </svg>
                                 )}
                             </span>

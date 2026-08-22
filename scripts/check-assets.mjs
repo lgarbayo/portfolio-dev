@@ -13,6 +13,7 @@ const expected = [
     { path: "favicon-32.png", why: "el icono de la pestaña" },
     { path: "assets/ui/personaje.webp", why: "el render de la figura del centro de la bienvenida" },
     { path: "assets/ui/personaje.glb", why: "el modelo 3D que sustituye a ese render en escritorio" },
+    { path: "assets/ui/links-qr.svg", why: "el QR de la cabecera; se genera con scripts/make-links-qr.mjs" },
 ];
 
 const missing = expected.filter(({ path }) => !existsSync(join("public", path)));

@@ -1,0 +1,174 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import { channels, isExternal } from "@/lib/channels";
+import { publicAssetExists } from "@/lib/assets";
+import { defaultLocale, locales, localizedPath, useTranslations } from "@/i18n/index";
+
+/*
+ * La página a la que lleva el QR de la cabecera.
+ *
+ * Sin prefijo de idioma a propósito, y es la única del sitio que se salta el
+ * esquema. La URL de esta página se dice en voz alta y se teclea a mano —"entra
+ * en lgarbayo.com/links"—, y `/es/links/` es una sílaba de más y una decisión
+ * que quien la escucha no tiene por qué tomar. Lo que hay dentro tampoco la
+ * necesita: son cuatro nombres de plataforma que no se traducen.
+ *
+ * Los enlaces salen de `lib/channels`, los mismos que la sección de Contacto.
+ * La diferencia entre las dos no es qué enseñan sino cuándo: Contacto se lee
+ * sentado, dentro del recorrido de la página, y esto se abre de pie con el
+ * móvil recién escaneado.
+ */
+const locale = defaultLocale;
+const t = useTranslations(locale);
+
+// Retrato propio de esta página, no el de la sección Sobre mí: allí va una foto
+// y aquí un avatar, que aguanta mejor el recorte redondo y el tamaño pequeño.
+const PORTRAIT = "/assets/ui/avatar-pixel.png";
+const portrait = publicAssetExists(PORTRAIT) ? PORTRAIT : null;
+
+/*
+ * El selector de idioma de la cabecera traduce la ruta por segmentos, y aquí eso
+ * apunta a `/es/links/`, que no existe. Se le dan los destinos a mano —es para
+ * lo que está `counterpartPaths`—: quien pulse otro idioma se va a la portada en
+ * ese idioma, que es lo que quería.
+ */
+const counterpartPaths = Object.fromEntries(
+    locales.map((code) => [code, localizedPath(code)]),
+);
+---
+
+<BaseLayout
+    locale={locale}
+    title={t("links.title")}
+    description={t("links.description")}
+    counterpartPaths={counterpartPaths}
+>
+    <section class="links">
+        {
+            portrait && (
+                <img
+                    class="links__portrait"
+                    src={portrait}
+                    alt={t("links.portraitAlt")}
+                    width="112"
+                    height="112"
+                    fetchpriority="high"
+                />
+            )
+        }
+
+        <h1 class="links__title">{t("site.title")}</h1>
+
+        <ul class="links__list" role="list">
+            {
+                channels.map((channel) => (
+                    <li>
+                        <a
+                            class="links__link"
+                            href={channel.href}
+                            aria-label={t(channel.label)}
+                            {...isExternal(channel.href)
+                                ? { target: "_blank", rel: "noopener noreferrer" }
+                                : {}}
+                        >
+                            <span
+                                class="links__icon"
+                                aria-hidden="true"
+                                style={`--icon: url(${channel.icon})`}
+                            />
+                            <span class="links__name">{channel.name}</span>
+                        </a>
+                    </li>
+                ))
+            }
+            <li>
+                <a class="links__link links__link--site" href={localizedPath(locale)}>
+                    <span class="links__name">{t("links.portfolio")}</span>
+                </a>
+            </li>
+        </ul>
+    </section>
+</BaseLayout>
+
+<style>
+    /* Una columna estrecha y centrada: esto se abre en un móvil recién
+       escaneado, y ahí una lista a lo ancho no aporta nada. */
+    .links {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: var(--space-3);
+        inline-size: min(100% - var(--gutter) * 2, 26rem);
+        margin-inline: auto;
+        padding-block: var(--space-8);
+        text-align: center;
+    }
+
+    /* El fichero es cuadrado, así que el círculo no recorta nada; `cover` está
+       por si algún día se cambia por uno que no lo sea. El fondo del avatar es
+       opaco y hace de disco de color detrás de la figura. */
+    .links__portrait {
+        inline-size: 7rem;
+        block-size: 7rem;
+        border-radius: var(--radius-full);
+        object-fit: cover;
+        border: 1px solid var(--color-border-strong);
+    }
+
+    .links__title {
+        margin-block-start: var(--space-2);
+        font-size: var(--text-2xl);
+        color: var(--color-accent);
+    }
+
+    .links__list {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-3);
+        inline-size: 100%;
+        margin-block-start: var(--space-5);
+        padding: 0;
+        list-style: none;
+    }
+
+    /* A todo lo ancho y con altura de sobra: se pulsa con el pulgar, de pie y
+       con prisa, que es el peor momento para un objetivo pequeño. */
+    .links__link {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: var(--space-3);
+        min-block-size: calc(var(--tap-target) + var(--space-2));
+        padding-inline: var(--space-5);
+        border: 1px solid var(--color-border-strong);
+        border-radius: var(--radius-full);
+        color: var(--color-text);
+        text-decoration: none;
+        font-size: var(--text-base);
+        transition:
+            border-color var(--duration-fast) var(--ease-out),
+            color var(--duration-fast) var(--ease-out);
+    }
+
+    .links__link:hover,
+    .links__link:focus-visible {
+        border-color: var(--color-accent);
+        color: var(--color-accent);
+    }
+
+    .links__link--site {
+        border-color: var(--color-accent);
+        color: var(--color-accent);
+    }
+
+    /* El icono es una máscara sobre el color del texto, no una imagen suelta:
+       así sigue al enlace cuando cambia de color al pasar por encima. */
+    .links__icon {
+        inline-size: 1.25rem;
+        block-size: 1.25rem;
+        background-color: currentColor;
+        -webkit-mask: var(--icon) center / contain no-repeat;
+        mask: var(--icon) center / contain no-repeat;
+        opacity: 0.9;
+    }
+</style>

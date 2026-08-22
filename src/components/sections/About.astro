@@ -1,5 +1,6 @@
 ---
 import Section from "../Section.astro";
+import CvViewer from "../CvViewer.astro";
 import { getLocalizedEntry } from "@/lib/content";
 import { useTranslations, type Locale } from "@/i18n/index";
 
@@ -41,6 +42,12 @@ const about = await getLocalizedEntry("about", locale);
             )
         }
     </div>
+
+    {/* El CV vivía en una sección de Contacto que ya no existe: los cuatro
+        canales que la acompañaban están ahora en la página del QR, y el visor
+        se quedaba solo sosteniendo una sección entera. Aquí encaja mejor —quien
+        acaba de leer quién soy es justo quien va a querer el CV. */}
+    <CvViewer locale={locale} />
 </Section>
 
 <style>

@@ -13,7 +13,6 @@ motionAlt: "Grandpa Simpson shuffles through the woods after a turtle that is wa
 motionPoster: /blog/grandpa-dentures.webp
 cover: /blog/arch-fdi-segmentation.webp
 coverAlt: "A 3D scan of a lower dental arch, each tooth segmented in its own colour and labelled with its FDI code, with the gingiva left in pink."
-canonicalUrl: https://www.linkedin.com/pulse/we-scanned-same-mouth-twice-minutes-apart-software-reported-garbayo-wbj2e/
 ---
 
 Nothing had moved. Same patient, same appointment, same scanner, two consecutive

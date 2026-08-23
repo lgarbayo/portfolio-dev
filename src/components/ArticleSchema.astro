@@ -1,0 +1,51 @@
+---
+import { localeTags, localizedPath, type Locale } from "@/i18n/index";
+
+/**
+ * Datos estructurados de un artículo.
+ *
+ * Es lo que Google usa para pintar la fecha y el autor bajo el titular en vez
+ * de una línea de texto suelta. Los mismos datos que ya están en el frontmatter,
+ * dichos en el vocabulario que el buscador entiende.
+ *
+ * `mainEntityOfPage` va a la URL de esta página aunque el canonical apunte fuera:
+ * describe dónde vive este marcado, no cuál es la versión buena.
+ */
+interface Props {
+    locale: Locale;
+    title: string;
+    description: string;
+    slug: string;
+    pubDate: Date;
+    updatedDate?: Date;
+    tags?: string[];
+    image?: string;
+}
+
+const { locale, title, description, slug, pubDate, updatedDate, tags = [], image } = Astro.props;
+
+const url = new URL(localizedPath(locale, `blog/${slug}`), Astro.site).href;
+
+const article = {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    headline: title,
+    description,
+    datePublished: pubDate.toISOString(),
+    // Sin fecha de revisión vale la de publicación: el campo es obligatorio de
+    // hecho —Google lo usa para ordenar— y omitirlo sale peor que repetirla.
+    dateModified: (updatedDate ?? pubDate).toISOString(),
+    inLanguage: localeTags[locale],
+    mainEntityOfPage: { "@type": "WebPage", "@id": url },
+    url,
+    image: new URL(image ?? "/og-image.png", Astro.site).href,
+    author: {
+        "@type": "Person",
+        name: "Luis Garbayo Fernández",
+        url: new URL(localizedPath(locale), Astro.site).href,
+    },
+    ...(tags.length > 0 ? { keywords: tags.join(", ") } : {}),
+};
+---
+
+<script type="application/ld+json" set:html={JSON.stringify(article)} is:inline />

@@ -65,9 +65,7 @@ const tiles = [
     <div class="hero__stage">
         <div class="hero__center">
             <h1 class="hero__greeting">{hero?.data.greeting ?? t("hero.greeting")}</h1>
-            {/* La frase estaba escrita en la colección y en los diccionarios, y no
-                se pintaba en ningún sitio: la bienvenida decía «hola, mundo!» y
-                nada más, ni a quien llega ni a un buscador. */}
+            {/* El saludo solo no decía nada, ni a quien llega ni a un buscador. */}
             <p class="hero__statement">{hero?.data.statement ?? t("hero.statement")}</p>
             <div class="hero__figure" data-avatar-slot {...model ? { "data-model": model } : {}}>
                 {
@@ -194,13 +192,12 @@ const tiles = [
         color: var(--color-accent);
     }
 
-    /* A todo el ancho de la caja y equilibrada: cada línea de más empuja la
-       figura contra las fichas de abajo, así que interesa que sean pocas. */
+    /* Un lema de una línea, no un párrafo: cualquier cosa más larga aquí crece
+       hacia abajo hasta empujar la figura contra las fichas. */
     .hero__statement {
-        margin-block-start: var(--space-3);
+        margin-block-start: var(--space-2);
         text-wrap: balance;
-        font-size: var(--text-sm);
-        line-height: var(--leading-relaxed);
+        font-size: var(--text-base);
         color: var(--color-text-muted);
     }
 
@@ -209,9 +206,7 @@ const tiles = [
         margin-block-start: var(--space-4);
         /* La caja manda sobre lo que lleve dentro: así el render y el modelo
            ocupan exactamente lo mismo y el cambio de uno a otro no mueve nada. */
-        /* Cede alto respecto a antes: con la frase encima, el centro entero
-           crecía hasta pisar las fichas de abajo. */
-        block-size: clamp(220px, 38vh, 380px);
+        block-size: clamp(260px, 46vh, 460px);
         display: flex;
         justify-content: center;
     }

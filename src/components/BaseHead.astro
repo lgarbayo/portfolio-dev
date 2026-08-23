@@ -84,9 +84,23 @@ const defaultHref =
 <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png" />
 <link rel="apple-touch-icon" href="/favicon-180.png" />
 
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+{/* Las fuentes se sirven desde aquí —ver `scripts/fetch-fonts.mjs`— y sus
+    `@font-face` entran con el CSS del sitio. Se precargan sólo los dos ficheros
+    latinos, que son los que necesita cualquier página desde el primer pintado:
+    el navegador no descubriría que los quiere hasta terminar de leer el CSS, y
+    para entonces ya ha perdido un viaje. Los `latin-ext` no se precargan porque
+    la mayoría de páginas no llegan a pedirlos. */}
 <link
-    rel="stylesheet"
-    href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="preload"
+    as="font"
+    type="font/woff2"
+    href="/fonts/space-grotesk-latin.woff2"
+    crossorigin
+/>
+<link
+    rel="preload"
+    as="font"
+    type="font/woff2"
+    href="/fonts/jetbrains-mono-latin.woff2"
+    crossorigin
 />

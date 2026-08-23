@@ -1,5 +1,12 @@
 ---
-import { defaultLocale, locales, ogLocales, translatePath, type Locale } from "@/i18n/index";
+import {
+    defaultLocale,
+    locales,
+    ogLocales,
+    translatePath,
+    useTranslations,
+    type Locale,
+} from "@/i18n/index";
 
 interface Props {
     locale: Locale;
@@ -34,7 +41,24 @@ const {
     alternateLocales = locales,
 } = Astro.props;
 
+const t = useTranslations(locale);
+
 const canonical = canonicalOverride ?? new URL(Astro.url.pathname, Astro.site).href;
+
+/*
+ * El feed del idioma de esta página, para que los lectores lo encuentren solos.
+ *
+ * Los tres feeds existían y no los anunciaba nadie: quien pegase la dirección
+ * del sitio en un lector no sacaba nada, porque el único enlace estaba dentro
+ * del índice del blog. Se anuncia sólo el del idioma que se está leyendo —los
+ * tres a la vez sólo sirven para que el lector pregunte cuál—, y con el mismo
+ * título que declara el propio feed, para que sea reconocible al suscribirse.
+ *
+ * La ruta se compone a mano: `localizedPath` cierra con barra, y `/es/rss.xml/`
+ * no existe.
+ */
+const feed = new URL(`/${locale}/rss.xml`, Astro.site).href;
+const feedTitle = `${t("blog.title")} — ${t("site.title")}`;
 const imageUrl = new URL(image, Astro.site).href;
 
 // Cada página se referencia a sí misma y a sus equivalentes reales. Con una
@@ -63,6 +87,8 @@ const defaultHref =
 
 {alternates.map(({ code, href }) => <link rel="alternate" hreflang={code} href={href} />)}
 {defaultHref && <link rel="alternate" hreflang="x-default" href={defaultHref} />}
+
+<link rel="alternate" type="application/rss+xml" title={feedTitle} href={feed} />
 
 <meta property="og:type" content={type} />
 <meta property="og:title" content={title} />

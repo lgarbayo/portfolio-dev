@@ -194,7 +194,7 @@ const contactChannels = [
                     )}
                     <ul class="experience-description">
                         {item.data.responsibilities.map((line) => (
-                            <li>{line}</li>
+                            <li set:html={line} />
                         ))}
                     </ul>
                     {item.data.stack.length > 0 && (

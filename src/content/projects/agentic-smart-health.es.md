@@ -21,6 +21,7 @@ tags:
   - DICOM
   - AI/Agents
 repoUrl: https://github.com/ANFAIA/Agentic-Smart-Health
+demoUrl: https://agentic-smart-health.lgarbayo.com
 highlights:
   - "Arquitectura multiagente con orquestador"
   - "Gemelo digital con Gaussian Splatting"

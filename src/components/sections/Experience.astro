@@ -70,7 +70,7 @@ const formatPeriod = (start: Date, end?: Date) =>
 
                     <ul class="timeline__list" role="list">
                         {item.data.responsibilities.map((line) => (
-                            <li>{line}</li>
+                            <li set:html={line} />
                         ))}
                     </ul>
 

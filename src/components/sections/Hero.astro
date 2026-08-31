@@ -441,6 +441,45 @@ const tiles = [
         }
     }
 
+    @media (max-width: 36rem) and (max-height: 40rem) {
+        .hero {
+            padding-block: var(--space-4);
+        }
+
+        .hero__stage {
+            gap: var(--space-4);
+        }
+
+        .hero__statement {
+            margin-block-start: var(--space-1);
+            font-size: var(--text-sm);
+        }
+
+        .hero__figure {
+            margin-block-start: var(--space-3);
+            min-block-size: 7rem;
+        }
+
+        .hero__tiles {
+            gap: var(--space-3);
+        }
+
+        .hero__tile-icon svg {
+            inline-size: 1.35rem;
+            block-size: 1.35rem;
+        }
+
+        .hero__tile-link {
+            min-inline-size: 4.85rem;
+            padding: var(--space-2);
+        }
+
+        .hero__desktop-note {
+            margin-block-start: var(--space-3);
+            line-height: var(--leading-snug);
+        }
+    }
+
     @media (prefers-reduced-motion: reduce) {
         .hero__tile {
             animation: none;

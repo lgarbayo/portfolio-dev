@@ -104,10 +104,16 @@ const GITHUB_ICON = "/assets/ui/github-mark-white.svg";
             text-align: start;
         }
 
-        /* En móvil el launcher ocupa la esquina inferior derecha: se reserva
-           sitio para que no solape el último enlace. */
+        /* En móvil medio el launcher sigue fijo en la esquina inferior derecha:
+           se reserva sitio para que no solape el último enlace. */
         .footer {
             padding-block-end: var(--space-9);
+        }
+    }
+
+    @media (max-width: 36rem) {
+        .footer {
+            padding-block-end: var(--space-6);
         }
     }
 </style>

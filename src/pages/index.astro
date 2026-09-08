@@ -1,5 +1,5 @@
 ---
-import { defaultLocale, locales } from "@/i18n/config";
+import { defaultLocale, locales, ogLocales, useTranslations } from "@/i18n/index";
 
 /*
  * La raíz no tiene contenido propio: resuelve idioma y redirige.
@@ -11,6 +11,23 @@ import { defaultLocale, locales } from "@/i18n/config";
  * Orden: preferencia guardada → idioma del navegador → inglés.
  */
 const fallback = `/${defaultLocale}/`;
+const t = useTranslations(defaultLocale);
+
+/*
+ * Esta página no la ve nadie, pero sí la leen WhatsApp, LinkedIn y compañía.
+ *
+ * `lgarbayo.com` es el enlace que se da a la gente, y quien lo pega en un chat
+ * genera una vista previa a partir de este HTML: esos programas no siguen el
+ * `refresh` ni ejecutan el script de abajo, así que nunca llegan a la página con
+ * idioma, que es la que tiene las etiquetas sociales. Sin esto la previa salía
+ * con el título a secas, sin imagen ni descripción.
+ *
+ * `og:url` apunta a la raíz y no al canonical: es la dirección que se compartió
+ * y la que se quiere ver en la tarjeta. Que Google consolide en `/en/` es cosa
+ * del canonical, que es otra etiqueta y va a lo suyo.
+ */
+const shared = new URL("/", Astro.site).href;
+const image = new URL("/og-image.png", Astro.site).href;
 ---
 
 <html lang={defaultLocale}>
@@ -21,6 +38,19 @@ const fallback = `/${defaultLocale}/`;
         <meta http-equiv="refresh" content={`0; url=${fallback}`} />
         <link rel="canonical" href={new URL(fallback, Astro.site).href} />
         <meta name="robots" content="noindex" />
+
+        <meta name="description" content={t("site.description")} />
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content={t("site.title")} />
+        <meta property="og:description" content={t("site.description")} />
+        <meta property="og:url" content={shared} />
+        <meta property="og:image" content={image} />
+        <meta property="og:locale" content={ogLocales[defaultLocale]} />
+        <meta property="og:site_name" content="Luis Garbayo Fernández" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={t("site.title")} />
+        <meta name="twitter:description" content={t("site.description")} />
+        <meta name="twitter:image" content={image} />
         <script is:inline define:vars={{ locales, fallback }}>
             (() => {
                 const pick = () => {

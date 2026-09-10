@@ -68,6 +68,9 @@ const counterpartPaths = Object.fromEntries(
                             class="links__link"
                             href={channel.href}
                             aria-label={t(channel.label)}
+                            data-track="channel_click"
+                            data-track-channel-name={channel.name}
+                            data-track-channel-surface="links"
                             {...isExternal(channel.href)
                                 ? { target: "_blank", rel: "noopener noreferrer" }
                                 : {}}
@@ -83,7 +86,13 @@ const counterpartPaths = Object.fromEntries(
                 ))
             }
             <li>
-                <a class="links__link links__link--site" href={localizedPath(locale)}>
+                <a
+                    class="links__link links__link--site"
+                    href={localizedPath(locale)}
+                    data-track="channel_click"
+                    data-track-channel-name="Portfolio"
+                    data-track-channel-surface="links"
+                >
                     <span class="links__name">{t("links.portfolio")}</span>
                 </a>
             </li>

@@ -12,7 +12,11 @@ const t = useTranslations(locale);
 ---
 
 <BaseLayout locale={locale} title={t("notFound.title")} description={t("notFound.description")}>
-    <div class="container notfound">
+    {/* La marca que hace que la analítica pueda separar esta página del
+        resto: se sirve bajo cualquier URL rota, así que su ruta no dice
+        nada. Con el grupo aparte, el informe de páginas de la 404 es la
+        lista de enlaces rotos que apuntan al sitio. */}
+    <div class="container notfound" data-not-found>
         <h1>{t("notFound.title")}</h1>
         <p>{t("notFound.description")}</p>
         <a class="button button--primary" href={localizedPath(locale)}>{t("notFound.home")}</a>

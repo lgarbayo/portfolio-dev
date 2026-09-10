@@ -38,7 +38,15 @@ const targets = otherLocales(locale).map((target) => ({
                 <span class="lang__sep" aria-hidden="true">
                     /
                 </span>
-                <a class="lang__link" href={href} hreflang={code} data-set-locale={code}>
+                <a
+                    class="lang__link"
+                    href={href}
+                    hreflang={code}
+                    data-set-locale={code}
+                    data-track="language_switch"
+                    data-track-from-language={locale}
+                    data-track-to-language={code}
+                >
                     <span class="visually-hidden">
                         {t("lang.switchTo", { language: t(`lang.name.${code}`) })}
                     </span>

@@ -14,11 +14,13 @@ const data = project.data;
 
 // Sólo se pintan los enlaces que existen: una tarjeta no debe mostrar controles
 // muertos por un campo opcional que nadie rellenó.
+// `kind` no se pinta: viaja al evento de analítica para poder separar quién
+// va al código y quién a la demo, que no es la misma visita.
 const links = [
-    data.repoUrl && { href: data.repoUrl, label: t("projects.viewRepo") },
-    data.demoUrl && { href: data.demoUrl, label: t("projects.viewDemo") },
-    data.devpostUrl && { href: data.devpostUrl, label: t("projects.viewDevpost") },
-].filter((link): link is { href: string; label: string } => Boolean(link));
+    data.repoUrl && { href: data.repoUrl, label: t("projects.viewRepo"), kind: "repo" },
+    data.demoUrl && { href: data.demoUrl, label: t("projects.viewDemo"), kind: "demo" },
+    data.devpostUrl && { href: data.devpostUrl, label: t("projects.viewDevpost"), kind: "devpost" },
+].filter((link): link is { href: string; label: string; kind: string } => Boolean(link));
 ---
 
 <article class="card" data-reveal>
@@ -76,6 +78,9 @@ const links = [
                         href={link.href}
                         target="_blank"
                         rel="noopener noreferrer"
+                        data-track="project_link_click"
+                        data-track-project-slug={data.slug}
+                        data-track-link-kind={link.kind}
                     >
                         {link.label} <span aria-hidden="true">→</span>
                     </a>

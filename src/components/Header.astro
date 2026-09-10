@@ -82,7 +82,13 @@ const sections = [
             {
                 sections.map((section) => (
                     <li>
-                        <a class="header__link" href={anchor(section.id)} data-nav-section={section.id}>
+                        <a
+                            class="header__link"
+                            href={anchor(section.id)}
+                            data-nav-section={section.id}
+                            data-track="nav_click"
+                            data-track-nav-target={section.id}
+                        >
                             {section.label}
                         </a>
                     </li>
@@ -94,6 +100,8 @@ const sections = [
                         <a
                             class="header__link"
                             href={localizedPath(locale, "blog")}
+                            data-track="nav_click"
+                            data-track-nav-target="blog"
                             {...onBlog ? { "data-active": "" } : {}}
                         >
                             {t("nav.blog")}

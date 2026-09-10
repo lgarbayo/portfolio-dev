@@ -90,7 +90,12 @@ const tiles = [
                         class="hero__tile"
                         style={`--x:${tile.x}%; --y:${tile.y}%; --float:${tile.float}s; --delay:${tile.delay}s`}
                     >
-                        <a class="hero__tile-link" href={tile.href}>
+                        <a
+                            class="hero__tile-link"
+                            href={tile.href}
+                            data-track="hero_tile_click"
+                            data-track-tile-id={tile.id}
+                        >
                             <span class="hero__tile-icon" aria-hidden="true">
                                 {tile.id === "about" && (
                                     <svg viewBox="0 0 24 24" focusable="false">

@@ -80,10 +80,16 @@ const files = CV_LOCALES.map((code) => ({ code, href: `/cv-${code}.pdf` })).filt
                 <div class="cv__dialog-bar">
                     <p class="cv__dialog-title" data-cv-title />
                     <div class="cv__dialog-actions">
-                        <a class="cv__action" data-cv-download download>
+                        <a class="cv__action" data-cv-download download data-track="cv_download">
                             {t("cv.download")}
                         </a>
-                        <a class="cv__action" data-cv-tab target="_blank" rel="noopener noreferrer">
+                        <a
+                            class="cv__action"
+                            data-cv-tab
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            data-track="cv_new_tab"
+                        >
                             {t("cv.newTab")}
                         </a>
                         <button class="cv__action cv__close" type="button" data-cv-close>

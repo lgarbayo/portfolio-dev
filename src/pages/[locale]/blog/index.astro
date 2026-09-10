@@ -37,7 +37,12 @@ const posts = await getPublishedPosts(locale);
 
         {
             posts.length > 0 && (
-                <a class="blog__feed" href={`/${locale}/rss.xml`}>
+                <a
+                    class="blog__feed"
+                    href={`/${locale}/rss.xml`}
+                    data-track="rss_click"
+                    data-track-feed-language={locale}
+                >
                     {t("blog.feed")}
                 </a>
             )

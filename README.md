@@ -75,6 +75,35 @@ page rather than raw XML — that is `public/rss/styles.xsl`, a stylesheet the b
 on its own, leaving the file itself untouched for feed readers. The Blog link appears in the
 header only once a published post exists.
 
+## Analytics
+
+Google Analytics 4, and it stays off unless you turn it on. The whole thing hangs off one
+environment variable:
+
+```bash
+PUBLIC_GA_ID=G-XXXXXXXXXX   # Analytics → Admin → Data streams → the web stream
+```
+
+Leave it unset — as `.env.example` does — and no tag, no consent banner and no request to
+Google survive the build. That is the default for local work and for anyone who clones this.
+
+Two things the default GA setup would get wrong here, both handled in code:
+
+- **Navigation is client-side.** The `ClientRouter` moves between pages with `pushState`, so
+  the automatic page view only ever fires once. Page views are sent by hand on
+  `astro:page-load`, after the swap, which is the only moment the title is right. Turn off
+  *Page changes based on browser history events* in Enhanced Measurement or every navigation
+  counts twice.
+- **Most of the site isn't a link.** The QR, the CV viewer, game mode, the 3D figure, the
+  keyboard scene, the shortcuts — none of them change the URL. They send their own events,
+  declared either as `data-track` attributes in the markup or as `track()` calls in the
+  module that owns the interaction.
+
+Consent is Google's consent mode, denied by default, and only for measurement: the three
+advertising signals stay denied for good and are never asked about.
+
+`src/lib/analytics.ts` has the full reasoning and the event list.
+
 ## License
 
 MIT — see [LICENSE.md](LICENSE.md).

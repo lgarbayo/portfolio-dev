@@ -9,7 +9,7 @@ description: >-
   YOLOv8n, fully local speech-to-text with Whisper, and semantic reasoning
   through a Gemma 3 served by Ollama, always grounded in what the camera can
   actually see. No cloud service ever receives the camera or the microphone.
-category: hackathon
+category: data
 context: Hackathon training
 year: 2026
 featured: true

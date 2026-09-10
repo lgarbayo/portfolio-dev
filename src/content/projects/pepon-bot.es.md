@@ -10,7 +10,7 @@ description: >-
   razonamiento semántico con un Gemma 3 servido por Ollama, siempre anclado a lo
   que la cámara ve de verdad. Ningún servicio en la nube recibe la cámara ni el
   micrófono.
-category: hackathon
+category: data
 context: "Entrenamiento para hackathon"
 year: 2026
 featured: true

@@ -9,7 +9,7 @@ description: >-
   clases de COCO con YOLOv8n, voz a texto totalmente local con Whisper e
   razoamento semántico cun Gemma 3 servido por Ollama, sempre ancorado ao que a
   cámara ve de verdade. Ningún servizo na nube recibe a cámara nin o micrófono.
-category: hackathon
+category: data
 context: "Adestramento para hackathon"
 year: 2026
 featured: true

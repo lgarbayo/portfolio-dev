@@ -1,0 +1,74 @@
+---
+/**
+ * Arranque de Google Analytics 4, en el `<head>` y en línea.
+ *
+ * Va aquí y no en un módulo diferido por una razón concreta: el modo de
+ * consentimiento sólo surte efecto si los valores por defecto están puestos
+ * antes de que gtag procese nada. Cualquier cosa que llegue después ya habría
+ * dejado escribir una cookie.
+ *
+ * El resto de la analítica —vistas de página, eventos propios, propiedades de
+ * usuario— vive en `lib/analytics.ts`, que sí es un módulo normal.
+ *
+ * Sin `PUBLIC_GA_ID` no se pinta nada: ni el script, ni la petición a Google,
+ * ni el banner. Es lo que hace que en local, y en cualquier clon del repo, la
+ * web funcione sin medir absolutamente nada.
+ *
+ * El cuerpo del script se compone como cadena en vez de escribirse suelto
+ * dentro de la etiqueta porque va envuelto en una expresión del template, y ahí
+ * las llaves de JavaScript y las del template compiten por el mismo símbolo.
+ */
+const gaId = import.meta.env.PUBLIC_GA_ID;
+
+/*
+ * Todo dentro de una función: el `ClientRouter` puede volver a ejecutar este
+ * script tras una navegación, y una declaración de nivel superior reventaría la
+ * segunda vez. La bandera hace el resto.
+ */
+const bootstrap = `(function () {
+    if (window.__analyticsBooted) return;
+    window.__analyticsBooted = true;
+
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { window.dataLayer.push(arguments); }
+    window.gtag = gtag;
+
+    // Todo denegado de salida. \`wait_for_update\` le da medio segundo al banner
+    // para resolver antes del primer ping, y así una visita que acepta no queda
+    // partida entre el ping sin cookies y el siguiente.
+    gtag("consent", "default", {
+        ad_storage: "denied",
+        ad_user_data: "denied",
+        ad_personalization: "denied",
+        analytics_storage: "denied",
+        wait_for_update: 500,
+    });
+
+    // Quien ya dijo que sí no vuelve a esperar esos 500 ms.
+    try {
+        if (localStorage.getItem("analytics-consent") === "granted") {
+            gtag("consent", "update", { analytics_storage: "granted" });
+        }
+    } catch (error) {
+        // Almacenamiento bloqueado: se queda denegado, que es el lado seguro.
+    }
+
+    gtag("js", new Date());
+    // La vista de página la manda \`lib/analytics.ts\` en \`astro:page-load\`:
+    // aquí el <title> de una navegación todavía puede ser el de la anterior.
+    gtag("config", "${gaId}", { send_page_view: false });
+})();`;
+---
+
+{
+    gaId && (
+        <>
+            {/* La conexión con el dominio del script se abre pronto: es una
+                petición a otro origen en el camino crítico y el saludo TLS
+                cuesta más que el propio fichero. */}
+            <link rel="preconnect" href="https://www.googletagmanager.com" />
+            <script is:inline set:html={bootstrap} />
+            <script is:inline async src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`} />
+        </>
+    )
+}

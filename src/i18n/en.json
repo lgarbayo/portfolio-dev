@@ -103,6 +103,10 @@
     "footer.builtWith": "Built with Astro, TypeScript and Phaser",
     "footer.source": "Source",
     "footer.sourceLabel": "See this portfolio's source code on GitHub",
+    "consent.label": "Analytics consent",
+    "consent.message": "I use Google Analytics to see which parts of this site actually get read. No ads and no profiling — and it stays off unless you say yes.",
+    "consent.accept": "Accept",
+    "consent.reject": "Reject",
     "notFound.title": "Page not found",
     "notFound.description": "That URL doesn't lead anywhere. The portfolio, however, does.",
     "notFound.home": "Go to the home page"

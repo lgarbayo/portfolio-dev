@@ -1,0 +1,106 @@
+---
+import { useTranslations, type Locale } from "@/i18n/index";
+
+/**
+ * El banner del consentimiento de analítica.
+ *
+ * Nace oculto y sólo lo destapa `lib/consent.ts`, que es quien sabe si hay
+ * analítica configurada y si ya se preguntó. Al revés —nacer visible y
+ * esconderse con JavaScript— habría un parpadeo en cada carga para quien ya
+ * decidió, y una barra muerta para quien tenga el JS bloqueado.
+ *
+ * Dos botones del mismo tamaño y sin colorear uno de "bueno": rechazar tiene
+ * que costar lo mismo que aceptar, y esa es también la parte que la ley mira.
+ */
+interface Props {
+    locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = useTranslations(locale);
+---
+
+<aside class="consent" data-consent-banner aria-label={t("consent.label")} hidden>
+    <p class="consent__text">{t("consent.message")}</p>
+    <div class="consent__actions">
+        <button class="consent__button" type="button" data-consent="denied">
+            {t("consent.reject")}
+        </button>
+        <button class="consent__button" type="button" data-consent="granted">
+            {t("consent.accept")}
+        </button>
+    </div>
+</aside>
+
+<style>
+    /* Abajo a la izquierda: el launcher del juego vive en la esquina contraria y
+       el ancho máximo deja libre esa mitad, así que ninguno tapa al otro. */
+    .consent {
+        position: fixed;
+        inset-block-end: var(--space-4);
+        inset-inline-start: var(--space-4);
+        z-index: var(--z-menu);
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-3);
+        inline-size: min(100% - var(--space-4) * 2, 24rem);
+        padding: var(--space-4);
+        background: var(--color-surface-raised);
+        border: 1px solid var(--color-border-strong);
+        border-radius: var(--radius-md);
+        box-shadow: var(--shadow-lg);
+    }
+
+    /* `display: flex` pisa el `display: none` que el navegador le da a
+       `[hidden]`, así que sin esto el atributo no esconde nada y el banner
+       se queda puesto después de decidir. */
+    .consent[hidden] {
+        display: none;
+    }
+
+    .consent__text {
+        margin: 0;
+        font-size: var(--text-sm);
+        line-height: var(--leading-normal);
+        color: var(--color-text-muted);
+    }
+
+    .consent__actions {
+        display: flex;
+        gap: var(--space-2);
+    }
+
+    .consent__button {
+        flex: 1;
+        min-block-size: var(--tap-target);
+        padding-inline: var(--space-4);
+        background: none;
+        border: 1px solid var(--color-border-strong);
+        border-radius: var(--radius-full);
+        color: var(--color-text);
+        font-family: var(--font-mono);
+        font-size: var(--text-xs);
+        letter-spacing: var(--tracking-wide);
+        text-transform: uppercase;
+        cursor: pointer;
+        transition:
+            border-color var(--duration-fast) var(--ease-out),
+            color var(--duration-fast) var(--ease-out);
+    }
+
+    .consent__button:hover,
+    .consent__button:focus-visible {
+        border-color: var(--color-accent);
+        color: var(--color-accent);
+    }
+
+    /* En pantallas estrechas el launcher deja de estar anclado, así que el
+       banner puede ocupar el ancho entero sin pisar nada. */
+    @media (max-width: 36rem) {
+        .consent {
+            inset-inline: var(--space-3);
+            inset-block-end: var(--space-3);
+            inline-size: auto;
+        }
+    }
+</style>

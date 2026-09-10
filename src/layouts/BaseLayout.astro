@@ -5,6 +5,8 @@ import Footer from "@/components/Footer.astro";
 import GameLauncher from "@/components/GameLauncher.astro";
 import GameOverlay from "@/components/GameOverlay.astro";
 import PageTransition from "@/components/PageTransition.astro";
+import Analytics from "@/components/Analytics.astro";
+import ConsentBanner from "@/components/ConsentBanner.astro";
 import { ClientRouter } from "astro:transitions";
 import { useTranslations, type Locale } from "@/i18n/index";
 import "@/styles/global.css";
@@ -51,6 +53,7 @@ const t = useTranslations(locale);
             type={type}
             alternateLocales={alternateLocales}
         />
+        <Analytics />
         <slot name="head" />
         <ClientRouter />
     </head>
@@ -73,6 +76,7 @@ const t = useTranslations(locale);
         <GameLauncher locale={locale} />
         <GameOverlay locale={locale} />
         <PageTransition />
+        <ConsentBanner locale={locale} />
 
         <slot name="after-body" />
 
@@ -85,8 +89,22 @@ const t = useTranslations(locale);
             import { initLocaleLinks } from "@/lib/locale-links";
             import { initAvatar, destroyAvatar } from "@/lib/avatar";
             import { initPostMotion, destroyPostMotion } from "@/lib/post-motion";
+            import { initAnalytics, destroyAnalytics } from "@/lib/analytics";
+            import { initConsentBanner } from "@/lib/consent";
+
+            /*
+             * En la primera carga esto corría dos veces: una al evaluarse el
+             * módulo y otra cuando el router dispara `astro:page-load`. Todas
+             * las funciones de abajo son idempotentes, así que no se notaba —
+             * hasta que la analítica empezó a contar dos vistas por visita.
+             * La bandera se levanta aquí y la baja el swap, que es justo la
+             * frontera entre una página y la siguiente.
+             */
+            let booted = false;
 
             const boot = () => {
+                if (booted) return;
+                booted = true;
                 void initReveal();
                 initGameMode();
                 initShortcuts();
@@ -95,6 +113,10 @@ const t = useTranslations(locale);
                 initSectionTransition();
                 void initAvatar();
                 initPostMotion();
+                // Al final del arranque: la vista de página se manda con el
+                // DOM de la página nueva ya montado.
+                initAnalytics();
+                initConsentBanner();
             };
 
             boot();
@@ -102,9 +124,11 @@ const t = useTranslations(locale);
             // Los ScrollTrigger apuntan a nodos que el swap sustituye: si no se
             // matan aquí, quedan observando elementos que ya no existen.
             document.addEventListener("astro:before-swap", () => {
+                booted = false;
                 destroyReveal();
                 destroyAvatar();
                 destroyPostMotion();
+                destroyAnalytics();
             });
         </script>
     </body>

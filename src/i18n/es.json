@@ -103,6 +103,10 @@
     "footer.builtWith": "Hecho con Astro, TypeScript y Phaser",
     "footer.source": "Código",
     "footer.sourceLabel": "Mira el código de este portfolio en GitHub",
+    "consent.label": "Consentimiento de analítica",
+    "consent.message": "Uso Google Analytics para ver qué partes de esta web se leen de verdad. Sin publicidad ni perfilado, y apagado mientras no digas que sí.",
+    "consent.accept": "Aceptar",
+    "consent.reject": "Rechazar",
     "notFound.title": "Página no encontrada",
     "notFound.description": "Esa URL no lleva a ninguna parte. El portfolio, en cambio, sí.",
     "notFound.home": "Ir a la página principal"

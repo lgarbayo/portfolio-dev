@@ -13,6 +13,8 @@
  * overlay. Aquí viven los saltos de sección.
  */
 
+import { track } from "./analytics";
+
 let cleanup: (() => void) | null = null;
 
 export function isTypingTarget(target: EventTarget | null): boolean {
@@ -43,6 +45,10 @@ export function initShortcuts(): void {
         if (!Number.isNaN(index) && index >= 1 && index <= sections.length) {
             event.preventDefault();
             const link = sections[index - 1]!;
+            // Los atajos son la parte del sitio que sólo descubre quien mira
+            // el panel de teclas. Saber si alguien los usa es lo que dice si
+            // ese panel merece seguir ahí.
+            track("keyboard_shortcut", { shortcut_key: String(index) });
             document.getElementById(link.dataset.navSection!)?.scrollIntoView({
                 behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
                     ? "auto"

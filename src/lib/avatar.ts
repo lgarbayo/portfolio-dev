@@ -1,3 +1,4 @@
+import { track } from "./analytics";
 import { prefersReducedMotion } from "./reduced-motion";
 import type { AvatarHandle } from "./three/avatar-scene";
 
@@ -16,6 +17,21 @@ import type { AvatarHandle } from "./three/avatar-scene";
 let avatar: AvatarHandle | null = null;
 let cleanup: (() => void) | null = null;
 
+/*
+ * Qué acabó viendo el visitante en el hueco de la figura.
+ *
+ * Es el dato que más falta hace de toda la portada: el modelo cuesta 127 KB
+ * más el motor, y las puertas de abajo lo descartan en móvil, en táctil, sin
+ * WebGL y con movimiento reducido. Sin medirlo no hay forma de saber si ese
+ * trabajo lo ve la mayoría o una minoría, y las dos respuestas llevan a
+ * decisiones opuestas sobre dónde seguir invirtiendo.
+ */
+type AvatarStatus = "ready" | "skipped_environment" | "skipped_webgl" | "failed";
+
+function report(status: AvatarStatus): void {
+    track("avatar_3d", { avatar_status: status });
+}
+
 export async function initAvatar(): Promise<void> {
     destroyAvatar();
 
@@ -28,10 +44,16 @@ export async function initAvatar(): Promise<void> {
 
     const narrow = window.matchMedia("(max-width: 56rem)").matches;
     const coarse = !window.matchMedia("(hover: hover) and (pointer: fine)").matches;
-    if (narrow || coarse || prefersReducedMotion()) return;
+    if (narrow || coarse || prefersReducedMotion()) {
+        report("skipped_environment");
+        return;
+    }
 
     const { supportsWebGL } = await import("./three/renderer");
-    if (!supportsWebGL()) return;
+    if (!supportsWebGL()) {
+        report("skipped_webgl");
+        return;
+    }
 
     // El módulo se rearma en cada navegación; si el hueco ya no es el mismo nodo
     // —swap del router a media carga— lo montado aquí sobraría.
@@ -44,6 +66,7 @@ export async function initAvatar(): Promise<void> {
         instance = await createAvatarScene(slot, modelUrl);
     } catch (error) {
         console.warn("La figura 3D no se pudo cargar; queda el render.", error);
+        report("failed");
         return;
     }
 
@@ -57,6 +80,7 @@ export async function initAvatar(): Promise<void> {
     // fundido: el cambio de render a modelo no es exacto y un corte seco lo
     // delata.
     slot.dataset.avatarLive = "";
+    report("ready");
 
     cleanup = wire(instance, slot);
 }

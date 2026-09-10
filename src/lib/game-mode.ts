@@ -1,5 +1,6 @@
 import { prefersReducedMotion } from "./reduced-motion";
 import { keyboardIsClaimed } from "./shortcuts";
+import { track } from "./analytics";
 import type { GameHandle } from "@/game/host";
 
 /**
@@ -44,6 +45,7 @@ export function initGameMode(): void {
 
         handle?.destroy();
         handle = null;
+        track("game_close");
 
         // Cualquier panel que el juego dejara abierto se cierra con él.
         document
@@ -56,8 +58,14 @@ export function initGameMode(): void {
         lastFocused = null;
     };
 
-    const open = async ({ suppressInitialEnter = false } = {}) => {
+    const open = async ({ suppressInitialEnter = false, trigger = "pointer" } = {}) => {
         if (isOpen() || loading) return;
+
+        // Se cuenta la apertura y, aparte, cuánto tardó en estar jugable:
+        // Phaser entra por import dinámico y es el bulto más grande del
+        // sitio, así que ese tiempo es el que decide si alguien espera.
+        track("game_open", { game_trigger: trigger });
+        const started = performance.now();
 
         lastFocused = document.activeElement as HTMLElement | null;
         loading = true;
@@ -68,8 +76,10 @@ export function initGameMode(): void {
         try {
             const { mountGame } = await import("@/game/host");
             handle = mountGame(stage, { suppressInitialEnter });
+            track("game_ready", { load_ms: Math.round(performance.now() - started) });
         } catch (error) {
             console.error("No se pudo cargar el juego:", error);
+            track("game_error");
             // La página de debajo sigue entera: sólo falló esta capa.
             errorEl && (errorEl.hidden = false);
         } finally {
@@ -116,7 +126,7 @@ export function initGameMode(): void {
         // se escribe en un campo.
         if (event.key.toLowerCase() === "g" && !keyboardIsClaimed(event.target)) {
             event.preventDefault();
-            void open();
+            void open({ trigger: "keyboard" });
         }
     };
 
@@ -129,7 +139,7 @@ export function initGameMode(): void {
         const trigger = (event.target as HTMLElement | null)?.closest("[data-open-game]");
         if (!trigger) return;
         event.preventDefault();
-        void open({ suppressInitialEnter: true });
+        void open({ suppressInitialEnter: true, trigger: "keyboard" });
     };
 
     // --- Cierre ---

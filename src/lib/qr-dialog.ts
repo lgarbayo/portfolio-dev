@@ -6,6 +6,8 @@
  * dejarse listeners puestos cuando el router cambia de página.
  */
 
+import { track } from "./analytics";
+
 let cleanup: (() => void) | null = null;
 
 export function initQrDialog(): void {
@@ -20,6 +22,10 @@ export function initQrDialog(): void {
         const target = event.target as HTMLElement | null;
         if (target?.closest("[data-qr-open]")) {
             dialog.showModal();
+            // El QR es el motivo entero de que exista `/links/`: sin este
+            // evento no hay forma de saber si se usa, porque abrirlo no
+            // cambia de URL y quien lo escanea es otro dispositivo.
+            track("qr_open");
             return;
         }
         if (target?.closest("[data-qr-close]")) close();

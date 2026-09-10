@@ -1,3 +1,4 @@
+import { track } from "./analytics";
 import { prefersReducedMotion } from "./reduced-motion";
 
 /**
@@ -42,7 +43,12 @@ export function initStackScene(): void {
     if (keycaps.length === 0) return;
 
     const tooNarrow = window.matchMedia("(max-width: 48rem)").matches;
-    if (tooNarrow || prefersReducedMotion()) return;
+    if (tooNarrow || prefersReducedMotion()) {
+        // Mismo motivo que en la figura del hero: interesa la proporción
+        // entre quien ve el teclado y quien se queda con el listado.
+        track("stack_scene", { scene_status: "skipped_environment" });
+        return;
+    }
 
     if (!("IntersectionObserver" in window)) return;
 
@@ -57,7 +63,11 @@ export function initStackScene(): void {
             self.disconnect();
 
             const { supportsWebGL } = await import("./three/renderer");
-            if (mine !== generation || !supportsWebGL()) return;
+            if (mine !== generation) return;
+            if (!supportsWebGL()) {
+                track("stack_scene", { scene_status: "skipped_webgl" });
+                return;
+            }
 
             const { createKeyboardScene } = await import("./three/keyboard-scene");
             const { loadSoundPreference, setSoundEnabled, soundEnabled } = await import(
@@ -75,6 +85,7 @@ export function initStackScene(): void {
 
             const instance = createKeyboardScene(container, keycaps);
             scene = instance;
+            track("stack_scene", { scene_status: "ready" });
 
             wireControls(container, instance, {
                 loadSoundPreference,
@@ -119,8 +130,15 @@ function wireControls(
 
     // Al activar una tecla se dice en texto qué tecnología es: la información no
     // puede quedarse sólo en el 3D.
+    let activated = false;
     instance.onActivate = (name) => {
         if (readout) readout.textContent = name;
+        // Sólo la primera: activar teclas es un gesto que se repite mucho en
+        // la misma visita, y lo que se quiere saber es cuánta gente llega a
+        // tocar el teclado, no cuántas teclas pulsa quien ya está jugando.
+        if (activated) return;
+        activated = true;
+        track("stack_scene_interact", { technology: name });
     };
 
     if (!soundButton) return;

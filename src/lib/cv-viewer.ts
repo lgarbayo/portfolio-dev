@@ -9,6 +9,8 @@
  * mantiene el PDF cargado en memoria por cada apertura, y en móvil eso se nota.
  */
 
+import { track } from "./analytics";
+
 let cleanup: (() => void) | null = null;
 
 export function initCvViewer(): void {
@@ -28,7 +30,14 @@ export function initCvViewer(): void {
         if (title) title.textContent = label;
         download?.setAttribute("href", href);
         newTab?.setAttribute("href", href);
+        // Los dos botones ya se cuentan solos con su `data-track`; lo que les
+        // falta es de qué CV hablan, y eso sólo se sabe al abrir.
+        if (download) download.dataset.trackCvLabel = label;
+        if (newTab) newTab.dataset.trackCvLabel = label;
         dialog.showModal();
+        // El idioma del PDF va en el evento: es la única señal de qué
+        // versión del CV se pide de verdad, y hay tres.
+        track("cv_open", { cv_label: label });
     };
 
     const close = () => {

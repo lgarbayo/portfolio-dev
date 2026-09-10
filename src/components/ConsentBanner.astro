@@ -18,19 +18,28 @@ interface Props {
 
 const { locale } = Astro.props;
 const t = useTranslations(locale);
+
+// Sin analítica no hay nada que consentir, y el marcado tampoco se pinta: una
+// barra oculta en las 27 páginas sería peso muerto y una trampa para el
+// siguiente que lea el HTML buscando por qué hay un banner que nunca sale.
+const gaId = import.meta.env.PUBLIC_GA_ID;
 ---
 
-<aside class="consent" data-consent-banner aria-label={t("consent.label")} hidden>
-    <p class="consent__text">{t("consent.message")}</p>
-    <div class="consent__actions">
-        <button class="consent__button" type="button" data-consent="denied">
-            {t("consent.reject")}
-        </button>
-        <button class="consent__button" type="button" data-consent="granted">
-            {t("consent.accept")}
-        </button>
-    </div>
-</aside>
+{
+    gaId && (
+        <aside class="consent" data-consent-banner aria-label={t("consent.label")} hidden>
+            <p class="consent__text">{t("consent.message")}</p>
+            <div class="consent__actions">
+                <button class="consent__button" type="button" data-consent="denied">
+                    {t("consent.reject")}
+                </button>
+                <button class="consent__button" type="button" data-consent="granted">
+                    {t("consent.accept")}
+                </button>
+            </div>
+        </aside>
+    )
+}
 
 <style>
     /* Abajo a la izquierda: el launcher del juego vive en la esquina contraria y

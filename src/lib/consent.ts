@@ -68,10 +68,16 @@ let cleanup: (() => void) | null = null;
 export function initConsentBanner(): void {
     cleanup?.();
 
+    // La comprobación del ID va primero, y el orden importa: sin él la constante
+    // vale `undefined` en tiempo de compilación y el empaquetador se lleva por
+    // delante todo lo que viene después. Con el `querySelector` por delante no
+    // podría, y este módulo entra en el chunk de arranque de las 27 páginas.
+    if (!GA_ID) return;
+
     const banner = document.querySelector<HTMLElement>("[data-consent-banner]");
     if (!banner) return;
 
-    if (!GA_ID || readConsent() !== null) {
+    if (readConsent() !== null) {
         banner.hidden = true;
         return;
     }

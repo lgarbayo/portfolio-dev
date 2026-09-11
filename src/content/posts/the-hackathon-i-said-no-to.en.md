@@ -4,6 +4,9 @@ description: "My proposal to host a NASA hackathon in Ourense was accepted, and 
 pubDate: 2026-09-11
 locale: en
 slug: the-hackathon-i-said-no-to
+motion: /blog/homer-bushes.mp4
+motionAlt: "Homer Simpson backs away and slowly sinks into a hedge until only his eyes are showing."
+motionPoster: /blog/homer-bushes.webp
 tags:
   - community
   - hackathons

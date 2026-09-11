@@ -4,9 +4,9 @@ description: "Aceptáronme a proposta de organizar un hackathon da NASA en Ouren
 pubDate: 2026-09-11
 locale: gl
 slug: the-hackathon-i-said-no-to
-motion: /blog/homer-bushes.mp4
-motionAlt: "Homer Simpson bótase cara atrás e vai desaparecendo, pouco a pouco, dentro dunha sebe ata que só se lle ven os ollos."
-motionPoster: /blog/homer-bushes.webp
+motion: /blog/grandpa-in-and-out.mp4
+motionAlt: "O avó Simpson entra pola porta, colga o sombreiro no cabideiro, pénsao mellor, vólveo coller e vaise por onde veu, con Bart mirándoo desde o escritorio."
+motionPoster: /blog/grandpa-in-and-out.webp
 tags:
   - community
   - hackathons

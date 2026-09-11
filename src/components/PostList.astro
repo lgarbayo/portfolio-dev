@@ -1,5 +1,6 @@
 ---
 import type { CollectionEntry } from "astro:content";
+import { readingMinutes } from "@/lib/reading-time";
 import { localeTags, localizedPath, useTranslations, type Locale } from "@/i18n/index";
 
 interface Props {
@@ -32,9 +33,17 @@ const formatter = new Intl.DateTimeFormat(localeTags[locale], {
                             class="postlist__link"
                             href={localizedPath(post.data.locale, `blog/${post.data.slug}`)}
                         >
-                            <time class="postlist__date" datetime={post.data.pubDate.toISOString()}>
-                                {formatter.format(post.data.pubDate)}
-                            </time>
+                            <p class="postlist__meta">
+                                <time datetime={post.data.pubDate.toISOString()}>
+                                    {formatter.format(post.data.pubDate)}
+                                </time>
+                                <span aria-hidden="true">·</span>
+                                <span>
+                                    {t("blog.readingTime", {
+                                        minutes: readingMinutes(post.body ?? ""),
+                                    })}
+                                </span>
+                            </p>
                             <h2 class="postlist__title">
                                 {post.data.title}
                                 {post.data.draft && <span class="postlist__draft">{t("blog.draft")}</span>}
@@ -137,7 +146,13 @@ const formatter = new Intl.DateTimeFormat(localeTags[locale], {
         text-decoration: none;
     }
 
-    .postlist__date {
+    /* Fecha y minutos de lectura, en la misma línea: son las dos cosas que
+       se miran antes de decidir si se entra. */
+    .postlist__meta {
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
+        margin: 0;
         font-family: var(--font-mono);
         font-size: var(--text-xs);
         letter-spacing: var(--tracking-wide);

@@ -2,6 +2,7 @@
 import { getCollection, render } from "astro:content";
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import ArticleSchema from "@/components/ArticleSchema.astro";
+import { readingMinutes } from "@/lib/reading-time";
 import { localeTags, localizedPath, otherLocales, useTranslations, type Locale } from "@/i18n/index";
 
 export async function getStaticPaths() {
@@ -49,6 +50,8 @@ const counterpartPaths = Object.fromEntries(
  */
 const alternateLocales = [locale, ...translatedInto];
 
+const minutes = readingMinutes(post.body ?? "");
+
 const formatter = new Intl.DateTimeFormat(localeTags[locale], {
     day: "numeric",
     month: "long",
@@ -85,6 +88,10 @@ const formatter = new Intl.DateTimeFormat(localeTags[locale], {
                 <time datetime={post.data.pubDate.toISOString()}>
                     {formatter.format(post.data.pubDate)}
                 </time>
+                {/* El separador es decorativo: para quien escucha la página, la
+                    fecha y los minutos ya son dos frases distintas. */}
+                <span aria-hidden="true">·</span>
+                <span>{t("blog.readingTime", { minutes })}</span>
                 {post.data.draft && <span class="post__draft">{t("blog.draft")}</span>}
             </p>
             <h1>{post.data.title}</h1>
@@ -140,7 +147,7 @@ const formatter = new Intl.DateTimeFormat(localeTags[locale], {
     .post__meta {
         display: flex;
         align-items: center;
-        gap: var(--space-3);
+        gap: var(--space-2);
         font-family: var(--font-mono);
         font-size: var(--text-xs);
         letter-spacing: var(--tracking-wide);

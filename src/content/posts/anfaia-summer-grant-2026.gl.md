@@ -5,6 +5,7 @@ pubDate: 2026-09-12
 locale: gl
 slug: anfaia-summer-grant-2026
 tags:
+  - anfaia
   - healthcare
   - community
 ---

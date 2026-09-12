@@ -4,6 +4,9 @@ description: "Two months building a data format for dentistry with ANFAIA and HI
 pubDate: 2026-09-12
 locale: en
 slug: anfaia-summer-grant-2026
+motion: /blog/lisa-studying.mp4
+motionAlt: "Lisa Simpson sits at the desk in her room, typing away at the computer with a smile, her bookshelf behind her."
+motionPoster: /blog/lisa-studying.webp
 tags:
   - anfaia
   - healthcare

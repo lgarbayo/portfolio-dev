@@ -4,6 +4,9 @@ description: "Dous meses construíndo un formato de datos para odontoloxía con 
 pubDate: 2026-09-12
 locale: gl
 slug: anfaia-summer-grant-2026
+motion: /blog/lisa-studying.mp4
+motionAlt: "Lisa Simpson, sentada no escritorio do seu cuarto, teclea no ordenador cun sorriso, coa estantería de libros detrás."
+motionPoster: /blog/lisa-studying.webp
 tags:
   - anfaia
   - healthcare

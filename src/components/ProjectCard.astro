@@ -19,7 +19,14 @@ const data = project.data;
 const links = [
     data.repoUrl && { href: data.repoUrl, label: t("projects.viewRepo"), kind: "repo" },
     data.demoUrl && { href: data.demoUrl, label: t("projects.viewDemo"), kind: "demo" },
+    data.videoUrl && { href: data.videoUrl, label: t("projects.viewVideo"), kind: "video" },
+    data.landingUrl && { href: data.landingUrl, label: t("projects.viewLanding"), kind: "landing" },
     data.devpostUrl && { href: data.devpostUrl, label: t("projects.viewDevpost"), kind: "devpost" },
+    data.productHuntUrl && {
+        href: data.productHuntUrl,
+        label: t("projects.viewProductHunt"),
+        kind: "producthunt",
+    },
 ].filter((link): link is { href: string; label: string; kind: string } => Boolean(link));
 ---
 

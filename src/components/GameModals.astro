@@ -144,6 +144,18 @@ const contactChannels = [
                                         href: project.data.demoUrl,
                                         label: t("projects.viewDemo"),
                                     },
+                                    project.data.videoUrl && {
+                                        href: project.data.videoUrl,
+                                        label: t("projects.viewVideo"),
+                                    },
+                                    project.data.landingUrl && {
+                                        href: project.data.landingUrl,
+                                        label: t("projects.viewLanding"),
+                                    },
+                                    project.data.productHuntUrl && {
+                                        href: project.data.productHuntUrl,
+                                        label: t("projects.viewProductHunt"),
+                                    },
                                 ]
                                     .filter((link): link is { href: string; label: string } =>
                                         Boolean(link),

@@ -81,6 +81,12 @@ const projects = defineCollection({
         repoUrl: z.url().optional(),
         demoUrl: z.url().optional(),
         devpostUrl: z.url().optional(),
+        /** Vídeo que enseña el proyecto funcionando, cuando no hay demo que abrir. */
+        videoUrl: z.url().optional(),
+        /** Web de presentación: no es la demo, es el escaparate del proyecto. */
+        landingUrl: z.url().optional(),
+        /** Lanzamiento en Product Hunt. */
+        productHuntUrl: z.url().optional(),
         year: z.number().int().optional(),
         role: z.string().optional(),
         /** Marco en el que se construyó: "HackUDC 2026", "Proyecto personal"… */
@@ -93,9 +99,18 @@ const projects = defineCollection({
     })
         // Cada proyecto tiene que llevar a algún sitio: una tarjeta sin enlace es
         // una afirmación sin manera de comprobarla.
-        .refine((entry) => entry.repoUrl || entry.demoUrl || entry.devpostUrl, {
-            message: "Un proyecto necesita al menos un enlace (repoUrl, demoUrl o devpostUrl).",
-        })
+        .refine(
+            (entry) =>
+                entry.repoUrl ||
+                entry.demoUrl ||
+                entry.devpostUrl ||
+                entry.videoUrl ||
+                entry.landingUrl ||
+                entry.productHuntUrl,
+            {
+                message: "Un proyecto necesita al menos un enlace.",
+            },
+        )
         .refine((entry) => !entry.thumbnail || entry.thumbnailAlt, {
             message: "Una miniatura necesita thumbnailAlt.",
         }),

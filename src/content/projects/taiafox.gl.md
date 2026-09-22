@@ -23,7 +23,9 @@ tags:
   - Voice AI
   - AI/LLM
 repoUrl: https://github.com/lgarbayo/HACKSPAIN-2026
-demoUrl: https://taiafox-ph-five.vercel.app/
+videoUrl: https://www.youtube.com/watch?v=vYMx2elWio0
+landingUrl: https://taiafox-ph-five.vercel.app/
+productHuntUrl: https://www.producthunt.com/products/taiafox
 highlights:
   - "Política con LLM, plan con solver"
   - "Chamadas de entrada e de saída"

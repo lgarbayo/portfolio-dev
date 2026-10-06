@@ -27,59 +27,89 @@ const formatPeriod = (start: Date, end?: Date) =>
     <ol class="timeline" role="list">
         {
             experience.map((item) => (
-                <li class="timeline__item" data-reveal>
-                    <div class="timeline__head">
-                        <h3 class="timeline__role">
-                            {item.data.role}
-                            <span class="timeline__org">
-                                {" @ "}
-                                {item.data.url ? (
-                                    <a
-                                        class="timeline__org-link"
-                                        href={item.data.url}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                    >
-                                        {item.data.organization}
-                                    </a>
-                                ) : (
-                                    item.data.organization
-                                )}
-                            </span>
-                        </h3>
-                        {item.data.logo && (
-                            <img
-                                class="timeline__logo"
-                                src={item.data.logo}
-                                alt={t("experience.logoAlt", { organization: item.data.organization })}
-                                width="96"
-                                height="32"
-                                loading="lazy"
-                                decoding="async"
-                            />
+                <li class:list={["timeline__item", {
+                    "timeline__item--illustrated": item.data.images.length > 0,
+                    "timeline__item--gallery": item.data.images.length > 1,
+                    "timeline__item--showcase": item.data.slug === "dataspartan" || item.data.slug === "academia-jorge-juan",
+                    "timeline__item--academy": item.data.slug === "academia-jorge-juan",
+                }]} data-reveal>
+                    <div class="timeline__content">
+                        <div class="timeline__head">
+                            <h3 class="timeline__role">
+                                {item.data.role}
+                                <span class="timeline__org">
+                                    {" @ "}
+                                    {item.data.url ? (
+                                        <a
+                                            class="timeline__org-link"
+                                            href={item.data.url}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                        >
+                                            {item.data.organization}
+                                        </a>
+                                    ) : (
+                                        item.data.organization
+                                    )}
+                                </span>
+                            </h3>
+                            {item.data.logo && (
+                                <img
+                                    class="timeline__logo"
+                                    src={item.data.logo}
+                                    alt={t("experience.logoAlt", { organization: item.data.organization })}
+                                    width="96"
+                                    height="32"
+                                    loading="lazy"
+                                    decoding="async"
+                                />
+                            )}
+                        </div>
+
+                        {item.data.startDate && (
+                            <p class="timeline__period">
+                                <time datetime={item.data.startDate.toISOString().slice(0, 10)}>
+                                    {formatPeriod(item.data.startDate, item.data.endDate)}
+                                </time>
+                            </p>
                         )}
-                    </div>
 
-                    {item.data.startDate && (
-                        <p class="timeline__period">
-                            <time datetime={item.data.startDate.toISOString().slice(0, 10)}>
-                                {formatPeriod(item.data.startDate, item.data.endDate)}
-                            </time>
-                        </p>
-                    )}
+                        {(item.data.employmentType || item.data.location) && (
+                            <p class="timeline__details">
+                                {[item.data.employmentType, item.data.location].filter(Boolean).join(" · ")}
+                            </p>
+                        )}
 
-                    <ul class="timeline__list" role="list">
-                        {item.data.responsibilities.map((line) => (
-                            <li set:html={line} />
-                        ))}
-                    </ul>
-
-                    {item.data.stack.length > 0 && (
-                        <ul class="timeline__stack scroll-x" role="list">
-                            {item.data.stack.map((tech) => (
-                                <li class="tag">{tech}</li>
+                        <ul class="timeline__list" role="list">
+                            {item.data.responsibilities.map((line) => (
+                                <li set:html={line} />
                             ))}
                         </ul>
+
+                        {item.data.stack.length > 0 && (
+                            <ul class="timeline__stack scroll-x" role="list">
+                                {item.data.stack.map((tech) => (
+                                    <li class="tag">{tech}</li>
+                                ))}
+                            </ul>
+                        )}
+                    </div>
+                    {item.data.images.length > 0 && (
+                        <div class:list={["timeline__media", { "timeline__media--multiple": item.data.images.length > 1 }]}>
+                            {item.data.images.map((image) => (
+                                <figure class:list={["timeline__figure", {
+                                    "timeline__figure--portrait": image.height > image.width,
+                                    "timeline__figure--plain": item.data.slug === "dataspartan" || item.data.slug === "anfaia",
+                                }]}>
+                                    <a href={image.src} target="_blank" rel="noopener noreferrer">
+                                        <img src={image.src} alt={image.alt}
+                                            width={image.width} height={image.height}
+                                            loading="lazy" decoding="async" />
+                                    </a>
+                                    {image.caption && <figcaption>{image.caption}</figcaption>}
+                                </figure>
+                            ))}
+                        </div>
                     )}
                 </li>
             ))
@@ -101,6 +131,153 @@ const formatPeriod = (start: Date, end?: Date) =>
     .timeline__item {
         position: relative;
         padding-inline-start: var(--space-5);
+    }
+
+    .timeline__content {
+        min-inline-size: 0;
+    }
+
+    .timeline__item--illustrated {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 30rem);
+        align-items: start;
+        gap: var(--space-6);
+    }
+
+    .timeline__item--gallery {
+        grid-template-columns: minmax(0, 1fr);
+        gap: var(--space-4);
+    }
+
+    /* The text determines each row's height; thumbnails fit inside it. */
+    .timeline__media {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        grid-template-rows: minmax(0, 1fr);
+        gap: var(--space-2);
+        contain: size;
+        align-self: stretch;
+        min-block-size: 14rem;
+        max-block-size: 18rem;
+    }
+
+    .timeline__media--multiple {
+        grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));
+        grid-template-rows: auto;
+        contain: none;
+        min-block-size: 0;
+        max-block-size: none;
+        gap: var(--space-4);
+    }
+
+    .timeline__media--multiple .timeline__figure a {
+        flex: none;
+        aspect-ratio: 16 / 10;
+    }
+
+    .timeline__figure {
+        display: flex;
+        flex-direction: column;
+        min-block-size: 0;
+        min-inline-size: 0;
+        margin: 0;
+    }
+
+    .timeline__figure a {
+        display: block;
+        flex: 1;
+        min-block-size: 0;
+        border-radius: var(--radius-lg);
+        overflow: hidden;
+        border: 1px solid var(--color-border);
+        background: var(--color-surface);
+    }
+
+    .timeline__figure img {
+        display: block;
+        inline-size: 100%;
+        block-size: 100%;
+        object-fit: contain;
+    }
+
+    .timeline__figure figcaption {
+        margin-block-start: var(--space-1);
+        color: var(--color-text-subtle);
+        font-size: var(--text-xs);
+        line-height: 1.3;
+    }
+
+    .timeline__figure--portrait img {
+        object-fit: cover;
+        object-position: center 25%;
+    }
+
+    .timeline__figure--plain a {
+        border: 0;
+        border-radius: 0;
+        background: none;
+    }
+
+    @media (max-width: 56rem) {
+        .timeline__item--illustrated {
+            grid-template-columns: minmax(0, 1fr);
+            gap: var(--space-4);
+        }
+
+        .timeline__media {
+            contain: none;
+            inline-size: min(100%, 30rem);
+            min-block-size: 0;
+            max-block-size: none;
+        }
+
+        .timeline__figure a {
+            flex: none;
+            aspect-ratio: 16 / 9;
+        }
+
+        .timeline__media--multiple {
+            inline-size: 100%;
+            grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
+        }
+    }
+
+    .timeline__item--showcase {
+        grid-template-columns: minmax(0, 1fr);
+        gap: var(--space-4);
+    }
+
+    .timeline__item--showcase .timeline__media {
+        contain: none;
+        inline-size: min(100%, 64rem);
+        min-block-size: 0;
+        max-block-size: none;
+    }
+
+    .timeline__item--academy .timeline__media {
+        inline-size: min(100%, 40rem);
+    }
+
+    .timeline__item--academy .timeline__figure a {
+        flex: none;
+        aspect-ratio: 16 / 9;
+    }
+
+    .timeline__figure--plain a {
+        flex: none;
+        aspect-ratio: auto;
+    }
+
+    .timeline__media--multiple .timeline__figure--plain a {
+        aspect-ratio: auto;
+    }
+
+    .timeline__figure--plain img {
+        block-size: auto;
+    }
+
+    .timeline__figure--plain figcaption {
+        text-align: center;
     }
 
     .timeline__item::before {
@@ -145,7 +322,7 @@ const formatPeriod = (start: Date, end?: Date) =>
     }
 
     .timeline__logo {
-        block-size: 1.75rem;
+        block-size: 2.5rem;
         inline-size: auto;
         opacity: 0.85;
     }
@@ -168,6 +345,12 @@ const formatPeriod = (start: Date, end?: Date) =>
         color: var(--color-text-muted);
         font-size: var(--text-sm);
         line-height: var(--leading-relaxed);
+    }
+
+    .timeline__details {
+        margin-block-end: var(--space-3);
+        font-size: var(--text-xs);
+        color: var(--color-text-muted);
     }
 
     .timeline__stack {

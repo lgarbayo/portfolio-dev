@@ -1,0 +1,32 @@
+[
+  {
+    "file": "anfaia-uos-viewer.webp",
+    "source": "https://github.com/ANFAIA/Agentic-Smart-Health",
+    "note": "Static frame from repository demo"
+  },
+  {
+    "file": "academia-jorge-juan-facade.webp",
+    "source": "https://www.paxinasgalegas.es/jorge-juan-92688em.html",
+    "note": "Facade photograph from Páxinas Galegas, watermark retained"
+  },
+  {
+    "file": "dataspartan-project-manager.webp",
+    "source": "https://github.com/lgarbayo/awesome-project-manager-app-web",
+    "note": "Local app screenshot with Playwright demo API responses"
+  },
+  {
+    "file": "anfaia-website-home.webp",
+    "source": "https://agentic-smart-health.lgarbayo.com/",
+    "note": "Screenshot of the live project website"
+  },
+  {
+    "file": "anfaia-website-pipeline.webp",
+    "source": "https://agentic-smart-health.lgarbayo.com/technical-side/",
+    "note": "Screenshot of the live project website"
+  },
+  {
+    "file": "anfaia-website-uos.webp",
+    "source": "https://agentic-smart-health.lgarbayo.com/technical-side/",
+    "note": "Screenshot of the live project website"
+  }
+]

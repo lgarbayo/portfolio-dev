@@ -11,11 +11,19 @@ interface Props {
 const { locale } = Astro.props;
 const t = useTranslations(locale);
 const about = await getLocalizedEntry("about", locale);
+const ourenseMapUrl = "https://www.google.com/maps/place/Ourense,+Orense,+Ourense/@41.7115912,-20.5173476,3632696m/data=!3m1!1e3!4m2!3m1!1s0xd2ffeb5bc5378eb:0x295326a374bca39c";
 ---
 
 <Section id="about" title={about?.data.title ?? t("about.title")}>
     <div class="about">
         <div class="about__content">
+            <p class="about__location">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                    <path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 1 1 16 0Z" />
+                    <circle cx="12" cy="10" r="2.5" />
+                </svg>
+                <span>{t("about.location.prefix")} <a href={ourenseMapUrl} target="_blank" rel="noopener noreferrer">Ourense</a>{t("about.location.region")}</span>
+            </p>
             {
                 about?.data.blocks.map((block) => (
                     <article class="about__block" data-reveal>
@@ -24,6 +32,8 @@ const about = await getLocalizedEntry("about", locale);
                     </article>
                 ))
             }
+
+            <CvViewer locale={locale} />
         </div>
 
         {
@@ -43,11 +53,6 @@ const about = await getLocalizedEntry("about", locale);
         }
     </div>
 
-    {/* El CV vivía en una sección de Contacto que ya no existe: los cuatro
-        canales que la acompañaban están ahora en la página del QR, y el visor
-        se quedaba solo sosteniendo una sección entera. Aquí encaja mejor —quien
-        acaba de leer quién soy es justo quien va a querer el CV. */}
-    <CvViewer locale={locale} />
 </Section>
 
 <style>
@@ -62,7 +67,32 @@ const about = await getLocalizedEntry("about", locale);
         display: flex;
         flex-direction: column;
         gap: var(--space-6);
-        max-inline-size: var(--prose-width);
+    }
+
+    .about__content :global(.cv) {
+        margin-block-start: 0;
+    }
+
+    .about__location {
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
+        color: var(--color-text-muted);
+        font-size: var(--text-sm);
+    }
+
+    .about__location span {
+        min-inline-size: 0;
+    }
+
+    .about__location svg {
+        flex-shrink: 0;
+    }
+
+    .about__location a {
+        color: var(--color-text);
+        text-decoration: underline;
+        text-underline-offset: 0.2em;
     }
 
     .about__block-title {
@@ -78,6 +108,8 @@ const about = await getLocalizedEntry("about", locale);
 
     .about__figure {
         margin: 0;
+        inline-size: min(100%, 22rem);
+        justify-self: end;
         position: sticky;
         inset-block-start: var(--space-8);
     }
@@ -98,6 +130,7 @@ const about = await getLocalizedEntry("about", locale);
         .about__figure {
             position: static;
             max-inline-size: 18rem;
+            justify-self: start;
         }
     }
 </style>

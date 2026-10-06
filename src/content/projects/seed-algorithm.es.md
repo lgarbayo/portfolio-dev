@@ -27,4 +27,6 @@ highlights:
   - "Distancias Haversine para evitar solapamientos"
   - "Densidad adaptativa urbano/rural"
   - "Mapas interactivos con Folium"
+thumbnail: /assets/projects/seed-algorithm.webp
+thumbnailAlt: "Mapa de las ubicaciones calculadas por SEED"
 ---

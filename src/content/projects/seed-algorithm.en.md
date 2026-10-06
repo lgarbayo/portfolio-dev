@@ -27,4 +27,6 @@ highlights:
   - "Haversine distances to avoid overlap"
   - "Density adapted to urban and rural areas"
   - "Interactive maps with Folium"
+thumbnail: /assets/projects/seed-algorithm.webp
+thumbnailAlt: "Map of the locations computed by SEED"
 ---

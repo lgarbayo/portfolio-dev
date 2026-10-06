@@ -24,4 +24,6 @@ highlights:
   - Progress tracking
   - Responsive UI
 repoUrl: https://github.com/lgarbayo/hacktoberfest2025-aitutor-breogan
+thumbnail: /assets/projects/breogan.webp
+thumbnailAlt: "Excerpt from the source code of breogan"
 ---

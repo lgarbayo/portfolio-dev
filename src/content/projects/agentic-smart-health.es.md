@@ -28,4 +28,6 @@ highlights:
   - "Ingesta de DICOM, STL y PDF"
   - "Servidor MCP para 3D Slicer"
   - "Open source, Apache 2.0"
+thumbnail: /assets/experience/anfaia-uos-viewer.webp
+thumbnailAlt: "Visor del gemelo digital dental de ANFAIA"
 ---

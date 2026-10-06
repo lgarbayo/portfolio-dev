@@ -32,4 +32,6 @@ highlights:
   - "Simulación en Minecraft por RCON"
   - "Dashboard en tempo real"
   - "Journal JSONL reproducible"
+thumbnail: /assets/projects/taiafox.webp
+thumbnailAlt: "Mapa de resposta a emerxencias de Taiafox"
 ---

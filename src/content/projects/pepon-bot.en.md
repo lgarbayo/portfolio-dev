@@ -28,4 +28,6 @@ highlights:
   - Grounded LLM reasoning
   - 24-hour visual memory
 repoUrl: https://github.com/lgarbayo/pepon-bot
+thumbnail: /assets/projects/pepon-bot.webp
+thumbnailAlt: "Pepón phone interface"
 ---

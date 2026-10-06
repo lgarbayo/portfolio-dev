@@ -28,4 +28,6 @@ highlights:
   - "Inxestión de DICOM, STL e PDF"
   - "Servidor MCP para 3D Slicer"
   - "Open source, Apache 2.0"
+thumbnail: /assets/experience/anfaia-uos-viewer.webp
+thumbnailAlt: "Visor do xemelgo dixital dental de ANFAIA"
 ---

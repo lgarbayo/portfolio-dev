@@ -28,4 +28,6 @@ highlights:
   - "DICOM, STL and PDF ingestion"
   - "MCP server for 3D Slicer"
   - "Open source, Apache 2.0"
+thumbnail: /assets/experience/anfaia-uos-viewer.webp
+thumbnailAlt: "ANFAIA dental digital twin viewer"
 ---

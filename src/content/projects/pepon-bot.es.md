@@ -29,4 +29,6 @@ highlights:
   - "Razonamiento con LLM anclado a lo que ve"
   - "Memoria visual de 24 horas"
 repoUrl: https://github.com/lgarbayo/pepon-bot
+thumbnail: /assets/projects/pepon-bot.webp
+thumbnailAlt: "Interfaz del teléfono de Pepón"
 ---

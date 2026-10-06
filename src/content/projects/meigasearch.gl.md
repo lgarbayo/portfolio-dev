@@ -28,4 +28,6 @@ highlights:
   - "Inxestión por OCR"
   - "Inferencia automática de categorías"
   - "Múltiples provedores LLM"
+thumbnail: /assets/projects/meigasearch.webp
+thumbnailAlt: "Interface de busca de MeigaSearch"
 ---

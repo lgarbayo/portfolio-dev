@@ -25,4 +25,6 @@ highlights:
   - "5 niveis de competencia"
   - "Seguimento do progreso"
   - "Interface responsive"
+thumbnail: /assets/projects/breogan.webp
+thumbnailAlt: "Fragmento do código de breogan"
 ---

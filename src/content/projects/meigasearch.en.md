@@ -28,4 +28,6 @@ highlights:
   - Multi-provider LLM
 repoUrl: https://github.com/lgarbayo/HackUDC-2026
 devpostUrl: https://devpost.com/software/meigasearch
+thumbnail: /assets/projects/meigasearch.webp
+thumbnailAlt: "MeigaSearch search interface"
 ---

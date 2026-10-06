@@ -31,4 +31,6 @@ repoUrl: https://github.com/lgarbayo/HACKSPAIN-2026
 videoUrl: https://www.youtube.com/watch?v=vYMx2elWio0
 landingUrl: https://taiafox-ph-five.vercel.app/
 productHuntUrl: https://www.producthunt.com/products/taiafox
+thumbnail: /assets/projects/taiafox.webp
+thumbnailAlt: "Taiafox emergency response map"
 ---

@@ -1,7 +1,7 @@
 import * as THREE from "three";
 
 /**
- * Runtime 3D compartido entre el avatar y la escena del teclado.
+ * Runtime 3D de la escena del teclado.
  *
  * Existe por dos razones. La primera es el peso: importando Three desde un único
  * módulo, Vite lo emite en un chunk y las dos islas se lo reparten en vez de
@@ -36,7 +36,7 @@ export function supportsWebGL(): boolean {
 
 interface CreateOptions {
     container: HTMLElement;
-    /** Campo de visión; el teclado quiere poco, el avatar algo más. */
+    /** Campo de visión; el teclado quiere poco. */
     fov?: number;
     cameraPosition?: [number, number, number];
     alpha?: boolean;
@@ -44,7 +44,7 @@ interface CreateOptions {
      * Tone mapping filmico. Lo pide quien ilumina con valores físicos —el
      * teclado tiene una direccional a 2.2 y un mapa de entorno— porque sin él
      * los blancos se van a plano y el plástico pierde el brillo. Se activa a
-     * mano en vez de por defecto para no reencuadrar el avatar de paso.
+     * mano en vez de por defecto para no reencuadrar la escena de paso.
      */
     filmic?: boolean;
 }

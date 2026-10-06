@@ -14,6 +14,8 @@ declare module "virtual:keycap-icons" {
             path: string;
             /** Color de marca, con almohadilla. */
             color: string;
+            /** Trazos de logos locales que usan varios colores, como Java. */
+            layers?: Array<{ path: string; color: string }>;
             title: string;
             /** Lado de la caja del SVG: 24 en Simple Icons, lo que toque en los locales. */
             size: number;

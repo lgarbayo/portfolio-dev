@@ -120,7 +120,11 @@ export function createKeyboardScene(container: HTMLElement, keycaps: Keycap[]): 
 
     // Cielo y suelo neutros: cualquier tinte aquí se cuela en las caras en
     // sombra de las teclas y rompe la escala de grises por la puerta de atrás.
-    scene.add(new THREE.HemisphereLight(0xf2f2f2, 0x141414, 0.25));
+    //
+    // El suelo va claro porque el renderer es transparente y debajo está la
+    // página: con el suelo casi negro que pedía el fondo oscuro, sobre
+    // `--color-bg` las caras en sombra se leían como agujeros recortados.
+    scene.add(new THREE.HemisphereLight(0xf2f2f2, 0x9a9a9a, 0.25));
 
     // Reflejos del plástico. Se genera aquí, sin descargar ningún HDR: son
     // cuatro paneles blancos alrededor, que es de donde salen los brillos
@@ -197,7 +201,10 @@ export function createKeyboardScene(container: HTMLElement, keycaps: Keycap[]): 
             clearcoat: 0.5,
             clearcoatRoughness: 0.18,
             emissive: 0xffffff,
-            emissiveIntensity: 0.3,
+            // Lo justo para que la tecla no se apague del todo en sombra. Subirlo
+            // —hacía falta contra el fondo oscuro— lava la tecla contra una
+            // página clara y se pierde el volumen.
+            emissiveIntensity: 0.12,
         });
 
         const mesh = new THREE.Mesh(capGeometry, material);
@@ -495,6 +502,7 @@ export function createKeyboardScene(container: HTMLElement, keycaps: Keycap[]): 
     renderer.domElement.addEventListener("pointerdown", onPointerDown);
     renderer.domElement.addEventListener("dblclick", onDoubleClick);
     window.addEventListener("pointerup", onPointerUp);
+    renderer.domElement.addEventListener("pointercancel", onPointerUp);
     window.addEventListener("keydown", onKeyDown);
     window.addEventListener("keyup", onKeyUp);
     updateCursor();
@@ -549,6 +557,7 @@ export function createKeyboardScene(container: HTMLElement, keycaps: Keycap[]): 
         renderer.domElement.removeEventListener("pointerdown", onPointerDown);
         renderer.domElement.removeEventListener("dblclick", onDoubleClick);
         window.removeEventListener("pointerup", onPointerUp);
+        renderer.domElement.removeEventListener("pointercancel", onPointerUp);
         window.removeEventListener("keydown", onKeyDown);
         window.removeEventListener("keyup", onKeyUp);
         // Las texturas de los logos no las recoge el barrido de `createScene`:
@@ -688,32 +697,12 @@ function iconTexture(icon: KeycapIcon): THREE.CanvasTexture {
     ctx.translate(size / 2, size / 2);
     ctx.scale(scale, scale);
     ctx.translate(-icon.size / 2, -icon.size / 2);
-    ctx.fillStyle = grayOf(icon.color);
-    ctx.fill(new Path2D(icon.path));
+    for (const layer of icon.layers ?? [{ path: icon.path, color: icon.color }]) {
+        ctx.fillStyle = layer.color;
+        ctx.fill(new Path2D(layer.path));
+    }
 
     return finishTexture(canvas);
-}
-
-/**
- * El gris que le toca a un color de marca.
- *
- * No es un `grayscale()` a secas: convertido tal cual, un logo claro sobre una
- * tecla blanca se queda casi invisible. Se toma el brillo percibido y se
- * reparte en una banda que siempre contrasta contra el keycap, así que el logo
- * oscuro sigue siendo el más oscuro y el vivo pasa a gris medio, pero ninguno
- * de los dos desaparece.
- */
-function grayOf(hex: string): string {
-    const value = Number.parseInt(hex.slice(1), 16);
-    const r = ((value >> 16) & 255) / 255;
-    const g = ((value >> 8) & 255) / 255;
-    const b = (value & 255) / 255;
-
-    // Coeficientes de luminancia: el ojo ve el verde mucho más que el azul.
-    const luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b;
-    const level = Math.round((0.1 + luminance * 0.4) * 255);
-
-    return `rgb(${level}, ${level}, ${level})`;
 }
 
 /** Respaldo para las tecnologías sin logo: el texto corto de la tecla. */

@@ -49,9 +49,7 @@ function exportName(slug) {
 /**
  * Lee un logo de `src/assets/keycap-icons`, si es que ese slug tiene uno.
  *
- * La tecla se pinta de un solo color, así que los trazos del SVG se concatenan
- * en un único `d` y del `fill` sólo interesa el primero, como color de marca
- * del que sale luego el gris.
+ * Conserva cada trazo con su color para respetar los logos multicolor.
  */
 function localIcon(slug) {
     const file = join(LOCAL_DIR, `${slug}.svg`);
@@ -63,6 +61,10 @@ function localIcon(slug) {
 
     return {
         path,
+        layers: [...source.matchAll(/<path\b[^>]*>/g)].map(([tag]) => ({
+            path: tag.match(/\sd="([^"]+)"/)?.[1] ?? "",
+            color: tag.match(/\sfill="(#[0-9a-fA-F]+)"/)?.[1] ?? "#000000",
+        })),
         color: source.match(/\sfill="(#[0-9a-fA-F]+)"/)?.[1] ?? "#000000",
         title: source.match(/<title>([^<]+)<\/title>/)?.[1] ?? slug,
         // Los SVG de marca no vienen todos en la caja de 24 de Simple Icons.

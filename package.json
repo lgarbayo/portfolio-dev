@@ -4,8 +4,8 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "node scripts/clean-cache.mjs --dev && astro dev",
-    "build": "node scripts/clean-cache.mjs && astro check && astro build && node scripts/translation-coverage.mjs && node scripts/check-assets.mjs && node scripts/assert-bundle-budget.mjs",
+    "dev": "astro dev",
+    "build": "astro check && astro build && node scripts/translation-coverage.mjs && node scripts/check-assets.mjs && node scripts/assert-bundle-budget.mjs",
     "preview": "astro preview",
     "check": "astro check",
     "coverage:i18n": "node scripts/translation-coverage.mjs"

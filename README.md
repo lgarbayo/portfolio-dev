@@ -59,8 +59,9 @@ Adding a locale means adding it to `src/i18n/config.ts` (which also holds the BC
 for date formatting), a `src/i18n/<code>.json` dictionary, and one `<slug>.<code>.md` per
 content entry. `npm run build` reports what is still missing.
 
-Content files added while `astro dev` is running may not show up: the content store in
-`.astro/` is built at startup. Restart it — `npm run dev` clears that cache first.
+Astro watches content files while `npm run dev` is running. Keep `.astro/` intact:
+the development server uses its generated files and content store. Neither `dev`
+nor `build` deletes this directory, so a build can run alongside the development server.
 
 ## Blog
 

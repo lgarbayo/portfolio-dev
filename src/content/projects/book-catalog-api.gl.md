@@ -18,4 +18,6 @@ highlights:
   - "Validación de ISBN"
   - "Xestión de edicións"
   - "Arquitectura hexagonal"
+thumbnail: /assets/projects/book-catalog-api.webp
+thumbnailAlt: "Fragmento do código de book-catalog-api"
 ---

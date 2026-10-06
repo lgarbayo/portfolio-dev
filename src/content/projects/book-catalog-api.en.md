@@ -18,4 +18,6 @@ highlights:
   - Edition management
   - Hexagonal architecture
 repoUrl: https://github.com/lgarbayo/Book-Catalog-API-Rest
+thumbnail: /assets/projects/book-catalog-api.webp
+thumbnailAlt: "Excerpt from the source code of book-catalog-api"
 ---

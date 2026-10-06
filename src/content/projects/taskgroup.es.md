@@ -22,4 +22,6 @@ highlights:
   - "Asignación de tareas"
   - "Seguimiento del progreso"
   - "Sistema de invitaciones"
+thumbnail: /assets/projects/taskgroup.webp
+thumbnailAlt: "Página de inicio de TaskGroup"
 ---

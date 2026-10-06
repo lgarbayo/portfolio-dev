@@ -25,4 +25,6 @@ highlights:
   - "Mutex de zonas críticas vía supervisor"
   - "Ciclo de salida disparado por saturación"
   - "Visualización en vivo con Swing"
+thumbnail: /assets/projects/warehouse.webp
+thumbnailAlt: "Simulador de almacén con robots autónomos, estanterías y estadísticas en Jason/JaCaMo"
 ---

@@ -25,4 +25,6 @@ highlights:
   - "Critical-zone mutex through a supervisor"
   - "Outbound cycle triggered by saturation"
   - "Live visualisation with Swing"
+thumbnail: /assets/projects/warehouse.webp
+thumbnailAlt: "Warehouse simulator with autonomous robots, shelves and statistics in Jason/JaCaMo"
 ---

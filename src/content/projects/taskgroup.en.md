@@ -22,4 +22,6 @@ highlights:
   - Progress tracking
   - Invitation system
 repoUrl: https://github.com/lgarbayo/TaskGroup
+thumbnail: /assets/projects/taskgroup.webp
+thumbnailAlt: "TaskGroup home page"
 ---

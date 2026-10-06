@@ -24,4 +24,6 @@ highlights:
   - "RAG over a Qdrant vector store"
   - "Paper discovery and indexing"
   - "Markdown reports"
+thumbnail: /assets/projects/jeicob.webp
+thumbnailAlt: "Excerpt from the source code of jeicob"
 ---

@@ -19,4 +19,6 @@ highlights:
   - "Análisis de progreso"
   - "Estimaciones con IA"
   - "Gestión de hitos"
+thumbnail: /assets/experience/dataspartan-project-manager.webp
+thumbnailAlt: "Interfaz de Awesome Project Manager con proyectos y tareas"
 ---

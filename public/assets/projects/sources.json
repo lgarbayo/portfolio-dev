@@ -1,0 +1,62 @@
+{
+  "taiafox": {
+    "source": "https://taiafox-ph-five.vercel.app/shots/map.png",
+    "kind": "application-screenshot"
+  },
+  "meigasearch": {
+    "source": "https://github.com/lgarbayo/HackUDC-2026/tree/HEAD/frontend",
+    "kind": "application-screenshot"
+  },
+  "pepon-bot": {
+    "source": "https://github.com/lgarbayo/pepon-bot/blob/HEAD/docs/screenshots/phone-ui-idle.png",
+    "kind": "application-screenshot"
+  },
+  "seed-algorithm": {
+    "source": "https://github.com/lgarbayo/seed-algorithm/blob/HEAD/notebooks/outputs/SEED_1000.png",
+    "kind": "application-screenshot"
+  },
+  "breogan": {
+    "repo": "lgarbayo/hacktoberfest2025-aitutor-breogan",
+    "path": "reflex-chat/chat/chat.py",
+    "url": "https://github.com/lgarbayo/hacktoberfest2025-aitutor-breogan/blob/HEAD/reflex-chat/chat/chat.py",
+    "kind": "repository-code-excerpt"
+  },
+  "jeicob": {
+    "repo": "lgarbayo/jeicob",
+    "path": "src/tools.py",
+    "url": "https://github.com/lgarbayo/jeicob/blob/HEAD/src/tools.py",
+    "kind": "repository-code-excerpt"
+  },
+  "warehouse": {
+    "source": "user-provided screenshot",
+    "repo": "lgarbayo/warehouse",
+    "asset": "/assets/projects/warehouse.webp",
+    "kind": "application-screenshot"
+  },
+  "taskgroup": {
+    "source": "https://github.com/lgarbayo/TaskGroup",
+    "kind": "application-screenshot"
+  },
+  "book-catalog-api": {
+    "repo": "lgarbayo/Book-Catalog-API-Rest",
+    "path": "src/main/java/com/dataspartan/catalog/adapter/controller/BookController.java",
+    "url": "https://github.com/lgarbayo/Book-Catalog-API-Rest/blob/HEAD/src/main/java/com/dataspartan/catalog/adapter/controller/BookController.java",
+    "kind": "repository-code-excerpt"
+  },
+  "project-manager-api": {
+    "repo": "lgarbayo/project-manager-API-Rest",
+    "path": "src/main/java/com/project_manager/rest/controller/ProjectController.java",
+    "url": "https://github.com/lgarbayo/project-manager-API-Rest/blob/HEAD/src/main/java/com/project_manager/rest/controller/ProjectController.java",
+    "kind": "repository-code-excerpt"
+  },
+  "agentic-smart-health": {
+    "asset": "/assets/experience/anfaia-uos-viewer.webp",
+    "source": "https://github.com/ANFAIA/Agentic-Smart-Health",
+    "kind": "viewer-screenshot"
+  },
+  "project-manager-web": {
+    "asset": "/assets/experience/dataspartan-project-manager.webp",
+    "source": "https://github.com/lgarbayo/awesome-project-manager-app-web",
+    "kind": "application-screenshot"
+  }
+}

@@ -18,4 +18,6 @@ highlights:
   - AI estimates
   - Milestone management
 repoUrl: https://github.com/lgarbayo/awesome-project-manager-app-web
+thumbnail: /assets/experience/dataspartan-project-manager.webp
+thumbnailAlt: "Awesome Project Manager interface with projects and tasks"
 ---

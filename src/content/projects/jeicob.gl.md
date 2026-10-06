@@ -24,4 +24,6 @@ highlights:
   - "RAG sobre base vectorial Qdrant"
   - "Descarga e indexado de papers"
   - "Informes en Markdown"
+thumbnail: /assets/projects/jeicob.webp
+thumbnailAlt: "Fragmento do código de jeicob"
 ---

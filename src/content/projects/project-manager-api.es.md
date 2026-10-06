@@ -24,4 +24,6 @@ highlights:
   - "Estimación con IA"
   - "Análisis de proyectos"
   - "Generación de descripciones"
+thumbnail: /assets/projects/project-manager-api.webp
+thumbnailAlt: "Fragmento del código de project-manager-api"
 ---

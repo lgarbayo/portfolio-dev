@@ -24,4 +24,6 @@ highlights:
   - Project analysis
   - Description generation
 repoUrl: https://github.com/lgarbayo/project-manager-API-Rest
+thumbnail: /assets/projects/project-manager-api.webp
+thumbnailAlt: "Excerpt from the source code of project-manager-api"
 ---

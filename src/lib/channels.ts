@@ -21,6 +21,12 @@ export interface Channel {
 
 export const channels: readonly Channel[] = [
     {
+        href: "https://x.com/LuisGarbayo",
+        label: "contact.x",
+        icon: "/assets/ui/x.svg",
+        name: "X",
+    },
+    {
         href: "mailto:lugarbayo@gmail.com",
         label: "contact.email",
         icon: "/assets/ui/mail-svgrepo-com.svg",

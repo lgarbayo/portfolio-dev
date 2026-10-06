@@ -2,6 +2,7 @@
 import { byCurrentThenRecent, getLocalizedEntries, getLocalizedEntry } from "@/lib/content";
 import { localeTags, useTranslations, type Locale } from "@/i18n/index";
 import "@/styles/game-modals.css";
+import { channels } from "@/lib/channels";
 
 interface Props {
     locale: Locale;
@@ -57,12 +58,12 @@ const formatter = new Intl.DateTimeFormat(localeTags[locale], {
 const period = (start: Date, end?: Date) =>
     `${formatter.format(start)} – ${end ? formatter.format(end) : t("experience.present")}`;
 
-const contactChannels = [
-    { href: "mailto:lugarbayo@gmail.com", label: t("contact.email"), icon: "/assets/ui/mail-svgrepo-com.svg", alt: "Email" },
-    { href: "https://linkedin.com/in/luis-garbayo", label: t("contact.linkedin"), icon: "/assets/ui/linkedin-svgrepo-com.svg", alt: "LinkedIn" },
-    { href: "https://github.com/lgarbayo", label: t("contact.github"), icon: "/assets/ui/github-mark-white.svg", alt: "GitHub" },
-    { href: "https://devpost.com/lgarbayo", label: t("contact.devpost"), icon: "/assets/ui/devpost-svgrepo-com.svg", alt: "Devpost" },
-];
+const contactChannels = channels.map((channel) => ({
+    href: channel.href,
+    label: t(channel.label),
+    icon: channel.icon,
+    alt: channel.name,
+}));
 ---
 
 <div id="aboutModal" class="portfolio-modal">
@@ -203,6 +204,11 @@ const contactChannels = [
                     </div>
                     {item.data.startDate && (
                         <p class="experience-period">{period(item.data.startDate, item.data.endDate)}</p>
+                    )}
+                    {(item.data.employmentType || item.data.location) && (
+                        <p class="experience-period">
+                            {[item.data.employmentType, item.data.location].filter(Boolean).join(" · ")}
+                        </p>
                     )}
                     <ul class="experience-description">
                         {item.data.responsibilities.map((line) => (

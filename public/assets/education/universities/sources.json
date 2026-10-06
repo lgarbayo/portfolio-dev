@@ -1,0 +1,42 @@
+[
+  {
+    "name": "esei-building",
+    "url": "https://esei.uvigo.es/wp-content/uploads/2019/09/foto-edificio.jpg",
+    "sourcePage": "https://esei.uvigo.es/",
+    "width": 900,
+    "height": 540,
+    "asset": "/assets/education/universities/esei-building.webp"
+  },
+  {
+    "name": "esei-campus",
+    "url": "https://esei.uvigo.es/wp-content/uploads/2019/09/cabecera-esei-10.jpg",
+    "sourcePage": "https://esei.uvigo.es/",
+    "width": 1440,
+    "height": 295,
+    "asset": "/assets/education/universities/esei-campus.webp"
+  },
+  {
+    "name": "esei-facilities",
+    "url": "https://esei.uvigo.es/wp-content/uploads/2020/07/banner-esei-ppal.jpg",
+    "sourcePage": "https://esei.uvigo.es/",
+    "width": 1440,
+    "height": 540,
+    "asset": "/assets/education/universities/esei-facilities.webp"
+  },
+  {
+    "name": "usc-mathematics-entrance",
+    "url": "https://olardoestudante.gal/es/foto-1920x1920/es/uploads/galerias/niv35/cafeteria-facultad-matematicas-usc.jpg",
+    "sourcePage": "https://olardoestudante.gal/es/",
+    "width": 1600,
+    "height": 636,
+    "asset": "/assets/education/universities/usc-mathematics-entrance.webp"
+  },
+  {
+    "name": "usc-mathematics-building",
+    "url": "https://assets.usc.gal/sites/default/files/2019-11/190904_AFP05164.jpg",
+    "sourcePage": "https://www.usc.gal/es/centro/facultad-matematicas",
+    "width": 1600,
+    "height": 1067,
+    "asset": "/assets/education/universities/usc-mathematics-building.webp"
+  }
+]

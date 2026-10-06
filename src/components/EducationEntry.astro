@@ -71,22 +71,31 @@ const typeLabel = {
         lo que se cuenta arriba, no la información. */}
     {
         data.images.length > 0 && (
-            <ul class="education__gallery" role="list">
-                {data.images.map((image) => (
-                    <li>
-                        <img
-                            class="education__photo"
-                            src={image.src}
-                            alt={image.alt}
-                            loading="lazy"
-                            decoding="async"
-                        />
-                    </li>
-                ))}
-            </ul>
+            <div class="education__gallery" data-education-gallery>
+                <div class="education__gallery-viewport" tabindex="0" role="region" aria-label={t("education.gallery.label")}>
+                    <div class="education__gallery-track">
+                        {[0, 1, 2, 3, 4, 5, 6, 7].map((copy) => (
+                            <ul class="education__gallery-list" role="list" aria-hidden={copy > 0 ? "true" : undefined} inert={copy > 0}>
+                                {data.images.map((image) => (
+                                    <li>
+                                        <img
+                                            class="education__photo"
+                                            src={image.src}
+                                            alt={copy === 0 ? image.alt : ""}
+                                            loading="lazy"
+                                            decoding="async"
+                                        />
+                                    </li>
+                                ))}
+                            </ul>
+                        ))}
+                    </div>
+                </div>
+            </div>
         )
     }
 </li>
+
 
 <style>
     .education__type {
@@ -148,28 +157,67 @@ const typeLabel = {
         text-underline-offset: 0.2em;
     }
 
-    /*
-     * Las fotos comparten fila mientras quepan y se apilan cuando no. El
-     * `auto-fit` con mínimo evita decidir a mano cuántas caben: valen dos, y
-     * valdrían cuatro el día que se añadan.
-     */
     .education__gallery {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
-        gap: var(--space-3);
         margin-block-start: var(--space-4);
-        max-inline-size: var(--prose-width);
+        min-inline-size: 0;
+    }
+
+    .education__gallery-viewport {
+        overflow-x: auto;
+        scrollbar-width: none;
+    }
+
+    .education__gallery-track {
+        display: flex;
+        inline-size: max-content;
+        animation: education-gallery-scroll 60s linear infinite;
+    }
+
+    .education__gallery-list {
+        display: flex;
+        flex: 0 0 auto;
+        gap: var(--space-3);
         padding: 0;
+        padding-inline-end: var(--space-3);
         list-style: none;
     }
 
+    .education__gallery-list > li {
+        flex: 0 0 auto;
+        inline-size: clamp(15rem, 22vw, 22rem);
+    }
+
     .education__photo {
+        display: block;
         inline-size: 100%;
-        /* Recorte a una proporción común: dos fotos de encuadres distintos
-           puestas al lado se ven desparejadas si cada una manda sobre su alto. */
-        aspect-ratio: 16 / 9;
-        object-fit: cover;
+        block-size: clamp(8.5rem, 13vw, 12rem);
+        object-fit: contain;
+        background: var(--color-surface);
         border-radius: var(--radius-md);
         border: 1px solid var(--color-border);
+    }
+
+    @keyframes education-gallery-scroll {
+        to { transform: translateX(-12.5%); }
+    }
+
+    .education__gallery-viewport:focus-within .education__gallery-track {
+        animation-play-state: paused;
+    }
+
+    @media (hover: hover) {
+        .education__gallery-viewport:hover .education__gallery-track {
+            animation-play-state: paused;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .education__gallery-track {
+            animation: none;
+        }
+
+        .education__gallery-list[aria-hidden="true"] {
+            display: none;
+        }
     }
 </style>

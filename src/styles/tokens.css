@@ -3,38 +3,54 @@
  * tocar ni un componente — si algún componente necesita un literal, es que
  * falta un token.
  *
- * La web va en escala de grises: gris oscuro de fondo y blancos como acento. Sin
+ * La web va en escala de grises: gris claro de fondo y negros como acento. Sin
  * matiz que valga —los canales R, G y B valen lo mismo en cada tono—, porque un
  * gris con una pizca de azul deja de leerse como neutro en cuanto se pone al
  * lado de uno que no la tiene.
  *
+ * El fondo es gris claro y no blanco porque es el fondo del clip del hero,
+ * graduado para que coincida: así el rectángulo del vídeo desaparece dentro de
+ * la página en vez de haber que recortar al personaje. Si este valor cambia,
+ * cambia con él la graduación de `scripts/make-hero-figure.mjs`.
+ *
  * Sin color con el que marcar jerarquía, la marca el brillo: el acento es lo más
- * claro de la página, el texto corriente queda un escalón por debajo, y de ahí
- * hacia abajo los apagados. Por eso `--color-text` no es blanco: si lo fuese, un
+ * oscuro de la página, el texto corriente queda un escalón por encima, y de ahí
+ * hacia arriba los apagados. Por eso `--color-text` no es negro: si lo fuese, un
  * título en acento y un párrafo se verían igual.
  *
  * El modo juego no pasa por aquí: conserva su paleta en `game-modals.css` y en
  * las escenas de Phaser.
+ *
+ * Tampoco pasa `public/rss/styles.xsl`, que se sirve crudo y no puede importar
+ * esto: tiene los mismos valores copiados a mano y hay que tocarlo a la vez.
  */
 
 :root {
+    --color-scheme: light;
     /* --- Color: superficies --- */
-    --color-bg: #171717;
-    --color-surface: #202020;
-    --color-surface-raised: #2b2b2b;
-    --color-border: rgba(255, 255, 255, 0.08);
-    --color-border-strong: rgba(255, 255, 255, 0.16);
+    --color-bg: #e6e6e6;
+    --color-surface: #f0f0f0;
+    --color-surface-raised: #fafafa;
+    --color-border: rgba(38, 38, 38, 0.12);
+    --color-border-strong: rgba(38, 38, 38, 0.22);
+    --color-glass-surface: linear-gradient(135deg, rgba(207, 211, 216, 0.86), rgba(153, 160, 169, 0.68));
+    --color-glass-border: rgba(255, 255, 255, 0.6);
+    --shadow-glass: inset 0 1px 0 rgba(255, 255, 255, 0.6), 0 6px 24px rgba(38, 38, 38, 0.06);
 
-    /* --- Color: texto --- */
-    --color-text: #d8d8d8;
-    --color-text-muted: rgba(216, 216, 216, 0.68);
-    --color-text-subtle: rgba(216, 216, 216, 0.45);
+    /* --- Color: texto ---
+       Las alfas son más altas que las que había en oscuro (.78/.58 frente a
+       .68/.45) a propósito: oscuro sobre claro pierde contraste más deprisa por
+       cada punto de alfa que claro sobre oscuro, así que con las mismas los
+       apagados se habrían quedado por debajo de donde estaban. */
+    --color-text: #262626;
+    --color-text-muted: rgba(38, 38, 38, 0.78);
+    --color-text-subtle: rgba(38, 38, 38, 0.58);
 
     /* --- Color: acento --- */
-    --color-accent: #f5f5f5;
-    --color-accent-bright: #ffffff;
-    --color-accent-dim: rgba(245, 245, 245, 0.12);
-    --color-accent-border: rgba(245, 245, 245, 0.32);
+    --color-accent: #0f0f0f;
+    --color-accent-strong: #000000;
+    --color-accent-dim: rgba(15, 15, 15, 0.1);
+    --color-accent-border: rgba(15, 15, 15, 0.28);
 
     /* --- Color: acentos secundarios (heredados de los mundos del juego) --- */
     --color-world-about: #cfcfcf;
@@ -42,7 +58,7 @@
     --color-world-experience: #9a9a9a;
     --color-world-contact: #808080;
 
-    --color-focus: #ffffff;
+    --color-focus: #0f0f0f;
 
     /* --- Tipografía --- */
     --font-sans: "Space Grotesk", "Inter", system-ui, -apple-system, BlinkMacSystemFont,
@@ -104,7 +120,7 @@
      * midiera 100svh, asomaría por abajo el principio de la siguiente.
      */
     --header-height: 4.25rem;
-    --gutter: clamp(1.25rem, 0.9rem + 1.8vw, 2.5rem);
+    --gutter: clamp(1.5rem, 5vw, 7rem);
 
     /* --- Radios --- */
     --radius-sm: 6px;
@@ -113,9 +129,9 @@
     --radius-full: 9999px;
 
     /* --- Sombras --- */
-    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
-    --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.45);
-    --shadow-lg: 0 24px 60px rgba(0, 0, 0, 0.55);
+    --shadow-sm: 0 1px 2px rgba(38, 38, 38, 0.1);
+    --shadow-md: 0 8px 24px rgba(38, 38, 38, 0.14);
+    --shadow-lg: 0 24px 60px rgba(38, 38, 38, 0.18);
 
     /* --- Movimiento ---
        Las duraciones son tokens para que la política de reduced-motion pueda
@@ -145,4 +161,27 @@
        44px es el mínimo accesible; los componentes lo aplican vía min-block-size
        en vez de repetir el número. */
     --tap-target: 44px;
+}
+
+:root[data-theme="dark"] {
+    --color-scheme: dark;
+    --color-bg: #181a1d;
+    --color-surface: #22252a;
+    --color-surface-raised: #2c3036;
+    --color-border: rgba(235, 237, 240, 0.14);
+    --color-border-strong: rgba(235, 237, 240, 0.28);
+    --color-text: #ebedf0;
+    --color-text-muted: rgba(235, 237, 240, 0.8);
+    --color-text-subtle: rgba(235, 237, 240, 0.64);
+    --color-accent: #f4f5f7;
+    --color-accent-strong: #ffffff;
+    --color-accent-dim: rgba(235, 237, 240, 0.1);
+    --color-accent-border: rgba(235, 237, 240, 0.3);
+    --color-focus: #f4f5f7;
+    --color-glass-surface: linear-gradient(135deg, rgba(89, 96, 106, 0.7), rgba(47, 53, 62, 0.68));
+    --color-glass-border: rgba(235, 237, 240, 0.22);
+    --shadow-glass: inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 6px 24px rgba(0, 0, 0, 0.16);
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.25);
+    --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.32);
+    --shadow-lg: 0 24px 60px rgba(0, 0, 0, 0.4);
 }

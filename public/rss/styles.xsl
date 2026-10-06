@@ -32,13 +32,17 @@
                 <link rel="icon" href="/favicon-32.png" sizes="32x32" />
                 <title><xsl:value-of select="/rss/channel/title" /></title>
                 <style>
+                    /* OJO: esto es una copia por valor de `src/styles/tokens.css`.
+                       Esta hoja se sirve cruda al navegador y no puede importar
+                       nada, así que el fork es permanente: al cambiar la paleta
+                       hay que tocar los dos sitios. */
                     :root {
-                        color-scheme: dark;
-                        --bg: #171717;
-                        --text: #d8d8d8;
-                        --muted: rgba(216, 216, 216, 0.68);
-                        --subtle: rgba(216, 216, 216, 0.45);
-                        --border: rgba(255, 255, 255, 0.08);
+                        color-scheme: light;
+                        --bg: #e6e6e6;
+                        --text: #262626;
+                        --muted: rgba(38, 38, 38, 0.78);
+                        --subtle: rgba(38, 38, 38, 0.58);
+                        --border: rgba(38, 38, 38, 0.12);
                         --sans: "Space Grotesk", "Inter", system-ui, -apple-system, sans-serif;
                         --mono: "JetBrains Mono", ui-monospace, "Cascadia Mono", monospace;
                     }

@@ -4,6 +4,7 @@ slug: voluntariado-maristas
 role: "Volunteer"
 organization: "Asociación Social 10% – CPR Maristas Santa María Ourense"
 url: https://maristascompostela.org/asociacion-social-del-10-en-ourense/
+logo: /assets/ui/maristas.webp
 order: 1
 responsibilities:
   - "Fighting poverty."

@@ -11,8 +11,9 @@ const expected = [
     { path: "cv-es.pdf", why: "el CV en castellano del visor de Contacto" },
     { path: "og-image.png", why: "imagen de previsualización al compartir enlaces" },
     { path: "favicon-32.png", why: "el icono de la pestaña" },
-    { path: "assets/ui/personaje.webp", why: "el render de la figura del centro de la bienvenida" },
-    { path: "assets/ui/personaje.glb", why: "el modelo 3D que sustituye a ese render en escritorio" },
+    { path: "assets/ui/hero-figure.webp", why: "el fotograma de la figura del centro de la bienvenida" },
+    { path: "assets/ui/hero-figure.mp4", why: "el vídeo que sustituye a ese fotograma en escritorio" },
+    { path: "assets/ui/hero-figure-narrow.webp", why: "el mismo fotograma recortado, que es lo único que se pide en estrecho" },
     { path: "assets/ui/links-qr.svg", why: "el QR de la cabecera; se genera con scripts/make-links-qr.mjs" },
 ];
 

@@ -87,7 +87,9 @@ const t = useTranslations(locale);
             import { initSectionTransition } from "@/lib/section-transition";
             import { initShortcuts } from "@/lib/shortcuts";
             import { initLocaleLinks } from "@/lib/locale-links";
-            import { initAvatar, destroyAvatar } from "@/lib/avatar";
+            import { initHeroVideo, destroyHeroVideo } from "@/lib/hero-video";
+            import { initHeroFade, destroyHeroFade } from "@/lib/hero-fade";
+            import { initHeroType, destroyHeroType } from "@/lib/hero-type";
             import { initPostMotion, destroyPostMotion } from "@/lib/post-motion";
             import { initAnalytics, destroyAnalytics } from "@/lib/analytics";
             import { initConsentBanner } from "@/lib/consent";
@@ -111,7 +113,9 @@ const t = useTranslations(locale);
                 initLocaleLinks();
                 void initPageTransition();
                 initSectionTransition();
-                void initAvatar();
+                initHeroVideo();
+                initHeroFade();
+                initHeroType();
                 initPostMotion();
                 // Al final del arranque: la vista de página se manda con el
                 // DOM de la página nueva ya montado.
@@ -126,7 +130,9 @@ const t = useTranslations(locale);
             document.addEventListener("astro:before-swap", () => {
                 booted = false;
                 destroyReveal();
-                destroyAvatar();
+                destroyHeroVideo();
+                destroyHeroFade();
+                destroyHeroType();
                 destroyPostMotion();
                 destroyAnalytics();
             });

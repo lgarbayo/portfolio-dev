@@ -2,8 +2,9 @@
  * Fuente única de verdad para "este visitante no quiere movimiento".
  *
  * El CSS ya neutraliza transiciones y animaciones declarativas, pero lo que
- * corre en JS —el observer de revelado, el wipe entre páginas, el avatar, la
- * escena 3D— tiene que consultarlo por su cuenta antes de arrancar nada.
+ * corre en JS —el observer de revelado, el wipe entre páginas, la figura del
+ * hero, la escena 3D— tiene que consultarlo por su cuenta antes de arrancar
+ * nada.
  */
 
 const QUERY = "(prefers-reduced-motion: reduce)";

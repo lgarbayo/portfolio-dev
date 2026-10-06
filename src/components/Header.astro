@@ -1,6 +1,7 @@
 ---
 import LanguageSelector from "./LanguageSelector.astro";
 import QrButton from "./QrButton.astro";
+import ThemeToggle from "./ThemeToggle.astro";
 import { publicAssetExists } from "@/lib/assets";
 import { localizedPath, useTranslations, type Locale } from "@/i18n/index";
 
@@ -18,7 +19,7 @@ const t = useTranslations(locale);
 
 // El memoji hace de logo. Si el fichero no está, la marca vuelve a las
 // iniciales: la cabecera nunca se queda sin nada donde pinchar para volver.
-const MEMOJI = "/assets/ui/memoji.webp";
+const MEMOJI = "/assets/ui/memoji-full.webp";
 const memoji = publicAssetExists(MEMOJI) ? MEMOJI : null;
 
 const home = localizedPath(locale);
@@ -63,6 +64,7 @@ const sections = [
         de un toque en cualquier tamaño de pantalla. */}
     <div class="header__actions">
         <QrButton locale={locale} />
+        <ThemeToggle locale={locale} />
 
         <button
             class="header__toggle"
@@ -131,8 +133,8 @@ const sections = [
         align-items: center;
         justify-content: space-between;
         gap: var(--space-4);
-        inline-size: min(100% - var(--gutter) * 2, var(--content-width));
-        margin-inline: auto;
+        inline-size: 100%;
+        padding-inline: var(--gutter);
         padding-block: var(--space-3);
         /* El fondo translúcido evita que el texto de la página se lea a través
            del header al hacer scroll. */
@@ -155,7 +157,7 @@ const sections = [
     .header__brand-memoji {
         /* Alto fijo y ancho libre: manda la altura de la cabecera, y el recorte
            es más alto que ancho. */
-        block-size: 2.5rem;
+        block-size: 2.75rem;
         inline-size: auto;
         transition: scale var(--duration-fast) var(--ease-out);
     }
@@ -307,7 +309,7 @@ const sections = [
                mismo color se leería como parte de la página. */
             background: var(--color-surface);
             border-block-end: 1px solid var(--color-border);
-            box-shadow: 0 18px 34px rgba(0, 0, 0, 0.45);
+            box-shadow: var(--shadow-md);
             /* Cerrado no debe ser alcanzable con Tab: visibility lo saca del
                orden de foco, cosa que opacity sola no hace. */
             visibility: hidden;

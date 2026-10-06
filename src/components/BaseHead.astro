@@ -79,6 +79,18 @@ const defaultHref =
 
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
+{/* Tiñe la barra del navegador en móvil con el fondo de la página, para que
+    el borde superior no corte en seco. Mismo valor que `--color-bg`. */}
+<meta name="theme-color" content="#e6e6e6" />
+<script is:inline>
+    // Antes del primer pintado: evita el destello claro al recargar en oscuro.
+    (() => {
+        let theme = "light";
+        try { if (localStorage.getItem("portfolio-theme") === "dark") theme = "dark"; } catch {}
+        document.documentElement.dataset.theme = theme;
+        document.querySelector('meta[name="theme-color"]')?.setAttribute("content", theme === "dark" ? "#181a1d" : "#e6e6e6");
+    })();
+</script>
 <meta name="generator" content={Astro.generator} />
 
 <title>{title}</title>

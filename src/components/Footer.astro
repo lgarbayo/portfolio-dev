@@ -60,6 +60,7 @@ const GITHUB_ICON = "/assets/ui/github-mark-white.svg";
     }
 
     .footer__inner {
+        inline-size: calc(100% - var(--gutter) * 2);
         display: flex;
         flex-wrap: wrap;
         align-items: center;
@@ -95,6 +96,12 @@ const GITHUB_ICON = "/assets/ui/github-mark-white.svg";
 
     .footer__built {
         font-family: var(--font-mono);
+    }
+
+    @media (min-width: 48.001rem) {
+        .footer {
+            padding-block-end: var(--space-8);
+        }
     }
 
     @media (max-width: 48rem) {

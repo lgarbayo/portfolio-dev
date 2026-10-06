@@ -44,6 +44,10 @@ const { id, title, description, reveal = true } = Astro.props;
         margin-block-end: var(--space-6);
     }
 
+    .section > .container {
+        inline-size: calc(100% - var(--gutter) * 2);
+    }
+
     .section__title {
         font-family: var(--font-mono);
         font-size: var(--text-2xl);

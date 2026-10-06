@@ -6,6 +6,13 @@ organization: Dataspartan
 url: https://es.dataspartan.com/
 startDate: 2025-09-01
 endDate: 2025-12-31
+images:
+  - src: "/assets/experience/dataspartan-project-manager.webp"
+    alt: "Awesome Project Manager interface with milestones and a Gantt chart"
+    width: 1600
+    height: 900
+    sourceUrl: "https://github.com/lgarbayo/awesome-project-manager-app-web"
+    caption: "Awesome Project Manager · Demonstration data"
 logo: /assets/ui/DS-Logo-Transparent-1-2.png
 responsibilities:
   - Contributed to full-stack development projects focusing on high-quality code and scalable solutions.

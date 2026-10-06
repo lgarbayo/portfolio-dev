@@ -5,8 +5,7 @@ import { prefersReducedMotion } from "./reduced-motion";
  * Monta la escena del teclado cuando la sección entra en pantalla, y sólo si el
  * entorno la admite.
  *
- * Los tres casos en que no se carga ni un byte de Three: pantalla estrecha, sin
- * WebGL, o movimiento reducido. En todos ellos la sección se queda con su
+ * Sin WebGL o con movimiento reducido no se carga Three. En todos ellos la sección se queda con su
  * listado de tecnologías, que es el contenido real y ya está en el HTML.
  */
 
@@ -42,8 +41,7 @@ export function initStackScene(): void {
     const keycaps = JSON.parse(container.dataset.keycaps ?? "[]");
     if (keycaps.length === 0) return;
 
-    const tooNarrow = window.matchMedia("(max-width: 48rem)").matches;
-    if (tooNarrow || prefersReducedMotion()) {
+    if (prefersReducedMotion()) {
         // Mismo motivo que en la figura del hero: interesa la proporción
         // entre quien ve el teclado y quien se queda con el listado.
         track("stack_scene", { scene_status: "skipped_environment" });
@@ -80,8 +78,8 @@ export function initStackScene(): void {
             // El teclado es la pieza central de la sección, no una franja
             // decorativa: ocupa el ancho de la pantalla (ver el `100vw` del CSS)
             // y buena parte del alto.
-            container.style.blockSize = "clamp(420px, 78vh, 820px)";
-            container.style.marginBlockEnd = "var(--space-6)";
+            container.style.blockSize = "clamp(260px, 70vw, min(62svh, 640px))";
+            container.style.marginBlockEnd = "var(--space-2)";
 
             const instance = createKeyboardScene(container, keycaps);
             scene = instance;
@@ -115,11 +113,20 @@ function wireControls(
 
     // La pista sobre pasar el ratón y arrastrar sólo tiene sentido con una
     // escena montada con la que hacer las dos cosas.
-    if (hint) hint.hidden = false;
+    const originalHint = hint?.textContent ?? "";
+    if (hint) {
+        if (window.matchMedia("(pointer: coarse)").matches) {
+            hint.textContent = hint.dataset.touchHint ?? originalHint;
+        }
+        hint.hidden = false;
+    }
 
     const cleanups: Array<() => void> = [
         () => {
-            if (hint) hint.hidden = true;
+            if (hint) {
+                hint.hidden = true;
+                hint.textContent = originalHint;
+            }
         },
     ];
 

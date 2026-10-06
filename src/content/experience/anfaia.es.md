@@ -1,13 +1,40 @@
 ---
 locale: es
 slug: anfaia
-role: AI Engineer Intern
-organization: ANFAIA
-url: https://anfaia.org/
-startDate: 2026-07-01
-logo: /assets/ui/ANFAIA_logo_web.png
+role: "AI/ML Engineer Intern"
+organization: "Asociación FARO para la Aceleración de la Inteligencia Artificial - ANFAIA"
+url: "https://anfaia.org/"
+startDate: "2026-07-01"
+endDate: "2026-08-31"
+employmentType: "Jornada completa"
+location: "En remoto"
+images:
+  - src: "/assets/experience/anfaia-uos-viewer.webp"
+    alt: "Visor UOS con la reconstrucción tridimensional de la dentadura"
+    width: 960
+    height: 515
+    sourceUrl: "https://github.com/ANFAIA/Agentic-Smart-Health"
+    caption: "Visor del gemelo digital dental · ANFAIA"
+  - src: "/assets/experience/anfaia-website-home.webp"
+    alt: "Portada de la web de Agentic Smart Health"
+    width: 1440
+    height: 950
+    sourceUrl: "https://agentic-smart-health.lgarbayo.com/"
+    caption: "Web del proyecto"
+  - src: "/assets/experience/anfaia-website-pipeline.webp"
+    alt: "Pipeline de procesamiento de datos de Agentic Smart Health"
+    width: 1440
+    height: 950
+    sourceUrl: "https://agentic-smart-health.lgarbayo.com/technical-side/"
+    caption: "Pipeline multiagente"
+  - src: "/assets/experience/anfaia-website-uos.webp"
+    alt: "Formato Unified Oral Scene explicado en la web del proyecto"
+    width: 1440
+    height: 950
+    sourceUrl: "https://agentic-smart-health.lgarbayo.com/technical-side/"
+    caption: "Formato UOS"
+logo: "/assets/ui/ANFAIA_logo_web.png"
 responsibilities:
-  - Como AI Engineer Intern dentro del programa de becas de verano de ANFAIA, fui el encargado de desarrollar <a href="https://agentic-smart-health.lgarbayo.com" target="_blank" rel="noopener noreferrer">Agentic Smart Health</a>, un proyecto open source enfocado en solucionar los silos de información en odontología.
-  - >-
-    Durante la beca, construí un sistema multiagente en Python estructurado en un monorepo gestionado con uv. Mi trabajo se centró en la creación de un Gemelo Digital basado en 3D Gaussian Splatting y en el desarrollo de un orquestador capaz de unificar escáneres DICOM, archivos STL y PDFs médicos. Además, integré este sistema con plataformas clínicas como 3D Slicer a través de un servidor MCP, optimizando el análisis clínico y garantizando la trazabilidad de los datos médicos.
+  - "Construí un sistema multiagente que unifica datos dentales heterogéneos (CBCT, STL, informes clínicos y fotografías) en un gemelo digital del paciente basado en Gaussian Splatting, con atributos clínicos por región y series longitudinales."
+  - "Como resultado, estamos introduciendo un nuevo formato abierto y extensible llamado UOS (Unified Oral Scene). Un archivo .uos es un ZIP sin comprimir cuya primera entrada es un manifest.json que declara todos los datos que contiene mediante su hash de contenido, los sistemas de coordenadas con nombre en los que se sitúan esos datos y las transformaciones medidas que relacionan esos sistemas."
 ---

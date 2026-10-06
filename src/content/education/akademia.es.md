@@ -27,4 +27,15 @@ images:
     alt: "Foto de grupo de la promoción de Akademia Future Builders"
   - src: /assets/ui/1781016059666.jpg
     alt: "Sesión de Akademia en la Fundación Innovación Bankinter"
+  - src: /assets/education/akademia/seed-layers.webp
+    alt: "Mapas SEED de demanda residencial, viabilidad económica y saturación territorial"
+  - src: /assets/education/akademia/seed-clustering.webp
+    alt: "Puntuaciones SEED antes y después del clustering"
+  - src: /assets/education/akademia/seed-locations.webp
+    alt: "Las 1.000 secciones censales seleccionadas por SEED"
+  - src: /assets/education/akademia/seed-fom-results.webp
+    alt: "Comparación de las 50 mejores ubicaciones según SEED y F-of-M"
+  - src: /assets/education/akademia/seed-sector-comparison.webp
+    alt: "Comparación de los resultados SEED con la distribución regional del sector"
+
 ---

@@ -25,4 +25,15 @@ images:
     alt: "Group photo of the Akademia Future Builders cohort"
   - src: /assets/ui/1781016059666.jpg
     alt: "Akademia session at Fundación Innovación Bankinter"
+  - src: /assets/education/akademia/seed-layers.webp
+    alt: "SEED maps of residential demand, economic viability and territorial saturation"
+  - src: /assets/education/akademia/seed-clustering.webp
+    alt: "SEED scores before and after clustering"
+  - src: /assets/education/akademia/seed-locations.webp
+    alt: "The 1,000 census areas selected by SEED"
+  - src: /assets/education/akademia/seed-fom-results.webp
+    alt: "Comparison of the top 50 locations selected by SEED and F-of-M"
+  - src: /assets/education/akademia/seed-sector-comparison.webp
+    alt: "Comparison of SEED results with the regional distribution of the sector"
+
 ---

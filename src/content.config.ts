@@ -122,6 +122,8 @@ const experience = defineCollection({
         ...localized,
         role: z.string(),
         organization: z.string(),
+        employmentType: z.string().optional(),
+        location: z.string().optional(),
         /**
          * Opcional: hay entradas sin periodo —un voluntariado que se cuenta por
          * lo que es, no por cuándo fue—. Sin fecha no se pinta la línea del
@@ -138,6 +140,14 @@ const experience = defineCollection({
         order: z.number().int().default(0),
         responsibilities: z.array(z.string()).min(1),
         logo: z.string().optional(),
+        images: z.array(z.object({
+            src: z.string(),
+            alt: z.string(),
+            width: z.number().int().positive(),
+            height: z.number().int().positive(),
+            sourceUrl: z.url(),
+            caption: z.string().optional(),
+        })).default([]),
         stack: z.array(z.string()).default([]),
         url: z.url().optional(),
     }),
@@ -165,7 +175,7 @@ const education = defineCollection({
         repoUrl: z.url().optional(),
         /** Fotos que acompañan a la descripción. El alt es obligatorio. */
         images: z
-            .array(z.object({ src: z.string(), alt: z.string() }))
+            .array(z.object({ src: z.string(), alt: z.string(), sourceUrl: z.url().optional() }))
             .default([]),
     }),
 });

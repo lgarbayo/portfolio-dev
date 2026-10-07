@@ -105,6 +105,23 @@ advertising signals stay denied for good and are never asked about.
 
 `src/lib/analytics.ts` has the full reasoning and the event list.
 
+## Hero media
+
+The light and dark hero videos and posters are committed in `public/assets/ui`.
+They require no AI service or media processing during a build. To regenerate them,
+place the enhanced source in the ignored `assets-src/video/robot-headturn-enhanced.mp4`
+and run:
+
+```bash
+node scripts/make-hero-figure.mjs
+python3 scripts/make-hero-dark.py
+```
+
+Both scripts need FFmpeg; the dark version also needs NumPy and OpenCV in Python.
+It uses a foreground mask to replace the background with `#181a1d`, preserving
+the robot's eyes and highlights. Both videos retain 54 keyframes at 24 fps for
+cursor seeking. The theme selects the matching video and still images.
+
 ## License
 
 MIT — see [LICENSE.md](LICENSE.md).

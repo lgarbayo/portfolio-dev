@@ -58,7 +58,7 @@ type HeroStatus = "ready" | "skipped_environment" | "skipped_decode" | "failed";
 /*
  * Qué acabó viendo el visitante en el hueco de la figura.
  *
- * Es el dato que más falta hace de toda la portada: el vídeo cuesta 426 KB y
+ * Es el dato que más falta hace de toda la portada: el vídeo cuesta ~1,1 MB y
  * las puertas de abajo lo descartan en móvil, en táctil, con movimiento
  * reducido y con ahorro de datos. Sin medirlo no hay forma de saber si ese
  * trabajo lo ve la mayoría o una minoría, y las dos respuestas llevan a
@@ -80,13 +80,15 @@ export function initHeroVideo(): void {
     const slot = document.querySelector<HTMLElement>("[data-hero-figure]");
     if (!slot) return;
 
-    const src = slot.dataset.video;
+    const src = document.documentElement.dataset.theme === "dark"
+        ? slot.dataset.videoDark || slot.dataset.video
+        : slot.dataset.video;
     // Sin vídeo no hay nada que montar. La imagen ya está puesta.
     if (!src) return;
 
     const narrow = window.matchMedia("(max-width: 56rem)").matches;
     const coarse = !window.matchMedia("(hover: hover) and (pointer: fine)").matches;
-    // Medio mega de adorno es exactamente lo que Save-Data existe para evitar.
+    // Save-Data evita descargar el vídeo decorativo cuando se ahorran datos.
     const saveData = Boolean(
         (navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData,
     );
@@ -385,3 +387,7 @@ export function destroyHeroVideo(): void {
     cleanup?.();
     cleanup = null;
 }
+
+// Cambiar de tema sustituye el vídeo y deja el póster correspondiente hasta
+// que el frontal de la nueva versión esté decodificado.
+document.addEventListener("portfolio:theme-change", () => initHeroVideo());

@@ -34,6 +34,9 @@ const HERO_POSTER = "/assets/ui/hero-figure.webp";
    `scripts/make-hero-figure.mjs`. */
 const HERO_POSTER_NARROW = "/assets/ui/hero-figure-narrow.webp";
 const HERO_VIDEO = "/assets/ui/hero-figure.mp4";
+const HERO_VIDEO_DARK = "/assets/ui/hero-figure-dark.mp4";
+const HERO_POSTER_DARK = "/assets/ui/hero-figure-dark.webp";
+const HERO_POSTER_NARROW_DARK = "/assets/ui/hero-figure-narrow-dark.webp";
 const HERO_FRAMES = "54";
 const HERO_FPS = "24";
 /* Dónde cae el frontal dentro del arco. No es el primer fotograma: el clip gira
@@ -50,6 +53,12 @@ const HERO_ANCHOR = "0.70";
 const poster = publicAssetExists(HERO_POSTER) ? HERO_POSTER : null;
 const posterNarrow = publicAssetExists(HERO_POSTER_NARROW) ? HERO_POSTER_NARROW : null;
 const video = publicAssetExists(HERO_VIDEO) ? HERO_VIDEO : null;
+const videoDark = publicAssetExists(HERO_VIDEO_DARK) ? HERO_VIDEO_DARK : null;
+const posters = [
+    { theme: "light", wide: poster, narrow: posterNarrow },
+    { theme: "dark", wide: publicAssetExists(HERO_POSTER_DARK) ? HERO_POSTER_DARK : poster,
+        narrow: publicAssetExists(HERO_POSTER_NARROW_DARK) ? HERO_POSTER_NARROW_DARK : posterNarrow },
+];
 
 const contact = channels.find((channel) => channel.name === "X")!;
 
@@ -164,27 +173,28 @@ const tiles = [
             data-anchor={HERO_ANCHOR}
             data-rest={HERO_REST}
             {...video ? { "data-video": video } : {}}
+            {...videoDark ? { "data-video-dark": videoDark } : {}}
         >
             {
-                poster && (
-                    <picture>
-                        <source media="(max-width: 48rem)" srcset={poster} />
+                posters.map((variant) => variant.wide && (
+                    <picture class:list={["hero__poster", `hero__poster--${variant.theme}`]}>
+                        <source media="(max-width: 48rem)" srcset={variant.wide} />
                         {/* El corte es el mismo que usan el reapilado y la
                             puerta de `hero-video.ts`: donde deja de haber vídeo
                             empieza a hacer falta el recorte centrado. */}
-                        {posterNarrow && (
-                            <source media="(max-width: 56rem)" srcset={posterNarrow} />
+                        {variant.narrow && (
+                            <source media="(max-width: 56rem)" srcset={variant.narrow} />
                         )}
                         <img
                             class="hero__figure-poster"
-                            src={poster}
+                            src={variant.wide}
                             alt=""
-                            width="1440"
-                            height="820"
+                            width="960"
+                            height="546"
                             fetchpriority="high"
                         />
                     </picture>
-                )
+                ))
             }
         </div>
 
@@ -252,20 +262,6 @@ const tiles = [
 
 <style>
     .hero {
-        /* El hero conserva la paleta clara sobre el fondo original del vídeo. */
-        --color-bg: #e6e6e6;
-        --color-surface: #f0f0f0;
-        --color-surface-raised: #fafafa;
-        --color-text: #262626;
-        --color-text-muted: rgba(38, 38, 38, 0.78);
-        --color-text-subtle: rgba(38, 38, 38, 0.58);
-        --color-accent: #0f0f0f;
-        --color-accent-strong: #000000;
-        --color-accent-dim: rgba(15, 15, 15, 0.1);
-        --color-accent-border: rgba(15, 15, 15, 0.28);
-        --color-border: rgba(38, 38, 38, 0.12);
-        --color-border-strong: rgba(38, 38, 38, 0.22);
-        --color-focus: #0f0f0f;
         /* Primera pantalla completa, y sólo la bienvenida: lo de debajo se ve al
            hacer scroll, no asomando por el borde. */
         display: flex;
@@ -493,6 +489,10 @@ const tiles = [
     .hero__figure-poster {
         transition: opacity var(--duration-slow) var(--ease-out);
     }
+
+    .hero__poster--dark { display: none; }
+    :global(html[data-theme="dark"]) .hero__poster--light { display: none; }
+    :global(html[data-theme="dark"]) .hero__poster--dark { display: block; }
 
     /* El póster se retira sólo cuando hay un fotograma pintado que lo
        sustituya, y con un fundido: el vídeo arranca en esa misma pose, así que

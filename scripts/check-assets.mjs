@@ -13,6 +13,9 @@ const expected = [
     { path: "favicon-32.png", why: "el icono de la pestaña" },
     { path: "assets/ui/hero-figure.webp", why: "el fotograma de la figura del centro de la bienvenida" },
     { path: "assets/ui/hero-figure.mp4", why: "el vídeo que sustituye a ese fotograma en escritorio" },
+    { path: "assets/ui/hero-figure-dark.mp4", why: "el giro del robot con fondo oscuro" },
+    { path: "assets/ui/hero-figure-dark.webp", why: "el frontal del hero en modo oscuro" },
+    { path: "assets/ui/hero-figure-narrow-dark.webp", why: "el frontal oscuro para pantalla estrecha" },
     { path: "assets/ui/hero-figure-narrow.webp", why: "el mismo fotograma recortado, que es lo único que se pide en estrecho" },
     { path: "assets/ui/links-qr.svg", why: "el QR de la cabecera; se genera con scripts/make-links-qr.mjs" },
 ];

@@ -5,6 +5,7 @@ const storageKey = "portfolio-theme";
 let initialized = false;
 
 function applyTheme(theme: Theme, target: Document = document) {
+    const changed = target.documentElement.dataset.theme !== theme;
     target.documentElement.dataset.theme = theme;
     target.querySelector('meta[name="theme-color"]')?.setAttribute("content", theme === "dark" ? "#181a1d" : "#e6e6e6");
     target.querySelectorAll<HTMLButtonElement>("[data-theme-toggle]").forEach((button) => {
@@ -12,6 +13,9 @@ function applyTheme(theme: Theme, target: Document = document) {
         button.setAttribute("aria-label", label);
         button.title = label;
     });
+    if (changed && target === document) {
+        document.dispatchEvent(new CustomEvent("portfolio:theme-change"));
+    }
 }
 
 export function initTheme() {

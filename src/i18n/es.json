@@ -120,5 +120,8 @@
     "consent.reject": "Rechazar",
     "notFound.title": "Página no encontrada",
     "notFound.description": "Esa URL no lleva a ninguna parte. El portfolio, en cambio, sí.",
-    "notFound.home": "Ir a la página principal"
+    "notFound.home": "Ir a la página principal",
+    "nav.press": "Prensa",
+    "press.title": "Ecos en la prensa",
+    "press.readArticle": "Leer artículo"
 }

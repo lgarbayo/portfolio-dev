@@ -120,5 +120,8 @@
     "consent.reject": "Reject",
     "notFound.title": "Page not found",
     "notFound.description": "That URL doesn't lead anywhere. The portfolio, however, does.",
-    "notFound.home": "Go to the home page"
+    "notFound.home": "Go to the home page",
+    "nav.press": "Press",
+    "press.title": "In the press",
+    "press.readArticle": "Read article"
 }

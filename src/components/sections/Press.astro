@@ -1,0 +1,98 @@
+---
+import Section from "../Section.astro";
+import { pressArticles } from "@/lib/press";
+import { localeTags, useTranslations, type Locale } from "@/i18n/index";
+
+interface Props { locale: Locale; }
+const { locale } = Astro.props;
+const t = useTranslations(locale);
+const date = new Intl.DateTimeFormat(localeTags[locale], {
+    day: "numeric", month: "long", year: "numeric", timeZone: "UTC",
+});
+---
+
+<Section id="press" title={t("press.title")}>
+    <ul class="press__grid" role="list">
+        {pressArticles.map((article) => (
+            <li class="press__card" data-reveal>
+                <a class="press__link" href={article.url} target="_blank" rel="noopener noreferrer"
+                    data-track="press_link_click" data-track-publisher={article.publisher}>
+                    <div class="press__meta">
+                        <span class="press__publisher">{article.publisher}</span>
+                        <time datetime={article.published}>{date.format(new Date(article.published))}</time>
+                    </div>
+                    <h3 class="press__headline" lang={article.language}>{article.title}</h3>
+                    <span class="press__read">{t("press.readArticle")} <span aria-hidden="true">↗</span></span>
+                </a>
+            </li>
+        ))}
+    </ul>
+</Section>
+
+<style>
+    .press__grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: var(--space-5);
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    .press__card {
+        min-inline-size: 0;
+        background: var(--color-glass-surface);
+        border: 1px solid var(--color-glass-border);
+        border-radius: 2rem;
+        box-shadow: var(--shadow-glass);
+        backdrop-filter: blur(16px) saturate(120%);
+        -webkit-backdrop-filter: blur(16px) saturate(120%);
+        transition: translate 180ms ease-out, box-shadow 180ms ease-out, border-color 180ms ease-out;
+    }
+    .press__link {
+        display: flex;
+        flex-direction: column;
+        block-size: 100%;
+        padding: clamp(1.25rem, 2vw, 2rem);
+        gap: var(--space-5);
+        color: var(--color-text);
+        text-decoration: none;
+        border-radius: inherit;
+    }
+    .press__meta { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.5rem 1rem; }
+    .press__publisher { font-weight: var(--weight-semibold); }
+    .press__meta time { font-size: var(--text-xs); color: var(--color-text-subtle); }
+    .press__headline {
+        font-family: var(--font-sans);
+        font-size: clamp(1.2rem, 1rem + 0.4vw, 1.5rem);
+        line-height: 1.4;
+        letter-spacing: -0.025em;
+    }
+    .press__read {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-block-start: auto;
+        font-size: var(--text-sm);
+        font-weight: var(--weight-medium);
+    }
+    .press__card:focus-within {
+        border-color: color-mix(in srgb, var(--color-text) 35%, var(--color-glass-border));
+        box-shadow: var(--shadow-glass), inset 0 0 40px rgba(255, 255, 255, 0.15), 0 12px 30px rgba(0, 0, 0, 0.12);
+    }
+    @media (hover: hover) and (pointer: fine) {
+        .press__card:hover {
+            translate: 0 -4px;
+            border-color: color-mix(in srgb, var(--color-text) 35%, var(--color-glass-border));
+            box-shadow: var(--shadow-glass), inset 0 0 40px rgba(255, 255, 255, 0.15), 0 12px 30px rgba(0, 0, 0, 0.12);
+        }
+    }
+    @media (max-width: 80rem) { .press__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+    @media (max-width: 48rem) {
+        .press__grid { grid-template-columns: 1fr; }
+        .press__card { border-radius: 1.5rem; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+        .press__card { transition: none; }
+        .press__card:hover { translate: none; }
+    }
+</style>

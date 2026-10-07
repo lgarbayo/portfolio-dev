@@ -120,5 +120,8 @@
     "consent.reject": "Rexeitar",
     "notFound.title": "Páxina non atopada",
     "notFound.description": "Ese enderezo non leva a ningures. O portfolio, en cambio, si.",
-    "notFound.home": "Ir á páxina principal"
+    "notFound.home": "Ir á páxina principal",
+    "nav.press": "Prensa",
+    "press.title": "Ecos na prensa",
+    "press.readArticle": "Ler artigo"
 }

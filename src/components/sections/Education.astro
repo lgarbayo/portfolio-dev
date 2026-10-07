@@ -44,7 +44,10 @@ const issued = new Intl.DateTimeFormat(localeTags[locale], { month: "short", yea
                 <ul class="education__languages" role="list">
                     {languages.data.items.map((item) => (
                         <li class="education__language">
-                            <span class="education__language-name">{item.name}</span>
+                            <span class="education__language-heading">
+                                {item.flag && <img class="education__language-flag" src={item.flag} alt="" width="40" height="28" loading="lazy" />}
+                                <span class="education__language-name">{item.name}</span>
+                            </span>
                             <span class="education__language-level">
                                 {item.level}
                                 {item.credential && (
@@ -67,7 +70,7 @@ const issued = new Intl.DateTimeFormat(localeTags[locale], { month: "short", yea
     */}
     {
         certifications.length > 0 && (
-            <div class="education__block">
+            <div class="education__block education__certifications">
                 <h3 class="education__block-title" data-reveal>
                     {t("education.certifications.title")}
                 </h3>
@@ -126,28 +129,79 @@ const issued = new Intl.DateTimeFormat(localeTags[locale], { month: "short", yea
     }
 
     .education__languages {
-        display: flex;
-        flex-direction: column;
-        gap: var(--space-2);
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
+        gap: var(--space-4);
         margin: 0;
         padding: 0;
         list-style: none;
-        max-inline-size: var(--prose-width);
     }
 
-    /* Nombre y nivel en la misma línea mientras quepan, y en dos cuando no: en
-       móvil "Inglés — Intermedio-avanzado · Cambridge (FCE)" no entra de una. */
     .education__language {
         display: flex;
-        flex-wrap: wrap;
-        align-items: baseline;
+        flex-direction: column;
+        align-items: start;
         gap: var(--space-2);
         font-size: var(--text-sm);
+        padding: var(--space-5);
+        border-radius: 1.25rem;
+    }
+
+    .education__language,
+    .education__certifications {
+        background: var(--color-glass-surface);
+        border: 1px solid var(--color-glass-border);
+        box-shadow: var(--shadow-glass);
+        backdrop-filter: blur(16px) saturate(120%);
+        -webkit-backdrop-filter: blur(16px) saturate(120%);
+        transition: translate 180ms ease-out, box-shadow 180ms ease-out, border-color 180ms ease-out;
+    }
+
+    :is(.education__language, .education__certifications):focus-within {
+        border-color: color-mix(in srgb, var(--color-text) 35%, var(--color-glass-border));
+        box-shadow: var(--shadow-glass), inset 0 0 40px rgba(255, 255, 255, 0.15), 0 12px 30px rgba(0, 0, 0, 0.12);
+    }
+
+    @media (hover: hover) and (pointer: fine) {
+        :is(.education__language, .education__certifications):hover {
+            translate: 0 -4px;
+            border-color: color-mix(in srgb, var(--color-text) 35%, var(--color-glass-border));
+            box-shadow: var(--shadow-glass), inset 0 0 40px rgba(255, 255, 255, 0.15), 0 12px 30px rgba(0, 0, 0, 0.12);
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        :is(.education__language, .education__certifications) { transition: none; }
+        :is(.education__language, .education__certifications):hover { translate: none; }
+    }
+
+    .education__certifications {
+        padding: clamp(1.25rem, 3vw, 2.5rem);
+        border-radius: 2rem;
+    }
+
+    .education__certifications .education__block-title {
+        color: var(--color-text);
     }
 
     .education__language-name {
+        font-size: var(--text-lg);
         font-weight: var(--weight-medium);
         color: var(--color-text);
+    }
+
+    .education__language-heading {
+        display: flex;
+        align-items: center;
+        gap: var(--space-3);
+    }
+
+    .education__language-flag {
+        inline-size: 2.5rem;
+        block-size: 1.75rem;
+        object-fit: contain;
+        flex-shrink: 0;
+        filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.15));
     }
 
     .education__language-level {
@@ -171,6 +225,11 @@ const issued = new Intl.DateTimeFormat(localeTags[locale], { month: "short", yea
         font-size: var(--text-sm);
         font-weight: var(--weight-medium);
         color: var(--color-text);
+    }
+
+    .education__cert {
+        padding-block: var(--space-3);
+        border-block-end: 1px solid var(--color-border);
     }
 
     .education__cert-meta {

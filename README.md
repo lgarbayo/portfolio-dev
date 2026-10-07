@@ -1,17 +1,68 @@
-# Portfolio
+# Luis Garbayo — Portfolio
 
-> A web portfolio with a playable version hidden one click away.
+> Software & AI engineering, healthcare technology, and a playable portfolio.
+
+[Visit lgarbayo.com](https://lgarbayo.com) · [Blog](https://lgarbayo.com/en/blog/)
+
+![Desktop hero in light mode, with Luis's introduction, project and blog links, and an interactive robot](docs/images/hero-light.png)
 
 ## About
 
-This started as a 2D game you had to play to read my CV. It still is a game — but the game
-is no longer the toll booth. The site is now a real, indexable portfolio in three languages,
-and the retro version lives behind a launcher in the corner for anyone who'd rather explore
-my work by walking a sprite into a pipe.
+My personal portfolio brings together my work in software and AI, with a particular
+interest in healthcare and building technology that improves people's lives.
+
+The site is available in **English, Spanish and Galician**, with a responsive layout,
+light and dark themes, and a blog. Its original 2D game remains available through
+**Game Mode**, using the same portfolio content as the main website.
+
+## Website previews
+
+### Projects
+
+Silver glass cards show project screenshots, descriptions and links to repositories,
+demos and other resources. Cards highlight on hover and keyboard focus.
+
+![Project cards featuring Agentic Smart Health and Taiafox](docs/images/projects.png)
+
+### Interactive stack
+
+A 3D keyboard displays technology logos in color. Hover or tap a key to explore it,
+drag to rotate the board, and optionally enable key sounds. The technology lists remain
+readable when WebGL or animation is unavailable.
+
+![Interactive 3D keyboard surrounded by technology categories](docs/images/stack.png)
+
+<details>
+<summary>Dark theme and mobile hero</summary>
+
+The hero has matching light and dark media. On mobile, it uses a still image and
+the header menu provides section navigation.
+
+![Desktop hero in dark mode with the robot's background matched to the page](docs/images/hero-dark.png)
+
+<img src="docs/images/hero-mobile.png" alt="Mobile hero with introduction, project, contact and blog buttons" width="390" />
+
+</details>
+
+Screenshots are stored in `docs/images/` and show the local production build.
+
+## Portfolio sections
+
+- **About:** a short introduction, Ourense location link, portrait and English/Spanish CVs.
+- **Experience:** current and previous roles, organization logos and selected project images.
+- **Projects:** featured work and smaller cards for other activities.
+- **Stack:** an interactive keyboard and technology categories.
+- **Education:** degrees with image galleries, language cards and certifications.
+- **In the press:** links to coverage in HISTORA, Faro de Vigo, La Voz de Galicia,
+  Atlántico and La Región.
+- **Blog:** article cards with linked motion previews and localized RSS feeds.
+
+## Game Mode
 
 Inspired by the **iconic worlds of Super Mario Bros**, the game features custom-designed
 character sprites and four worlds — about, projects, experience and contact — that blend
-nostalgia with personal branding.
+nostalgia with the portfolio. Its panels share the website's profile, projects,
+experience, education, languages, certifications, activities and press links.
 
 ![Sprite sheet: four frames of a pixel-art character with brown hair and a blue jumper — standing, walking, jumping and facing forward](public/assets/sprites/player.png)
 
@@ -33,6 +84,16 @@ npm run build    # type check, build, translation coverage, asset and bundle che
 npm run preview  # serve the production build
 ```
 
+The development server defaults to `http://localhost:4321`. Opening `/` selects
+the visitor's language and lands on the hero; the header portrait also returns there.
+
+For a quick validation without generating a production build:
+
+```bash
+npm run check
+npm run coverage:i18n
+```
+
 ## Structure
 
 ```text
@@ -41,12 +102,18 @@ src/
   i18n/         interface strings (en.json is the contract; es.json and gl.json translate it)
   components/   layout, sections and the game launcher
   game/         the Phaser game — host.ts is its only entry point
-  lib/          shared client behaviour (reveal, 3D scenes, game lifecycle)
-scripts/        build-time checks that run after every production build
+  lib/          shared data and client behaviour (press, profile, themes, 3D, game lifecycle)
+public/assets/  committed images, video, logos, flags and game assets
+docs/images/    website screenshots used in this README
+scripts/        build-time checks and optional hero media processing
 ```
 
 Adding a project, a job or a blog post means adding a file under `src/content/` — no
 component needs editing.
+
+Press articles live in `src/lib/press.ts`. Project selection and order are shared
+through `getPortfolioProjects()` in `src/lib/content.ts`, so the website and Game Mode
+show the same projects.
 
 ## Content and locales
 
@@ -68,8 +135,9 @@ nor `build` deletes this directory, so a build can run alongside the development
 Articles are Markdown files in `src/content/posts/`, named `<slug>.<locale>.md` like the rest
 of the content. Four fields are required — `title`, `description`, `pubDate` and `slug` — and
 `draft: true` keeps a post visible in `npm run dev` while hiding it from production, the feed
-and the sitemap. An optional `motion` clip (with its `motionAlt`) loops beside the entry in
-the index; it only plays on screen, and never with reduced motion.
+and the sitemap. An optional `motion` clip (with its `motionAlt`) appears at the top of
+the article card and links to the article; it only plays on screen, and never with
+reduced motion.
 
 Every locale gets a feed at `/<locale>/rss.xml`. Opening one in a browser shows a readable
 page rather than raw XML — that is `public/rss/styles.xsl`, a stylesheet the browser applies

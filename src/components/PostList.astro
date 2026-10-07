@@ -73,6 +73,11 @@ const formatter = new Intl.DateTimeFormat(localeTags[locale], {
                       que es exactamente su primer fotograma.
                     */}
                     {post.data.motion && (
+                        <a
+                            class="postlist__media-link"
+                            href={localizedPath(post.data.locale, `blog/${post.data.slug}`)}
+                            aria-label={post.data.title}
+                        >
                         <video
                             class="postlist__motion"
                             src={post.data.motion}
@@ -84,6 +89,7 @@ const formatter = new Intl.DateTimeFormat(localeTags[locale], {
                             preload="none"
                             data-post-motion
                         />
+                        </a>
                     )}
                 </li>
             ))}
@@ -93,46 +99,74 @@ const formatter = new Intl.DateTimeFormat(localeTags[locale], {
 
 <style>
     .postlist {
-        display: flex;
-        flex-direction: column;
-        gap: var(--space-6);
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: var(--space-5);
         margin: 0;
         padding: 0;
         list-style: none;
     }
 
-    /* Texto a la izquierda, clip a la derecha. El clip se dimensiona por sí
-       mismo y el texto se queda con lo que sobra; `minmax(0, 1fr)` es lo que
-       evita que un título largo empuje al clip fuera de la fila. */
     .postlist__item {
-        display: grid;
-        grid-template-columns: minmax(0, 1fr) auto;
-        align-items: start;
-        gap: var(--space-6);
+        display: flex;
+        flex-direction: column;
+        min-inline-size: 0;
+        gap: var(--space-5);
+        padding: 0.75rem;
+        background: var(--color-glass-surface);
+        border: 1px solid var(--color-glass-border);
+        box-shadow: var(--shadow-glass);
+        backdrop-filter: blur(16px) saturate(120%);
+        -webkit-backdrop-filter: blur(16px) saturate(120%);
+        border-radius: 2rem;
+        overflow: hidden;
+        transition: translate 180ms ease-out, box-shadow 180ms ease-out, border-color 180ms ease-out;
+    }
+
+    .postlist__item:focus-within {
+        border-color: color-mix(in srgb, var(--color-text) 35%, var(--color-glass-border));
+        box-shadow: var(--shadow-glass), inset 0 0 40px rgba(255, 255, 255, 0.15), 0 12px 30px rgba(0, 0, 0, 0.12);
+    }
+
+    @media (hover: hover) and (pointer: fine) {
+        .postlist__item:hover {
+            translate: 0 -4px;
+            border-color: color-mix(in srgb, var(--color-text) 35%, var(--color-glass-border));
+            box-shadow: var(--shadow-glass), inset 0 0 40px rgba(255, 255, 255, 0.15), 0 12px 30px rgba(0, 0, 0, 0.12);
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .postlist__item { transition: none; }
+        .postlist__item:hover { translate: none; }
+    }
+
+    .postlist__text {
+        padding: 0.5rem 0.75rem 0.75rem;
+    }
+
+    .postlist__media-link {
+        order: -1;
+        display: block;
+        border-radius: 1.25rem;
     }
 
     .postlist__motion {
-        /* El tope son 22rem y no más: el clip mide 476 px de ancho, así que a
-           partir de ahí se estaría ampliando y se vería blando. */
-        inline-size: clamp(12rem, 24vw, 22rem);
+        display: block;
+        inline-size: 100%;
         aspect-ratio: 476 / 346;
         object-fit: cover;
-        border: 1px solid var(--color-border);
-        border-radius: var(--radius-md);
+        border-radius: 1.25rem;
         background: var(--color-surface);
     }
 
-    /* En estrecho el clip pasa debajo del texto y a lo ancho: al lado se
-       quedaría en una miniatura ilegible y le robaría sitio al titular. */
     @media (max-width: 48rem) {
-        .postlist__item {
+        .postlist {
             grid-template-columns: 1fr;
         }
 
-        .postlist__motion {
-            inline-size: 100%;
-            max-inline-size: 20rem;
-        }
+        .postlist__item { border-radius: 1.5rem; padding: 0.5rem; }
+        .postlist__motion { border-radius: 1rem; }
     }
 
     .postlist__empty {
@@ -151,6 +185,7 @@ const formatter = new Intl.DateTimeFormat(localeTags[locale], {
     .postlist__meta {
         display: flex;
         align-items: center;
+        flex-wrap: wrap;
         gap: var(--space-2);
         margin: 0;
         font-family: var(--font-mono);
@@ -193,7 +228,7 @@ const formatter = new Intl.DateTimeFormat(localeTags[locale], {
 
     .postlist__description {
         margin-block-start: var(--space-2);
-        max-inline-size: var(--prose-width);
+        inline-size: 100%;
         color: var(--color-text-muted);
     }
 

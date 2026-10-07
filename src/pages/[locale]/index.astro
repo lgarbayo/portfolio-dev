@@ -6,6 +6,7 @@ import Projects from "@/components/sections/Projects.astro";
 import Stack from "@/components/sections/Stack.astro";
 import Experience from "@/components/sections/Experience.astro";
 import Education from "@/components/sections/Education.astro";
+import Press from "@/components/sections/Press.astro";
 import PersonSchema from "@/components/PersonSchema.astro";
 import { hasPublishedPosts } from "@/lib/content";
 import { locales, useTranslations, type Locale } from "@/i18n/index";
@@ -34,8 +35,9 @@ const title = t("site.title");
 
     <Hero locale={locale} showBlog={showBlog} />
     <About locale={locale} />
+    <Experience locale={locale} />
     <Projects locale={locale} />
     <Stack locale={locale} />
-    <Experience locale={locale} />
     <Education locale={locale} />
+    <Press locale={locale} />
 </BaseLayout>

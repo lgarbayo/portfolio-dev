@@ -56,6 +56,7 @@ const formatPeriod = (start: Date, end?: Date) =>
                             {item.data.logo && (
                                 <img
                                     class="timeline__logo"
+                                    class:list={{ "timeline__logo--clinic": item.data.slug === "histora" }}
                                     src={item.data.logo}
                                     alt={t("experience.logoAlt", { organization: item.data.organization })}
                                     width="96"
@@ -325,6 +326,13 @@ const formatPeriod = (start: Date, end?: Date) =>
         block-size: 2.5rem;
         inline-size: auto;
         opacity: 0.85;
+    }
+
+    .timeline__logo--clinic {
+        padding: 0.25rem;
+        border-radius: 0.25rem;
+        background: #fafafa;
+        opacity: 1;
     }
 
     .timeline__period {

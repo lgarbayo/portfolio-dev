@@ -1,0 +1,11 @@
+{
+  "spider-man.gif": {
+    "source": "https://es.picmix.com/stamp/Spider-Man-Marvel-2509445",
+    "download": "https://img1.picmix.com/output/stamp/normal/5/4/4/9/2509445_d4276.gif",
+    "author": "SapplerXCX"
+  },
+  "spider-man-still.webp": {
+    "source": "spider-man.gif",
+    "frame": 0
+  }
+}

@@ -78,6 +78,20 @@ export async function getLocalizedEntry<C extends CollectionKey>(
     return entries[0];
 }
 
+/** Selección y orden de proyectos compartidos por la web y Game Mode. */
+export async function getPortfolioProjects(locale: Locale) {
+    const projects = (await getLocalizedEntries("projects", locale)).sort((a, b) => {
+        if (a.data.featured !== b.data.featured) return a.data.featured ? -1 : 1;
+        return (b.data.year ?? 0) - (a.data.year ?? 0) || a.data.slug.localeCompare(b.data.slug);
+    });
+    const taiafox = projects.findIndex((project) => project.data.slug === "taiafox");
+    const meigasearch = projects.findIndex((project) => project.data.slug === "meigasearch");
+    if (taiafox >= 0 && meigasearch >= 0) {
+        [projects[taiafox], projects[meigasearch]] = [projects[meigasearch], projects[taiafox]];
+    }
+    return projects.filter((project) => !project.data.slug.endsWith("-api"));
+}
+
 /**
  * Posts visibles en un idioma: los escritos en él, más los del idioma por
  * defecto que todavía no estén traducidos.

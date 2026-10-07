@@ -1,7 +1,7 @@
 ---
 import Section from "../Section.astro";
 import ProjectCard from "../ProjectCard.astro";
-import { getLocalizedEntries } from "@/lib/content";
+import { getLocalizedEntries, getPortfolioProjects } from "@/lib/content";
 import { localeTags, useTranslations, type Locale } from "@/i18n/index";
 
 interface Props {
@@ -11,13 +11,7 @@ interface Props {
 const { locale } = Astro.props;
 const t = useTranslations(locale);
 
-const projects = await getLocalizedEntries("projects", locale);
-
-// Destacados primero, luego por año. El slug estabiliza los empates entre idiomas.
-const byRank = (a: (typeof projects)[number], b: (typeof projects)[number]) => {
-    if (a.data.featured !== b.data.featured) return a.data.featured ? -1 : 1;
-    return (b.data.year ?? 0) - (a.data.year ?? 0) || a.data.slug.localeCompare(b.data.slug);
-};
+const orderedProjects = await getPortfolioProjects(locale);
 
 /*
  * Las actividades van aparte y al final. No son proyectos —no tienen repo, ni
@@ -32,15 +26,6 @@ const period = new Intl.DateTimeFormat(localeTags[locale], { month: "short", yea
 const formatPeriod = (start: Date, end?: Date) =>
     end ? `${period.format(start)} – ${period.format(end)}` : period.format(start);
 
-const rankedProjects = projects.sort(byRank);
-const taiafoxIndex = rankedProjects.findIndex((project) => project.data.slug === "taiafox");
-const meigasearchIndex = rankedProjects.findIndex((project) => project.data.slug === "meigasearch");
-if (taiafoxIndex >= 0 && meigasearchIndex >= 0) {
-    [rankedProjects[taiafoxIndex], rankedProjects[meigasearchIndex]] =
-        [rankedProjects[meigasearchIndex], rankedProjects[taiafoxIndex]];
-}
-const isApi = (project: (typeof projects)[number]) => project.data.slug.endsWith("-api");
-const orderedProjects = rankedProjects.filter((project) => !isApi(project));
 ---
 
 <Section id="projects" title={t("projects.title")}>

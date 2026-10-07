@@ -87,6 +87,25 @@ const links = [
         border-radius: 2rem;
         overflow: hidden;
         min-inline-size: 0;
+        transition: translate 180ms ease-out, box-shadow 180ms ease-out, border-color 180ms ease-out;
+    }
+
+    .card:focus-within {
+        border-color: color-mix(in srgb, var(--color-text) 35%, var(--color-glass-border));
+        box-shadow: var(--shadow-glass), inset 0 0 40px rgba(255, 255, 255, 0.15), 0 12px 30px rgba(0, 0, 0, 0.12);
+    }
+
+    @media (hover: hover) and (pointer: fine) {
+        .card:hover {
+            translate: 0 -4px;
+            border-color: color-mix(in srgb, var(--color-text) 35%, var(--color-glass-border));
+            box-shadow: var(--shadow-glass), inset 0 0 40px rgba(255, 255, 255, 0.15), 0 12px 30px rgba(0, 0, 0, 0.12);
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .card { transition: none; }
+        .card:hover { translate: none; }
     }
 
     .card__media {

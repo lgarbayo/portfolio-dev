@@ -1,6 +1,10 @@
 ---
-import { byCurrentThenRecent, getLocalizedEntries, getLocalizedEntry } from "@/lib/content";
-import { localeTags, useTranslations, type Locale } from "@/i18n/index";
+import { byCurrentThenRecent, getLocalizedEntries, getLocalizedEntry, getPortfolioProjects, hasPublishedPosts } from "@/lib/content";
+import { getCollection } from "astro:content";
+import { publicAssetExists } from "@/lib/assets";
+import { ourenseMapUrl } from "@/lib/profile";
+import { pressArticles } from "@/lib/press";
+import { localeNames, localeTags, localizedPath, useTranslations, type Locale } from "@/i18n/index";
 import "@/styles/game-modals.css";
 import { channels } from "@/lib/channels";
 
@@ -14,42 +18,34 @@ const t = useTranslations(locale);
 /*
  * Los paneles que abre el juego al golpear un bloque.
  *
- * El marcado reproduce EXACTAMENTE la estructura y las clases del `index.html`
- * original, porque `game-modals.css` es el CSS original sin tocar y la mitad de
- * sus reglas cuelgan de esas clases (`.modal-content--about`, `.project-card`,
- * `.experience-item`…). Lo único que cambia respecto a antes es de dónde sale el
- * texto: de las colecciones en vez de estar escrito a mano, para no mantener la
- * misma información en dos sitios.
+ * Reutiliza las clases del juego original (`.modal-content--about`,
+ * `.project-card`, `.experience-item`…) y lee las mismas colecciones que la
+ * web. El perfil incluye formación, idiomas y stack; Proyectos incluye las
+ * actividades. La selección y el orden de proyectos también son compartidos.
  *
  * Los ids (`aboutModal`, `projectsModal`…) son el contrato con `WorldScene`, que
  * los busca por `${worldId}Modal`.
  */
 
 const about = await getLocalizedEntry("about", locale);
-const projects = await getLocalizedEntries("projects", locale);
+const projects = await getPortfolioProjects(locale);
 const experience = (await getLocalizedEntries("experience", locale)).sort(byCurrentThenRecent);
-
-const categories = [
-    { id: "hackathon", label: t("projects.category.hackathon") },
-    { id: "data", label: t("projects.category.data") },
-    { id: "backend", label: t("projects.category.backend") },
-    { id: "web", label: t("projects.category.web") },
-] as const;
-
-const columns = categories
-    .map((category) => ({
-        ...category,
-        items: projects
-            .filter((project) => project.data.category === category.id)
-            .sort((a, b) =>
-                a.data.featured !== b.data.featured
-                    ? a.data.featured
-                        ? -1
-                        : 1
-                    : (b.data.year ?? 0) - (a.data.year ?? 0),
-            ),
-    }))
-    .filter((column) => column.items.length > 0);
+const education = (await getLocalizedEntries("education", locale)).sort(
+    (a, b) => a.data.order - b.data.order || b.data.startDate.getTime() - a.data.startDate.getTime(),
+);
+const languages = await getLocalizedEntry("languages", locale);
+const activities = (await getLocalizedEntries("activities", locale)).sort(
+    (a, b) => b.data.startDate.getTime() - a.data.startDate.getTime(),
+);
+const stack = await getCollection("stack");
+const stackGroups = (["languages", "backend", "frontend", "data", "devops"] as const).map((id) => ({
+    label: t(`stack.category.${id}`),
+    items: stack.filter((entry) => entry.data.category === id)
+        .sort((a, b) => a.data.order - b.data.order || a.data.name.localeCompare(b.data.name)),
+})).filter((group) => group.items.length > 0);
+const cvLocales = (["en", "es"] as const).filter((code) => publicAssetExists(`/cv-${code}.pdf`));
+const showBlog = await hasPublishedPosts(locale);
+const educationYear = new Intl.DateTimeFormat(localeTags[locale], { year: "numeric" });
 
 const formatter = new Intl.DateTimeFormat(localeTags[locale], {
     month: "short",
@@ -70,13 +66,15 @@ const contactChannels = channels.map((channel) => ({
     <div class="modal-content modal-content--about">
         <button class="modal-close" data-close="aboutModal" aria-label={t("game.close")}>✕</button>
         <h2 class="about-title">{(about?.data.title ?? t("about.title")).toUpperCase()}</h2>
+        <p class="about-text">{t("hero.role")}</p>
+        <p class="about-text game-location">{t("about.location.prefix")} <a class="game-content-link" href={ourenseMapUrl} target="_blank" rel="noopener noreferrer">Ourense</a>{t("about.location.region")}</p>
 
         <div class="about-container">
             <div class="about-content">
                 {
                     about?.data.blocks.map((block) => (
                         <div class="about-section">
-                            <h3 class="about-section-title">{block.title}</h3>
+                            {block.title && <h3 class="about-section-title">{block.title}</h3>}
                             <p class="about-text">{block.body}</p>
                         </div>
                     ))
@@ -95,6 +93,49 @@ const contactChannels = channels.map((channel) => ({
                 )
             }
         </div>
+
+        <section class="about-section game-cv">
+            <h3 class="about-section-title">{t("cv.title")}</h3>
+            {cvLocales.map((code) => <a class="game-content-link" href={`/cv-${code}.pdf`} target="_blank" rel="noopener noreferrer">{localeNames[code]}</a>)}
+        </section>
+
+        <section class="about-section game-stack">
+            <h3 class="about-section-title">{t("stack.title")}</h3>
+            {stackGroups.map((group) => <div class="game-stack-group">
+                <h4 class="game-content-title">{group.label}</h4>
+                <div class="tech-badges">{group.items.map((entry) => <span class="tech-badge">{entry.data.name}</span>)}</div>
+            </div>)}
+        </section>
+
+        <section class="about-section game-education">
+            <h3 class="about-section-title">{t("education.title")}</h3>
+            {education.filter((entry) => entry.data.type !== "certification").map((entry) => <div class="game-education-entry">
+                <h4 class="game-content-title">{entry.data.title}</h4>
+                <p class="about-text">{entry.data.url
+                    ? <a class="game-content-link" href={entry.data.url} target="_blank" rel="noopener noreferrer">{entry.data.institution}</a>
+                    : entry.data.institution} · {educationYear.format(entry.data.startDate)}{entry.data.endDate ? `–${educationYear.format(entry.data.endDate)}` : ""}</p>
+                {entry.data.description.map((paragraph) => <p class="about-text">{paragraph}</p>)}
+                {entry.data.repoUrl && <a class="game-content-link" href={entry.data.repoUrl} target="_blank" rel="noopener noreferrer">{t("projects.viewRepo")} →</a>}
+            </div>)}
+        </section>
+
+        {languages && <section class="about-section game-languages">
+            <h3 class="about-section-title">{t("education.languages.title")}</h3>
+            <ul>{languages.data.items.map((item) => <li class="about-text">
+                {item.flag && <img class="game-language-flag" src={item.flag} width="30" height="20" alt="" loading="lazy" />}
+                <strong>{item.name}</strong> · {item.level}{item.credential && ` · ${item.credential}`}
+            </li>)}</ul>
+        </section>}
+
+        <section class="about-section game-certifications">
+            <h3 class="about-section-title">{t("education.certifications.title")}</h3>
+            {education.filter((entry) => entry.data.type === "certification").map((entry) => <div class="game-certification">
+                <h4 class="game-content-title">{entry.data.url
+                    ? <a class="game-content-link" href={entry.data.url} target="_blank" rel="noopener noreferrer">{entry.data.title}</a>
+                    : entry.data.title}</h4>
+                <p class="about-text">{entry.data.institution} · {formatter.format(entry.data.startDate)}</p>
+            </div>)}
+        </section>
     </div>
 </div>
 
@@ -105,15 +146,10 @@ const contactChannels = channels.map((channel) => ({
 
         <div class="projects-grid">
             {
-                columns.map((column) => (
-                    <div class="projects-column">
-                        <h3 class="projects-column-title">{column.label}</h3>
-                        {column.items.map((project) => (
+                projects.map((project) => (
                             <div class="project-card">
                                 <h3>
-                                    {project.data.context
-                                        ? `${project.data.title} - ${project.data.context}`
-                                        : project.data.title}
+                                    {project.data.title}
                                 </h3>
                                 <p class="project-description">{project.data.description}</p>
                                 <div class="tech-badges">
@@ -174,11 +210,19 @@ const contactChannels = channels.map((channel) => ({
                                         </div>
                                     ))}
                             </div>
-                        ))}
-                    </div>
                 ))
             }
         </div>
+
+        {activities.length > 0 && <section class="game-activities">
+            <h3 class="projects-column-title">{t("projects.activities.title")}</h3>
+            {activities.map((item) => <div class="project-card game-activity">
+                <h3>{item.data.title}</h3>
+                <p class="project-description">{item.data.context && `${item.data.context} · `}{formatter.format(item.data.startDate)}{item.data.endDate && ` – ${formatter.format(item.data.endDate)}`}</p>
+                {item.data.description && <p class="project-description">{item.data.description}</p>}
+                {item.data.award && <p class="project-features">{item.data.award}</p>}
+            </div>)}
+        </section>}
     </div>
 </div>
 
@@ -192,13 +236,16 @@ const contactChannels = channels.map((channel) => ({
                 <div class="experience-item">
                     <div class="experience-header">
                         <h3 class="experience-role">
-                            {item.data.role} @ {item.data.organization}
+                            {item.data.role} @ {item.data.url
+                                ? <a class="game-content-link" href={item.data.url} target="_blank" rel="noopener noreferrer">{item.data.organization}</a>
+                                : item.data.organization}
                         </h3>
                         {item.data.logo && (
                             <img
                                 src={item.data.logo}
                                 alt={t("experience.logoAlt", { organization: item.data.organization })}
                                 class="experience-logo experience-logo--inline"
+                                class:list={{ "experience-logo--clinic": item.data.slug === "histora" }}
                             />
                         )}
                     </div>
@@ -249,5 +296,13 @@ const contactChannels = channels.map((channel) => ({
                 ))
             }
         </div>
+        {showBlog && <p class="game-blog-link"><a class="game-content-link" href={localizedPath(locale, "blog/")}>{t("hero.cta.blog")} →</a></p>}
+        <section class="game-press game-activities">
+            <h3 class="about-section-title">{t("press.title")}</h3>
+            {pressArticles.map((article) => <div class="project-card">
+                <p class="project-description">{article.publisher} · {formatter.format(new Date(article.published))}</p>
+                <a class="game-content-link" href={article.url} lang={article.language} target="_blank" rel="noopener noreferrer">{article.title} ↗</a>
+            </div>)}
+        </section>
     </div>
 </div>

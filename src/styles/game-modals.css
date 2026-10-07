@@ -1,10 +1,8 @@
 /*
  * Estilos de los paneles de información del juego.
  *
- * Copiado VERBATIM del `src/style.css` original. No se toca ni se "mejora":
- * el juego tiene que verse exactamente como se veía antes de la migración, y
- * cualquier reescritura por bonita que sea rompe esa promesa. Si algo hay que
- * cambiar aquí, que sea una decisión deliberada, no un efecto colateral.
+ * Conserva la estética del juego original. Los nuevos bloques de contenido
+ * reutilizan esa paleta y tipografía para mantener los paneles coherentes.
  *
  * El marcado que lo acompaña (GameModals.astro) reproduce las mismas clases:
  * .modal-content--about, .project-card, .experience-item, .contact-btn…
@@ -633,3 +631,20 @@
     font-size: 0.75rem;
   }
 }
+
+/* Información compartida con la web, dentro de los cuatro mundos originales. */
+.portfolio-modal .game-location { margin-block: 0.75rem 1.5rem; }
+.portfolio-modal .game-content-link { color: #5ce68e; text-underline-offset: 0.2em; }
+.portfolio-modal .game-content-link:focus-visible { outline: 2px solid #5ce68e; outline-offset: 4px; }
+.portfolio-modal .game-cv .game-content-link + .game-content-link { margin-inline-start: 1.5rem; }
+.portfolio-modal .game-content-title { color: #f5deb3; font-size: 1rem; margin-block-end: 0.5rem; }
+.portfolio-modal .game-stack-group + .game-stack-group,
+.portfolio-modal .game-education-entry + .game-education-entry,
+.portfolio-modal .game-certification + .game-certification { margin-block-start: 1.5rem; }
+.portfolio-modal .game-education-entry .about-text + .about-text { margin-block-start: 0.75rem; }
+.portfolio-modal .game-languages ul { list-style: none; padding: 0; }
+.portfolio-modal .game-language-flag { display: inline-block; vertical-align: middle; margin-inline-end: 0.5rem; }
+.portfolio-modal .game-activities { margin-block-start: 2rem; }
+.portfolio-modal .game-activity + .game-activity { margin-block-start: 1rem; }
+.portfolio-modal .game-blog-link { margin-block-start: 2rem; text-align: center; }
+.portfolio-modal .experience-logo--clinic { background: #fafafa; border-radius: 4px; padding: 4px; }

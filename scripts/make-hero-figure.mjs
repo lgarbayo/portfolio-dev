@@ -13,7 +13,9 @@
 import { execFileSync } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
 
-const SOURCE = "assets-src/video/kling-robot-headturn.mp4";
+// La mejora de ElevenLabs conserva el giro y los tiempos del render original.
+const SOURCE = process.env.HERO_SOURCE || "assets-src/video/robot-headturn-enhanced.mp4";
+const enhanced = !SOURCE.endsWith("kling-robot-headturn.mp4");
 const VIDEO_OUT = "public/assets/ui/hero-figure.mp4";
 const POSTER_OUT = "public/assets/ui/hero-figure.webp";
 const NARROW_OUT = "public/assets/ui/hero-figure-narrow.webp";
@@ -102,7 +104,8 @@ const FPS = 24;
  * dos números con él.
  */
 const FLIP = "hflip";
-const CROP = "crop=1440:820:0:0";
+// El nuevo render es 1280×720: recortes proporcionales, sin ampliarlo.
+const CROP = enhanced ? "crop=960:546:0:0" : "crop=1440:820:0:0";
 
 /*
  * El fondo del clip es un gris casi neutro (#c2c4c9 de media). Esto lo sube a
@@ -118,10 +121,12 @@ const CROP = "crop=1440:820:0:0";
  * degradación de unos 12 niveles, así que el ajuste perfecto no existe y lo que
  * queda lo disimula el desvanecido largo de los bordes en el CSS.
  */
-const GRADE = "colorlevels=rimax=0.835:gimax=0.840:bimax=0.866";
+const GRADE = enhanced
+    ? "colorlevels=rimax=0.740:gimax=0.770:bimax=0.775"
+    : "colorlevels=rimax=0.835:gimax=0.840:bimax=0.866";
 
 /** Alto final. Lo fija `CROP`; esto sólo evita reescalar. */
-const HEIGHT = 820;
+const HEIGHT = enhanced ? 546 : 820;
 
 /*
  * Fotograma del póster: el frontal, que es el que enseña el vídeo con el cursor
@@ -149,7 +154,7 @@ const POSTER_FRAME = REST_FRAME;
  * proporción de 2,14, parecida a la de la banda, así que al cubrirla apenas se
  * recorta nada.
  */
-const NARROW_CROP = "crop=1200:560:408:0";
+const NARROW_CROP = enhanced ? "crop=800:374:272:0" : "crop=1200:560:408:0";
 
 if (!existsSync(SOURCE)) {
     // `assets-src/` está gitignorado —las fuentes pesadas no entran al
@@ -201,12 +206,8 @@ const run = (args) => execFileSync("ffmpeg", ["-v", "error", "-y", ...args], { s
  * `-bf 0` quita los B-frames: con todo en claves no aportan compresión y meten
  * reordenado en el decodificador, que es justo lo que no queremos al buscar.
  *
- * El CRF está en 33 y no en el 29 de antes porque se midió: entre los dos no
- * hay diferencia visible en la cabeza, y en el fondo —que es lo delicado, tiene
- * que pasar por el gris liso de la página— el rango de luma sale idéntico
- * (214-224 en los dos). La degradación propia del clip es mayor que cualquier
- * banda que meta el códec, así que bajar calidad ahí no se ve. Con el arco
- * entero eso es la diferencia entre 760 KB y 500 KB.
+ * CRF 20 para preservar el detalle del nuevo render, manteniendo todos los
+ * fotogramas clave para que el seguimiento del cursor sea fluido.
  */
 run([
     "-i", SOURCE,
@@ -214,14 +215,14 @@ run([
     "-map", "[v]", "-an",
     "-c:v", "libx264", "-profile:v", "high", "-pix_fmt", "yuv420p",
     "-g", "1", "-keyint_min", "1", "-sc_threshold", "0", "-bf", "0",
-    "-crf", "33", "-preset", "slower", "-movflags", "+faststart",
+    "-crf", "20", "-preset", "slower", "-movflags", "+faststart",
     VIDEO_OUT,
 ]);
 
 run([
     "-i", VIDEO_OUT,
     "-vf", `select=eq(n\\,${POSTER_FRAME})`,
-    "-frames:v", "1", "-c:v", "libwebp", "-quality", "80",
+    "-frames:v", "1", "-c:v", "libwebp", "-quality", "92",
     POSTER_OUT,
 ]);
 
@@ -230,7 +231,7 @@ run([
 run([
     "-i", SOURCE,
     "-vf", `select=eq(n\\,${ARC[0].from + POSTER_FRAME * STEP}),${FLIP},${NARROW_CROP},${GRADE}`,
-    "-frames:v", "1", "-c:v", "libwebp", "-quality", "80",
+    "-frames:v", "1", "-c:v", "libwebp", "-quality", "92",
     NARROW_OUT,
 ]);
 

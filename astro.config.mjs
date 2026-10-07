@@ -45,6 +45,9 @@ export default defineConfig({
     ],
 
     vite: {
+        // El teclado carga Three al entrar en Stack. Optimizarlo al arrancar
+        // evita invalidar dependencias cuando esa importación llega tarde.
+        optimizeDeps: { include: ["three"] },
         // Anota qué chunks llevan Phaser o Three dentro; el build falla después
         // si alguna página los pide de entrada (ver assert-bundle-budget.mjs).
         // El segundo sirve los logos de las teclas dentro del chunk del teclado

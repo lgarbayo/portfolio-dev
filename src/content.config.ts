@@ -47,7 +47,7 @@ const about = defineCollection({
         blocks: z
             .array(
                 z.object({
-                    title: z.string(),
+                    title: z.string().optional(),
                     body: z.string(),
                 }),
             )
@@ -241,6 +241,7 @@ const languages = defineCollection({
             .array(
                 z.object({
                     name: z.string(),
+                    flag: z.string().optional(),
                     level: z.string(),
                     /** Título que lo acredita, si lo hay. */
                     credential: z.string().optional(),

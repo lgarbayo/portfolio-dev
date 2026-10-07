@@ -1,7 +1,7 @@
 ---
 locale: en
 slug: anfaia
-role: "AI/ML Engineer Intern"
+role: "AI Engineering Fellow"
 organization: "Asociación FARO para la Aceleración de la Inteligencia Artificial - ANFAIA"
 url: "https://anfaia.org/"
 startDate: "2026-07-01"

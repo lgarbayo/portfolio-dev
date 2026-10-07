@@ -35,7 +35,7 @@ const image = new URL("/og-image.png", Astro.site).href;
         <meta charset="utf-8" />
         <title>Luis Garbayo Fernández</title>
         <!-- Sin JS el meta refresh lleva al idioma por defecto igualmente. -->
-        <meta http-equiv="refresh" content={`0; url=${fallback}`} />
+        <meta http-equiv="refresh" content={`0; url=${fallback}#hero`} />
         <link rel="canonical" href={new URL(fallback, Astro.site).href} />
         <meta name="robots" content="noindex" />
 
@@ -71,11 +71,11 @@ const image = new URL("/og-image.png", Astro.site).href;
 
                 // `replace` en vez de `assign`: la raíz no debe quedarse en el
                 // historial, o el botón atrás rebotaría contra la redirección.
-                location.replace(pick());
+                location.replace(`${pick()}${location.hash || "#hero"}`);
             })();
         </script>
     </head>
     <body>
-        <p><a href={fallback}>Luis Garbayo Fernández</a></p>
+        <p><a href={`${fallback}#hero`}>Luis Garbayo Fernández</a></p>
     </body>
 </html>

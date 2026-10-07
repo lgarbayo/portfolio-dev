@@ -7,6 +7,7 @@ import GameOverlay from "@/components/GameOverlay.astro";
 import PageTransition from "@/components/PageTransition.astro";
 import Analytics from "@/components/Analytics.astro";
 import ConsentBanner from "@/components/ConsentBanner.astro";
+import CursorGlow from "@/components/CursorGlow.astro";
 import { ClientRouter } from "astro:transitions";
 import { useTranslations, type Locale } from "@/i18n/index";
 import "@/styles/global.css";
@@ -77,6 +78,7 @@ const t = useTranslations(locale);
         <GameOverlay locale={locale} />
         <PageTransition />
         <ConsentBanner locale={locale} />
+        <CursorGlow />
 
         <slot name="after-body" />
 

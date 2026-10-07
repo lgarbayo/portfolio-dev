@@ -1,0 +1,121 @@
+<div class="cursor-glow" data-cursor-glow aria-hidden="true" transition:persist></div>
+<div class="cursor-mark" data-cursor-mark aria-hidden="true" transition:persist>
+    <span class="cursor-mark__ring"></span>
+    <span class="cursor-mark__dot"></span>
+</div>
+
+<script>
+    const glow = document.querySelector<HTMLElement>("[data-cursor-glow]");
+    const mark = document.querySelector<HTMLElement>("[data-cursor-mark]");
+    if (glow && mark) {
+        const mouse = window.matchMedia("(any-hover: hover) and (any-pointer: fine)");
+        let frame = 0;
+        let x = 0;
+        let y = 0;
+
+        const hide = () => {
+            glow.removeAttribute("data-visible");
+            mark.removeAttribute("data-visible");
+            document.documentElement.removeAttribute("data-custom-cursor");
+            cancelAnimationFrame(frame);
+            frame = 0;
+        };
+
+        document.addEventListener("pointermove", (event) => {
+            if (!mouse.matches || event.pointerType !== "mouse") {
+                hide();
+                return;
+            }
+            x = event.clientX;
+            y = event.clientY;
+            const target = event.target instanceof Element ? event.target : null;
+            const editing = Boolean(target?.closest('input, textarea, select, [contenteditable]:not([contenteditable="false"])'));
+            mark.toggleAttribute("data-interactive", Boolean(target?.closest('a, button, [role="button"], summary, canvas')));
+            mark.toggleAttribute("data-pressed", event.buttons > 0);
+            mark.toggleAttribute("data-visible", !editing);
+            document.documentElement.toggleAttribute("data-custom-cursor", !editing);
+            if (frame) return;
+            frame = requestAnimationFrame(() => {
+                glow.style.transform = `translate3d(${x - 100}px, ${y - 100}px, 0)`;
+                mark.style.transform = `translate3d(${x}px, ${y}px, 0)`;
+                glow.setAttribute("data-visible", "");
+                frame = 0;
+            });
+        }, { passive: true });
+
+        document.addEventListener("pointerdown", (event) => {
+            if (event.pointerType === "mouse") mark.setAttribute("data-pressed", "");
+        }, { passive: true });
+        document.addEventListener("pointerup", () => mark.removeAttribute("data-pressed"), { passive: true });
+
+        document.addEventListener("pointerleave", hide);
+        document.addEventListener("pointercancel", hide);
+        document.addEventListener("visibilitychange", () => { if (document.hidden) hide(); });
+        document.addEventListener("astro:before-swap", hide);
+        window.addEventListener("blur", hide);
+        mouse.addEventListener("change", hide);
+        document.addEventListener("astro:page-load", hide);
+    }
+</script>
+
+<style>
+    :global(html[data-custom-cursor]),
+    :global(html[data-custom-cursor] *) { cursor: none !important; }
+
+    .cursor-mark {
+        position: fixed;
+        inset: 0 auto auto 0;
+        z-index: 10000;
+        pointer-events: none;
+        opacity: 0;
+        mix-blend-mode: difference;
+    }
+
+    .cursor-mark[data-visible] { opacity: 1; }
+
+    .cursor-mark__ring,
+    .cursor-mark__dot {
+        position: absolute;
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+    }
+
+    .cursor-mark__ring {
+        width: 26px;
+        height: 26px;
+        border: 1px solid rgba(255, 255, 255, 0.75);
+        transition: width 150ms ease-out, height 150ms ease-out;
+    }
+
+    .cursor-mark__dot { width: 4px; height: 4px; background: white; }
+    .cursor-mark[data-interactive] .cursor-mark__ring { width: 38px; height: 38px; }
+    .cursor-mark[data-pressed] .cursor-mark__ring { width: 20px; height: 20px; }
+
+    @media (prefers-reduced-motion: reduce) {
+        .cursor-mark__ring { transition: none; }
+    }
+
+    .cursor-glow {
+        position: fixed;
+        inset: 0 auto auto 0;
+        inline-size: 200px;
+        block-size: 200px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0.16) 28%, rgba(255, 255, 255, 0.06) 50%, transparent 72%);
+        mix-blend-mode: screen;
+        z-index: var(--z-overlay);
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity var(--duration-fast) var(--ease-out);
+    }
+
+    .cursor-glow[data-visible] { opacity: 0.65; }
+
+    :global(html[data-theme="dark"]) .cursor-glow {
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0.09) 28%, rgba(255, 255, 255, 0.03) 50%, transparent 72%);
+    }
+
+    @media (hover: none) and (any-pointer: coarse) {
+        .cursor-glow, .cursor-mark { display: none; }
+    }
+</style>

@@ -9,12 +9,16 @@ import { join } from "node:path";
 const expected = [
     { path: "cv-en.pdf", why: "el CV en inglés del visor de Contacto" },
     { path: "cv-es.pdf", why: "el CV en castellano del visor de Contacto" },
-    // Se rehace a mano cuando cambia la portada: una captura del hero en es/ a
+    // Se rehace a mano cuando cambia la portada: una captura del hero en en/ a
     // 1920x1008 —la proporción de la tarjeta, pero grande, porque a 1200x630 la
     // columna del saludo ocupa tanto alto que las fichas se le montan encima—
     // reducida a 1200x630. En JPEG y no en PNG: es una imagen fotográfica, y
     // así son 50 KB en vez de 300, que es el umbral donde algunos clientes
     // dejan de generar la vista previa.
+    //
+    // En en/ y no en es/ porque el idioma por defecto es el inglés: tanto la
+    // raíz como el canonical llevan ahí, así que el título y la descripción que
+    // acompañan a la tarjeta salen en inglés y la imagen tiene que ir a juego.
     { path: "og-image.jpg", why: "imagen de previsualización al compartir enlaces" },
     { path: "favicon-32.png", why: "el icono de la pestaña" },
     { path: "assets/ui/hero-figure.webp", why: "el fotograma de la figura del centro de la bienvenida" },

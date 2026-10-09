@@ -80,9 +80,26 @@ export function initHeroVideo(): void {
     const slot = document.querySelector<HTMLElement>("[data-hero-figure]");
     if (!slot) return;
 
-    const src = document.documentElement.dataset.theme === "dark"
-        ? slot.dataset.videoDark || slot.dataset.video
-        : slot.dataset.video;
+    /*
+     * Dos ejes para elegir fichero: tema y códec.
+     *
+     * La placa buena va en AV1 a 1920 de ancho; la de reserva en H.264 a 960.
+     * No es una preferencia de formato sino de resolución: AV1 intra pura cuesta
+     * la mitad de bytes a igual calidad, y ese margen es lo que paga el doble de
+     * píxeles. Quien no pueda con AV1 —Safari anterior al 17, los Mac Intel— se
+     * lleva la de antes, que sigue girando igual, sólo que menos nítida.
+     *
+     * `canPlayType` devuelve "probably", "maybe" o cadena vacía; sólo la vacía
+     * es un no. Se pregunta en vez de dar por hecho porque el soporte depende
+     * del hardware, no sólo de la versión del navegador.
+     */
+    const dark = document.documentElement.dataset.theme === "dark";
+    const probe = document.createElement("video");
+    const av1 = probe.canPlayType('video/mp4; codecs="av01.0.05M.08"') !== ""
+        ? (dark ? slot.dataset.videoAv1Dark : slot.dataset.videoAv1)
+        : undefined;
+    const src = av1
+        ?? (dark ? slot.dataset.videoDark || slot.dataset.video : slot.dataset.video);
     // Sin vídeo no hay nada que montar. La imagen ya está puesta.
     if (!src) return;
 

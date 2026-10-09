@@ -11,12 +11,32 @@
 // Todo lo que sigue son medidas tomadas sobre el clip, no gustos. Están aquí
 // porque son justo lo que nadie podría deducir mirando el mp4 de salida.
 import { execFileSync } from "node:child_process";
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync, statSync } from "node:fs";
 
-// La mejora de ElevenLabs conserva el giro y los tiempos del render original.
-const SOURCE = process.env.HERO_SOURCE || "assets-src/video/robot-headturn-enhanced.mp4";
-const enhanced = !SOURCE.endsWith("kling-robot-headturn.mp4");
+/*
+ * La fuente por defecto es el render mejorado pasado por Real-ESRGAN x2, que
+ * deja 2560x1440 (ver `scripts/upscale-hero-source.py`). No es un capricho de
+ * nitidez: la placa es el FONDO del hero, o sea que se estira a lo ancho de la
+ * ventana, y con los 960 px que tenía antes eso eran 3,1 aumentos en un
+ * MacBook Pro de 14" y 5,3 en un 5K. Faltaban píxeles, no bits.
+ */
+const SOURCE = process.env.HERO_SOURCE || "assets-src/video/robot-headturn-2x.mp4";
+const doubled = SOURCE.endsWith("robot-headturn-2x.mp4");
+const enhanced = doubled || !SOURCE.endsWith("kling-robot-headturn.mp4");
 const VIDEO_OUT = "public/assets/ui/hero-figure.mp4";
+/*
+ * El principal va en AV1 y el de arriba queda de reserva.
+ *
+ * Medido sobre este mismo arco: AV1 intra pura da la misma calidad que H.264
+ * con la mitad de los bytes (535 KB contra 1048 a igual VMAF). Ese margen es
+ * justo lo que paga el doble de resolución, y encima el resultado busca igual
+ * de rápido —5,0 ms por salto contra 5,1— porque lo que importa aquí no es el
+ * bitrate sino que todos los fotogramas sean clave.
+ *
+ * La reserva existe por Safari anterior al 17 y por los Mac Intel, que no
+ * decodifican AV1. Sin ella se quedarían con el póster fijo y sin el giro.
+ */
+const AV1_OUT = "public/assets/ui/hero-figure.av1.mp4";
 const POSTER_OUT = "public/assets/ui/hero-figure.webp";
 const NARROW_OUT = "public/assets/ui/hero-figure-narrow.webp";
 
@@ -104,8 +124,17 @@ const FPS = 24;
  * dos números con él.
  */
 const FLIP = "hflip";
-// El nuevo render es 1280×720: recortes proporcionales, sin ampliarlo.
-const CROP = enhanced ? "crop=960:546:0:0" : "crop=1440:820:0:0";
+/*
+ * Proporcionalmente el mismo recorte en las tres fuentes: 75% del ancho desde
+ * la izquierda. Lo que cambia es de cuántos píxeles se parte — 2560, 1280 o
+ * 1916— y el robot acaba en el 70% del resultado en los tres casos, que es la
+ * invariante que sostiene el encuadre.
+ */
+const CROP = doubled
+    ? "crop=1920:1092:0:0"
+    : enhanced
+      ? "crop=960:546:0:0"
+      : "crop=1440:820:0:0";
 
 /*
  * El fondo del clip es un gris casi neutro (#c2c4c9 de media). Esto lo sube a
@@ -126,7 +155,16 @@ const GRADE = enhanced
     : "colorlevels=rimax=0.835:gimax=0.840:bimax=0.866";
 
 /** Alto final. Lo fija `CROP`; esto sólo evita reescalar. */
-const HEIGHT = enhanced ? 546 : 820;
+const HEIGHT = doubled ? 1092 : enhanced ? 546 : 820;
+
+/*
+ * La reserva en H.264 se queda en 960 de ancho, que es lo que se publicaba
+ * antes. No es pereza: a 1920 un H.264 intra puro se va por encima de 2,5 MB,
+ * y cargarle eso justo al navegador viejo es el peor reparto posible. Sale
+ * además algo mejor que el de antes aunque mida lo mismo, porque ahora baja
+ * desde 1920 en vez de ser el tamaño nativo.
+ */
+const FALLBACK_WIDTH = 960;
 
 /*
  * Fotograma del póster: el frontal, que es el que enseña el vídeo con el cursor
@@ -154,7 +192,11 @@ const POSTER_FRAME = REST_FRAME;
  * proporción de 2,14, parecida a la de la banda, así que al cubrirla apenas se
  * recorta nada.
  */
-const NARROW_CROP = enhanced ? "crop=800:374:272:0" : "crop=1200:560:408:0";
+const NARROW_CROP = doubled
+    ? "crop=1600:748:544:0"
+    : enhanced
+      ? "crop=800:374:272:0"
+      : "crop=1200:560:408:0";
 
 if (!existsSync(SOURCE)) {
     // `assets-src/` está gitignorado —las fuentes pesadas no entran al
@@ -206,12 +248,27 @@ const run = (args) => execFileSync("ffmpeg", ["-v", "error", "-y", ...args], { s
  * `-bf 0` quita los B-frames: con todo en claves no aportan compresión y meten
  * reordenado en el decodificador, que es justo lo que no queremos al buscar.
  *
- * CRF 20 para preservar el detalle del nuevo render, manteniendo todos los
- * fotogramas clave para que el seguimiento del cursor sea fluido.
+ * En AV1 el equivalente es `-g 1` más `keyint=1`: SVT necesita las dos, porque
+ * la primera fija el GOP y la segunda desactiva su propia lógica de claves.
+ *
+ * Los CRF no son comparables entre códecs. El 36 de AV1 y el 20 de H.264 están
+ * elegidos midiendo, no por analogía: a esos valores el AV1 de 1920 pesa menos
+ * que el H.264 de 960 que había antes y se ve bastante mejor.
  */
 run([
     "-i", SOURCE,
     "-filter_complex", `${arc}[v]`,
+    "-map", "[v]", "-an",
+    "-c:v", "libsvtav1", "-pix_fmt", "yuv420p",
+    "-g", "1", "-crf", "36", "-preset", "3",
+    "-svtav1-params", "keyint=1",
+    "-movflags", "+faststart",
+    AV1_OUT,
+]);
+
+run([
+    "-i", SOURCE,
+    "-filter_complex", `${arc},scale=${FALLBACK_WIDTH}:-2:flags=lanczos[v]`,
     "-map", "[v]", "-an",
     "-c:v", "libx264", "-profile:v", "high", "-pix_fmt", "yuv420p",
     "-g", "1", "-keyint_min", "1", "-sc_threshold", "0", "-bf", "0",
@@ -219,8 +276,10 @@ run([
     VIDEO_OUT,
 ]);
 
+// Los pósteres salen del AV1, que es la placa buena: son imágenes fijas y no
+// cuesta nada sacarlas de la fuente con más detalle.
 run([
-    "-i", VIDEO_OUT,
+    "-i", AV1_OUT,
     "-vf", `select=eq(n\\,${POSTER_FRAME})`,
     "-frames:v", "1", "-c:v", "libwebp", "-quality", "92",
     POSTER_OUT,
@@ -235,17 +294,25 @@ run([
     NARROW_OUT,
 ]);
 
-// Si esto no imprime sólo "1", el scrub irá a saltos y más vale enterarse aquí.
-const keyframes = execFileSync("ffprobe", [
-    "-v", "error", "-select_streams", "v",
-    "-show_entries", "frame=key_frame", "-of", "csv=p=0", VIDEO_OUT,
-])
-    .toString()
-    .split("\n")
-    .filter(Boolean);
-
-const allKey = keyframes.every((k) => k.startsWith("1"));
-console.log(`make-hero-figure: ${VIDEO_OUT} (${keyframes.length} fotogramas, todos clave: ${allKey ? "sí" : "NO"})`);
+// Si alguna no sale entera en claves, el scrub irá a saltos en ese navegador y
+// más vale enterarse aquí que en producción. Se comprueban las dos: son dos
+// códecs distintos y cada uno tiene su manera de ignorar lo que se le pide.
+let ok = true;
+for (const out of [AV1_OUT, VIDEO_OUT]) {
+    const keyframes = execFileSync("ffprobe", [
+        "-v", "error", "-select_streams", "v",
+        "-show_entries", "frame=key_frame", "-of", "csv=p=0", out,
+    ])
+        .toString()
+        .split("\n")
+        .filter(Boolean);
+    const allKey = keyframes.every((k) => k.startsWith("1"));
+    const size = Math.round(statSync(out).size / 1024);
+    console.log(
+        `make-hero-figure: ${out} (${keyframes.length} fotogramas, ${size} KB, todos clave: ${allKey ? "sí" : "NO"})`,
+    );
+    ok &&= allKey && keyframes.length === FRAMES;
+}
 console.log(`make-hero-figure: ${POSTER_OUT} (fotograma ${POSTER_FRAME})`);
 console.log(`make-hero-figure: ${NARROW_OUT} (el mismo, recortado para estrecho)`);
-if (!allKey) process.exit(1);
+if (!ok) process.exit(1);

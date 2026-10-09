@@ -35,6 +35,11 @@ const HERO_POSTER = "/assets/ui/hero-figure.webp";
 const HERO_POSTER_NARROW = "/assets/ui/hero-figure-narrow.webp";
 const HERO_VIDEO = "/assets/ui/hero-figure.mp4";
 const HERO_VIDEO_DARK = "/assets/ui/hero-figure-dark.mp4";
+/* La placa buena, en AV1 y al doble de resolución. La elige `hero-video.ts` si
+   el navegador la sabe decodificar; las de arriba quedan de reserva para Safari
+   anterior al 17 y los Mac Intel. El porqué está en `make-hero-figure.mjs`. */
+const HERO_VIDEO_AV1 = "/assets/ui/hero-figure.av1.mp4";
+const HERO_VIDEO_AV1_DARK = "/assets/ui/hero-figure-dark.av1.mp4";
 const HERO_POSTER_DARK = "/assets/ui/hero-figure-dark.webp";
 const HERO_POSTER_NARROW_DARK = "/assets/ui/hero-figure-narrow-dark.webp";
 const HERO_FRAMES = "54";
@@ -54,6 +59,8 @@ const poster = publicAssetExists(HERO_POSTER) ? HERO_POSTER : null;
 const posterNarrow = publicAssetExists(HERO_POSTER_NARROW) ? HERO_POSTER_NARROW : null;
 const video = publicAssetExists(HERO_VIDEO) ? HERO_VIDEO : null;
 const videoDark = publicAssetExists(HERO_VIDEO_DARK) ? HERO_VIDEO_DARK : null;
+const videoAv1 = publicAssetExists(HERO_VIDEO_AV1) ? HERO_VIDEO_AV1 : null;
+const videoAv1Dark = publicAssetExists(HERO_VIDEO_AV1_DARK) ? HERO_VIDEO_AV1_DARK : null;
 const posters = [
     { theme: "light", wide: poster, narrow: posterNarrow },
     { theme: "dark", wide: publicAssetExists(HERO_POSTER_DARK) ? HERO_POSTER_DARK : poster,
@@ -174,6 +181,8 @@ const tiles = [
             data-rest={HERO_REST}
             {...video ? { "data-video": video } : {}}
             {...videoDark ? { "data-video-dark": videoDark } : {}}
+            {...videoAv1 ? { "data-video-av1": videoAv1 } : {}}
+            {...videoAv1Dark ? { "data-video-av1-dark": videoAv1Dark } : {}}
         >
             {
                 posters.map((variant) => variant.wide && (

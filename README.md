@@ -175,20 +175,56 @@ advertising signals stay denied for good and are never asked about.
 
 ## Hero media
 
-The light and dark hero videos and posters are committed in `public/assets/ui`.
-They require no AI service or media processing during a build. To regenerate them,
-place the enhanced source in the ignored `assets-src/video/robot-headturn-enhanced.mp4`
-and run:
+The hero plates and posters are committed in `public/assets/ui`, so a build never
+touches an AI service or re-encodes anything. Four videos ship, one per theme and
+codec:
+
+| | AV1 (1920×1092) | H.264 (960×546) |
+| --- | --- | --- |
+| light | `hero-figure.av1.mp4` | `hero-figure.mp4` |
+| dark | `hero-figure-dark.av1.mp4` | `hero-figure-dark.mp4` |
+
+AV1 is what almost everyone gets; H.264 is the fallback for Safari below 17 and
+Intel Macs, which cannot decode AV1. `src/lib/hero-video.ts` asks `canPlayType`
+rather than sniffing versions, because AV1 support depends on the hardware. Every
+frame is a keyframe in both — the video is never played, it is scrubbed frame by
+frame against the cursor, and without all-intra encoding seeking stutters.
+
+### Regenerating them
+
+Three steps, and only the first needs a GPU. Sources live in the gitignored
+`assets-src/`.
 
 ```bash
+# 1. One-off: 1280×720 render -> 2560×1440 source. Needs an NVIDIA GPU,
+#    PyTorch with CUDA and spandrel.
+python3 scripts/upscale-hero-source.py
+
+# 2. Light plates and posters. Needs FFmpeg with libsvtav1 and libx264.
 node scripts/make-hero-figure.mjs
+
+# 3. Dark plates and posters, derived from the light AV1 one.
+#    Also needs NumPy and OpenCV.
 python3 scripts/make-hero-dark.py
 ```
 
-Both scripts need FFmpeg; the dark version also needs NumPy and OpenCV in Python.
-It uses a foreground mask to replace the background with `#181a1d`, preserving
-the robot's eyes and highlights. Both videos retain 54 keyframes at 24 fps for
-cursor seeking. The theme selects the matching video and still images.
+Step 1 exists because the plate is the hero's *background*, so it stretches to the
+window width: at 960px that was a 3.1× upscale on a 14" MacBook Pro and 5.3× on a
+5K display. Real-ESRGAN reconstructs the detail that plain interpolation only
+blurs. Each script's header explains the measurements behind its constants.
+
+The model weights are **not** committed — 64 MB for a step that runs once. Fetch
+them into the ignored `assets-src/models/` before running step 1:
+
+```bash
+hf download ai-forever/Real-ESRGAN RealESRGAN_x2.pth --local-dir assets-src/models
+```
+
+`upscale-hero-source.py` takes an alternative path as its first argument if you
+keep them elsewhere.
+
+Step 3 replaces the background with `#181a1d` using a foreground mask, preserving
+the robot's eyes and highlights. The theme picks the matching video and stills.
 
 ## License
 

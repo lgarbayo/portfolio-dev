@@ -58,7 +58,9 @@ TARGET = ROOT / "assets-src/video/robot-headturn-2x.mp4"
 FPS = 24
 
 # Los pesos no se versionan: 64 MB para un paso que se corre una vez.
-#   hf download ai-forever/Real-ESRGAN RealESRGAN_x2.pth --local-dir <dir>
+#   hf download ai-forever/Real-ESRGAN RealESRGAN_x2.pth --local-dir assets-src/models
+# Esa orden los deja justo en la ruta de abajo. Si los guardas en otro sitio,
+# pásale la ruta como primer argumento. También está en el README.
 MODEL = Path(
     sys.argv[1] if len(sys.argv) > 1 else ROOT / "assets-src/models/RealESRGAN_x2.pth"
 )

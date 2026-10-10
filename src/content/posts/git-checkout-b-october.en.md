@@ -18,7 +18,7 @@ The personal part I'm keeping to myself, but the professional part I can tell.
 I wrapped up the ANFAIA fellowship, the project picked up some press coverage
 (and I hope to have more news about it in the coming months), I went to
 HackSpain, I started teaching at a tutoring centre and, almost without noticing,
-I'm already working alongside HISTORA.
+I'm already working alongside GEMEDATA, the startup behind HISTORA.
 
 Somewhere in the middle of all that I realised something I already knew but had
 never written down: I'm the kind of person who gets hooked on something

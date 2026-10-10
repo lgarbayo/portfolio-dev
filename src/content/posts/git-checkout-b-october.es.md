@@ -18,7 +18,7 @@ Lo personal me lo guardo para mí, pero lo profesional lo puedo contar. Cerré l
 fellowship de ANFAIA, salieron varias noticias en prensa sobre el proyecto (y en
 estos meses espero poder traeros más noticias sobre él), fui a HackSpain, empecé
 a dar clases en una academia y, casi sin darme cuenta, ya estoy trabajando en
-colaboración con HISTORA.
+colaboración con GEMEDATA, la startup que hay detrás de HISTORA.
 
 En medio de todo eso me di cuenta de algo que ya sabía, pero que nunca había
 puesto por escrito: soy de los que cada mes se enganchan a una cosa distinta.

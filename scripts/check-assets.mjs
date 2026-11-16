@@ -1,7 +1,7 @@
 // Avisos de assets que el sitio espera pero todavía no están.
 //
 // No rompe el build: el sitio funciona sin ellos —la imagen social cae en el
-// genérico, la figura del hero se queda en su render— pero conviene que se vea,
+// genérico, el hero se queda con su retrato fijo— pero conviene que se vea,
 // o se despliega con un hueco y nadie se entera hasta que alguien lo mira.
 import { existsSync } from "node:fs";
 import { join } from "node:path";
@@ -21,14 +21,12 @@ const expected = [
     // acompañan a la tarjeta salen en inglés y la imagen tiene que ir a juego.
     { path: "og-image.jpg", why: "imagen de previsualización al compartir enlaces" },
     { path: "favicon-32.png", why: "el icono de la pestaña" },
-    { path: "assets/ui/hero-figure.webp", why: "el fotograma de la figura del centro de la bienvenida" },
-    { path: "assets/ui/hero-figure.mp4", why: "el vídeo que sustituye a ese fotograma en escritorio (reserva H.264)" },
-    { path: "assets/ui/hero-figure.av1.mp4", why: "la misma placa en AV1 y al doble de resolución, que es la que se sirve casi siempre" },
-    { path: "assets/ui/hero-figure-dark.av1.mp4", why: "lo mismo para el tema oscuro" },
-    { path: "assets/ui/hero-figure-dark.mp4", why: "el giro del robot con fondo oscuro" },
-    { path: "assets/ui/hero-figure-dark.webp", why: "el frontal del hero en modo oscuro" },
-    { path: "assets/ui/hero-figure-narrow-dark.webp", why: "el frontal oscuro para pantalla estrecha" },
-    { path: "assets/ui/hero-figure-narrow.webp", why: "el mismo fotograma recortado, que es lo único que se pide en estrecho" },
+    { path: "assets/ui/hero-portrait.webp", why: "el retrato fijo del hero; se genera con scripts/portrait/make_portrait.py" },
+    { path: "assets/ui/portrait-voxels.png", why: "los datos de la malla de cubos del retrato, del mismo script" },
+    { path: "fonts/departure-mono.woff2", why: "la fuente pixelada de títulos y etiquetas" },
+    { path: "assets/places/ourense.webp", why: "la foto de fondo de Ourense en «Sobre mí»" },
+    { path: "assets/places/coruna.webp", why: "la foto de fondo de A Coruña en «Sobre mí»" },
+    { path: "assets/places/madrid.webp", why: "la foto de fondo de Madrid en «Sobre mí»" },
     { path: "assets/ui/links-qr.svg", why: "el QR de la cabecera; se genera con scripts/make-links-qr.mjs" },
 ];
 

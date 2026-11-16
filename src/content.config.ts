@@ -57,18 +57,6 @@ const about = defineCollection({
     }),
 });
 
-const hero = defineCollection({
-    loader: localizedGlob("hero"),
-    schema: z.object({
-        ...localized,
-        greeting: z.string(),
-        /* El puesto no está aquí a propósito: la bienvenida ya no lo enseña y el
-           único sitio que lo usa —el JSON-LD de PersonSchema— lo lee de i18n, no
-           de esta colección. */
-        statement: z.string(),
-    }),
-});
-
 const projects = defineCollection({
     loader: localizedGlob("projects"),
     schema: z.object({
@@ -291,7 +279,6 @@ const posts = defineCollection({
 
 export const collections = {
     about,
-    hero,
     projects,
     experience,
     education,

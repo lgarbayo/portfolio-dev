@@ -1,8 +1,7 @@
 ---
 import LanguageSelector from "./LanguageSelector.astro";
 import QrButton from "./QrButton.astro";
-import ThemeToggle from "./ThemeToggle.astro";
-import { publicAssetExists } from "@/lib/assets";
+import { homeSections } from "@/lib/sections";
 import { localizedPath, useTranslations, type Locale } from "@/i18n/index";
 
 interface Props {
@@ -17,56 +16,29 @@ interface Props {
 const { locale, showBlog = false, onHome = true, counterpartPaths } = Astro.props;
 const t = useTranslations(locale);
 
-// El memoji hace de logo. Si el fichero no está, la marca vuelve a las
-// iniciales: la cabecera nunca se queda sin nada donde pinchar para volver.
-const MEMOJI = "/assets/ui/memoji-full.webp";
-const memoji = publicAssetExists(MEMOJI) ? MEMOJI : null;
-
 const home = localizedPath(locale);
-
-/*
- * El enlace del blog se marca aquí y no en el cliente: quien resalta la sección
- * activa en la home es un IntersectionObserver sobre las propias secciones, y en
- * las páginas del blog esas secciones no existen. Sin esto, el blog es el único
- * sitio del que estás dentro sin que la navegación lo diga.
- */
-const onBlog = Astro.url.pathname.includes("/blog");
 const anchor = (id: string) => (onHome ? `#${id}` : `${home}#${id}`);
-
-const sections = [
-    { id: "about", label: t("nav.about") },
-    { id: "experience", label: t("nav.experience") },
-    { id: "projects", label: t("nav.projects") },
-    { id: "stack", label: t("nav.stack") },
-    { id: "education", label: t("nav.education") },
-    { id: "press", label: t("nav.press") },
-];
+const sections = homeSections(showBlog).map((section, index) => ({
+    ...section,
+    number: String(index + 1).padStart(2, "0"),
+    label: t(section.label),
+}));
+const onBlog = Astro.url.pathname.includes("/blog");
 ---
 
+{/*
+  Cabecera de pantalla: el nombre a un lado, y al otro el contacto y el menú.
+  Va fija y transparente por encima de todo, como el marco de un monitor: la
+  navegación ya no vive en la barra sino en el menú a pantalla completa.
+*/}
 <header class="header">
-    <a class="header__brand" href={anchor("hero")}>
-        {/* `width` y `height` son las medidas de pintado, no las del fichero: así el
-            logo ocupa lo que debe aunque la regla de abajo no llegue a aplicarse
-            —pasa en el servidor de desarrollo tras una navegación— en vez de
-            reventar la cabecera con la imagen a tamaño natural. */}
-        {
-            memoji ? (
-                <img class="header__brand-memoji" src={memoji} alt="" width="30" height="40" />
-            ) : (
-                <span class="header__brand-mark" aria-hidden="true">LG</span>
-            )
-        }
-        <span class="visually-hidden">Luis Garbayo Fernández</span>
-    </a>
+    <a class="header__brand" href={anchor("hero")}>Luis Garbayo</a>
 
-    {/* El QR va aquí y no dentro de la navegación a propósito: en móvil el
-        menú se pliega tras el botón de hamburguesa, y este es justo el botón
-        que se pulsa con prisa delante de alguien. Fuera del panel se alcanza
-        de un toque en cualquier tamaño de pantalla. */}
     <div class="header__actions">
-        <QrButton locale={locale} />
-        <ThemeToggle locale={locale} />
-
+        <a class="header__contact" href={anchor("contact")} data-track="nav_click" data-track-nav-target="contact">
+            {t("nav.contact")}
+            <span class="header__dot" aria-hidden="true"></span>
+        </a>
         <button
             class="header__toggle"
             type="button"
@@ -74,50 +46,53 @@ const sections = [
             aria-controls="primary-nav"
             data-menu-toggle
         >
+            <span aria-hidden="true">{t("nav.menu")}</span>
+            <span class="header__bars" aria-hidden="true">≡</span>
             <span class="visually-hidden" data-menu-label-open={t("nav.menu.open")}
                 data-menu-label-close={t("nav.menu.close")}>{t("nav.menu.open")}</span>
-            <span class="header__toggle-bars" aria-hidden="true"></span>
         </button>
     </div>
-
-    <nav class="header__nav" id="primary-nav" aria-label={t("nav.primary")} data-menu>
-        <ul class="header__list" role="list">
-            {
-                sections.map((section) => (
-                    <li>
-                        <a
-                            class="header__link"
-                            href={anchor(section.id)}
-                            data-nav-section={section.id}
-                            data-track="nav_click"
-                            data-track-nav-target={section.id}
-                        >
-                            {section.label}
-                        </a>
-                    </li>
-                ))
-            }
-            {
-                showBlog && (
-                    <li>
-                        <a
-                            class="header__link"
-                            href={localizedPath(locale, "blog")}
-                            data-track="nav_click"
-                            data-track-nav-target="blog"
-                            {...onBlog ? { "data-active": "" } : {}}
-                        >
-                            {t("nav.blog")}
-                        </a>
-                    </li>
-                )
-            }
-        </ul>
-        <div class="header__lang">
-            <LanguageSelector locale={locale} counterpartPaths={counterpartPaths} />
-        </div>
-    </nav>
 </header>
+
+<nav class="menu" id="primary-nav" aria-label={t("nav.primary")} data-menu>
+    <ol class="menu__list" role="list">
+        {sections.map((section) => (
+            <li>
+                <a
+                    class="menu__link"
+                    href={anchor(section.id)}
+                    data-nav-section={section.id}
+                    data-nav-label={section.label}
+                    data-track="nav_click"
+                    data-track-nav-target={section.id}
+                >
+                    <span class="menu__number">{section.number}</span>
+                    <span class="menu__label">{section.label}</span>
+                </a>
+            </li>
+        ))}
+    </ol>
+
+    <div class="menu__extras">
+        <p class="label">{t("nav.menu.extras")}</p>
+        <div class="menu__row">
+            {showBlog && (
+                <a
+                    class="menu__extra"
+                    href={localizedPath(locale, "blog")}
+                    data-track="nav_click"
+                    data-track-nav-target="blog-index"
+                    {...onBlog ? { "aria-current": "page" } : {}}
+                >
+                    &gt; {t("blog.all")}
+                </a>
+            )}
+            <button class="menu__extra" type="button" data-open-game>&gt; {t("game.launcher.label")}</button>
+            <QrButton locale={locale} />
+        </div>
+        <LanguageSelector locale={locale} counterpartPaths={counterpartPaths} />
+    </div>
+</nav>
 
 <script>
     import { initHeader } from "@/lib/header";
@@ -127,215 +102,195 @@ const sections = [
 
 <style>
     .header {
-        position: sticky;
+        position: fixed;
         inset-block-start: 0;
-        z-index: var(--z-sticky);
+        inset-inline: 0;
+        z-index: var(--z-menu);
         display: flex;
         align-items: center;
         justify-content: space-between;
         gap: var(--space-4);
-        inline-size: 100%;
+        block-size: var(--header-height);
         padding-inline: var(--gutter);
-        padding-block: var(--space-3);
-        /* El fondo translúcido evita que el texto de la página se lea a través
-           del header al hacer scroll. */
-        background: color-mix(in srgb, var(--color-bg) 88%, transparent);
-        backdrop-filter: blur(12px);
+        /* Un degradado y no un fondo: la cabecera no es una barra, es texto
+           sobre la pantalla, pero tiene que leerse encima de una foto. */
+        background: linear-gradient(to bottom, rgba(5, 5, 5, 0.85), transparent);
+        font-family: var(--font-pixel);
+        font-size: var(--text-xs);
+        letter-spacing: var(--tracking-wide);
+        text-transform: uppercase;
+        pointer-events: none;
     }
 
-    .header__brand {
-        display: inline-flex;
-        align-items: center;
-        min-block-size: var(--tap-target);
-        font-family: var(--font-mono);
-        font-size: var(--text-lg);
-        font-weight: var(--weight-bold);
-        color: var(--color-accent);
-        text-decoration: none;
-        letter-spacing: var(--tracking-tight);
+    .header > * {
+        pointer-events: auto;
     }
 
-    .header__brand-memoji {
-        /* Alto fijo y ancho libre: manda la altura de la cabecera, y el recorte
-           es más alto que ancho. */
-        block-size: 2.75rem;
-        inline-size: auto;
-        transition: scale var(--duration-fast) var(--ease-out);
-    }
-
-    .header__brand:hover .header__brand-memoji,
-    .header__brand:focus-visible .header__brand-memoji {
-        scale: 1.08;
-    }
-
-    /* Se va al final de la barra para que la navegación conserve su sitio a la
-       derecha: el grupo de acciones se coloca detrás con `order`, y el margen
-       automático de la navegación empuja a los dos contra el borde. */
-    .header__actions {
+    .header__brand,
+    .header__contact,
+    .header__toggle {
         display: inline-flex;
         align-items: center;
         gap: var(--space-2);
-        order: 3;
+        min-block-size: var(--tap-target);
+        color: var(--color-text);
+        text-decoration: none;
     }
 
-    .header__nav {
-        display: flex;
+    .header__brand {
+        font-size: var(--text-sm);
+    }
+
+    .header__actions {
+        display: inline-flex;
         align-items: center;
         gap: var(--space-5);
-        margin-inline-start: auto;
     }
 
-    .header__list {
-        display: flex;
+    .header__contact {
+        color: var(--color-text-muted);
+    }
+
+    .header__contact:hover {
+        color: var(--color-accent-strong);
+    }
+
+    .header__dot {
+        inline-size: 6px;
+        block-size: 6px;
+        background: var(--color-live);
+        box-shadow: 0 0 8px var(--color-live);
+    }
+
+    .header__toggle {
+        padding: 0;
+        background: none;
+        border: 0;
+        letter-spacing: inherit;
+        text-transform: inherit;
+        font: inherit;
+        cursor: pointer;
+    }
+
+    .header__bars {
+        font-size: 1.25em;
+        line-height: 1;
+    }
+
+    /* --- Menú a pantalla completa --- */
+
+    .menu {
+        position: fixed;
+        inset: 0;
+        z-index: calc(var(--z-menu) - 1);
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 20rem);
         align-items: center;
-        gap: var(--space-4);
+        gap: var(--space-8);
+        padding: calc(var(--header-height) + var(--space-6)) var(--gutter) calc(var(--hud-height) + var(--space-6));
+        background: rgba(5, 5, 5, 0.94);
+        backdrop-filter: blur(10px);
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        /* Cerrado no debe ser alcanzable con Tab: `visibility` lo saca del orden
+           de foco, cosa que la opacidad sola no hace. */
+        visibility: hidden;
+        opacity: 0;
+        transition:
+            opacity var(--duration-base) var(--ease-out),
+            visibility var(--duration-base);
+    }
+
+    .menu[data-open] {
+        visibility: visible;
+        opacity: 1;
+    }
+
+    .menu__list {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-1);
         margin: 0;
         padding: 0;
         list-style: none;
     }
 
-    .header__link {
+    .menu__link {
         display: inline-flex;
-        align-items: center;
-        min-block-size: var(--tap-target);
-        font-size: var(--text-sm);
-        color: var(--color-text-muted);
+        align-items: baseline;
+        gap: var(--space-5);
+        padding-block: var(--space-1);
+        color: var(--color-text-subtle);
         text-decoration: none;
+        font-family: var(--font-pixel);
+        text-transform: uppercase;
         transition: color var(--duration-fast) var(--ease-out);
     }
 
-    .header__link:hover,
-    .header__link[data-active] {
-        color: var(--color-accent);
+    .menu__number {
+        font-size: var(--text-sm);
     }
 
-    .header__link[data-active] {
-        font-weight: var(--weight-medium);
+    .menu__label {
+        font-size: clamp(2rem, 1.2rem + 3.5vw, 4.25rem);
+        line-height: 1.05;
     }
 
-    .header__toggle {
-        display: none;
-        align-items: center;
-        justify-content: center;
-        inline-size: var(--tap-target);
-        min-block-size: var(--tap-target);
+    .menu__link:hover,
+    .menu__link:focus-visible,
+    .menu__link[data-active] {
+        color: var(--color-accent-strong);
+    }
+
+    .menu__link[data-active] .menu__number::before {
+        content: "▸ ";
+    }
+
+    .menu__extras {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-4);
+        align-self: end;
+    }
+
+    .menu__row {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--space-2);
+    }
+
+    .menu__extra {
+        padding: 0;
         background: none;
         border: 0;
+        color: var(--color-text-muted);
+        font-family: var(--font-pixel);
+        font-size: var(--text-sm);
+        text-transform: uppercase;
+        text-decoration: none;
+        letter-spacing: var(--tracking-wide);
         cursor: pointer;
     }
 
-    .header__toggle-bars,
-    .header__toggle-bars::before,
-    .header__toggle-bars::after {
-        display: block;
-        inline-size: 22px;
-        block-size: 2px;
-        background: var(--color-text);
-        transition: transform var(--duration-fast) var(--ease-out);
-    }
-
-    .header__toggle-bars::before,
-    .header__toggle-bars::after {
-        content: "";
-        position: relative;
-    }
-
-    .header__toggle-bars::before {
-        inset-block-start: -7px;
-    }
-
-    .header__toggle-bars::after {
-        inset-block-start: 5px;
-    }
-
-    .header__toggle[aria-expanded="true"] .header__toggle-bars {
-        background: transparent;
-    }
-
-    .header__toggle[aria-expanded="true"] .header__toggle-bars::before {
-        transform: translateY(7px) rotate(45deg);
-    }
-
-    .header__toggle[aria-expanded="true"] .header__toggle-bars::after {
-        transform: translateY(-5px) rotate(-45deg);
+    .menu__extra:hover,
+    .menu__extra[aria-current] {
+        color: var(--color-accent-strong);
     }
 
     @media (max-width: 48rem) {
-        .header__toggle {
-            display: inline-flex;
+        .header__contact {
+            display: none;
         }
 
-        /* Con el menú abierto la cabecera deja de ser translúcida y toma el
-           gris del panel: dejaba asomar por detrás un trozo de la página, y del
-           mismo color que el panel las dos se leen como una sola pieza en vez
-           de como una franja encima de otra. */
-        .header:has(.header__nav[data-open]) {
-            background: var(--color-surface);
+        .menu {
+            grid-template-columns: minmax(0, 1fr);
+            align-content: start;
+            gap: var(--space-7);
         }
 
-        .header__nav {
-            /*
-             * `absolute` colgando de la cabecera, y no `fixed` contra la
-             * ventana.
-             *
-             * La cabecera lleva `backdrop-filter`, y eso la convierte en el
-             * bloque contenedor de sus descendientes posicionados: un `fixed`
-             * aquí dentro no se mide contra la ventana sino contra ella, que
-             * son 68 px de alto. La capa se quedaba en esa franja —pintando el
-             * fondo sólo ahí y soltando los enlaces por fuera— y con
-             * `overflow` puesto, recortada al primer enlace.
-             *
-             * Colgar el panel de la cabecera a propósito sale más barato que
-             * pelearse con eso, y es además lo que se quiere: un desplegable
-             * anclado a la barra, del ancho de la barra, que deja ver la página
-             * por debajo.
-             */
-            position: absolute;
-            inset-block-start: 100%;
-            inset-inline: 0;
-            border-radius: 0 0 var(--radius-md) var(--radius-md);
-            /* Si no cabe —un móvil en horizontal, o el texto muy ampliado— se
-               recorre por dentro en vez de crecer fuera de la pantalla. */
-            max-block-size: calc(100dvh - var(--header-height));
-            overflow-y: auto;
-            overscroll-behavior: contain;
-            z-index: var(--z-menu);
-            flex-direction: column;
-            justify-content: flex-start;
-            gap: var(--space-5);
-            padding-block: var(--space-5);
-            padding-inline: var(--gutter);
-            /* Un gris por encima del fondo de la página, más el borde y la
-               sombra: es lo que despega el panel de lo que queda debajo. Del
-               mismo color se leería como parte de la página. */
-            background: var(--color-surface);
-            border-block-end: 1px solid var(--color-border);
-            box-shadow: var(--shadow-md);
-            /* Cerrado no debe ser alcanzable con Tab: visibility lo saca del
-               orden de foco, cosa que opacity sola no hace. */
-            visibility: hidden;
-            opacity: 0;
-            transition:
-                opacity var(--duration-base) var(--ease-out),
-                visibility var(--duration-base);
-        }
-
-        .header__nav[data-open] {
-            visibility: visible;
-            opacity: 1;
-        }
-
-        .header__list {
-            flex-direction: column;
-            /* Los enlaces ya miden 44 px de alto cada uno por el objetivo
-               táctil, así que la separación puede ser corta sin que se peguen:
-               con `space-4` cada entrada ocupaba 60 px y en un móvil bajo
-               sobraban dos secciones fuera del panel. */
-            gap: var(--space-2);
-        }
-
-        .header__link {
-            font-size: var(--text-lg);
+        .menu__extras {
+            align-self: start;
         }
     }
 </style>

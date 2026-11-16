@@ -1,0 +1,618 @@
+---
+import CvViewer from "../CvViewer.astro";
+import Sheet from "../Sheet.astro";
+import { byCurrentThenRecent, getLocalizedEntries, getLocalizedEntry } from "@/lib/content";
+import { places } from "@/lib/places";
+import { sectionNumber } from "@/lib/sections";
+import { localeTags, useTranslations, type Locale } from "@/i18n/index";
+
+interface Props {
+    locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = useTranslations(locale);
+
+const about = await getLocalizedEntry("about", locale);
+const experience = (await getLocalizedEntries("experience", locale)).sort(byCurrentThenRecent);
+const educationAll = (await getLocalizedEntries("education", locale)).sort(
+    (a, b) => a.data.order - b.data.order || b.data.startDate.getTime() - a.data.startDate.getTime(),
+);
+const education = educationAll.filter((entry) => entry.data.type !== "certification");
+const certifications = educationAll.filter((entry) => entry.data.type === "certification");
+const languages = await getLocalizedEntry("languages", locale);
+
+const monthYear = new Intl.DateTimeFormat(localeTags[locale], { month: "short", year: "numeric" });
+const year = new Intl.DateTimeFormat(localeTags[locale], { year: "numeric" });
+const now = new Date();
+
+const isCurrent = (end?: Date) => !end || end > now;
+const period = (start?: Date, end?: Date, format = monthYear) => {
+    if (!start) return "";
+    const from = format.format(start);
+    const to = end && end <= now ? format.format(end) : t("experience.present");
+    // «2026 – 2026» no dice nada que «2026» no diga.
+    return from === to ? from : `${from} – ${to}`;
+};
+
+const years = (dates: Array<Date | undefined>) => {
+    const valid = dates.filter((date): date is Date => Boolean(date)).map((date) => date.getFullYear());
+    return valid.length ? `${Math.min(...valid)} – ${t("experience.present")}` : "";
+};
+
+const typeLabel = {
+    degree: t("education.type.degree"),
+    scholarship: t("education.type.scholarship"),
+    certification: t("education.type.certification"),
+    program: t("education.type.program"),
+};
+
+const first = places[0]!;
+const last = places[places.length - 1]!;
+---
+
+{/*
+  «Sobre mí», «Experiencia» y «Formación» en una pantalla, como tres paneles
+  sobre una ciudad. En escritorio la sección mide una pantalla por ciudad y se
+  queda clavada mientras se recorre: las fotos van pasando por detrás —Ourense,
+  A Coruña, Madrid— y los paneles se quedan. El detalle de cada entrada se abre
+  en una ficha (`Sheet`), no dentro del panel.
+*/}
+<section class="overview" id="about" aria-labelledby="about-title" style={`--places: ${places.length}`} data-overview>
+    <div class="overview__stage">
+        <div class="overview__backdrops" aria-hidden="true">
+            {places.map((place, index) => (
+                <picture class="overview__photo" data-place={index} {...index === 0 ? { "data-active": "" } : {}}>
+                    <source media="(max-width: 48rem)" srcset={place.photoNarrow} />
+                    <img src={place.photo} alt="" loading={index === 0 ? "lazy" : "lazy"} decoding="async" />
+                </picture>
+            ))}
+        </div>
+
+        <div class="overview__panels">
+            <article class="panel panel--about">
+                <header class="panel__head">
+                    <p class="label">{sectionNumber("about")}.1</p>
+                    <h2 class="panel__title" id="about-title">{about?.data.title ?? t("about.title")}</h2>
+                    <p class="label">{t("overview.label")}</p>
+                </header>
+                <p class="panel__lead">{t("overview.lead")}</p>
+                {about?.data.blocks.map((block) => <p class="panel__text">{block.body}</p>)}
+
+                <dl class="panel__coords label">
+                    <div><dt>{first.city}</dt><dd>{first.coords}</dd></div>
+                    <div><dt>{last.city}</dt><dd>{last.coords}</dd></div>
+                </dl>
+
+                {languages && (
+                    <ul class="panel__languages" role="list" aria-label={t("education.languages.title")}>
+                        {languages.data.items.map((item) => (
+                            <li>
+                                <span>{item.name}</span>
+                                <span class="label">{item.credential ?? item.level}</span>
+                            </li>
+                        ))}
+                    </ul>
+                )}
+
+                <CvViewer locale={locale} compact />
+            </article>
+
+            <article class="panel" id="experience" aria-labelledby="experience-title">
+                <header class="panel__head">
+                    <p class="label">{sectionNumber("about")}.2</p>
+                    <h2 class="panel__title" id="experience-title">{t("experience.title")}</h2>
+                    <p class="label">{years(experience.map((entry) => entry.data.startDate))}</p>
+                </header>
+                <ul class="rows" role="list">
+                    {experience.map((entry) => (
+                        <li>
+                            <button class="row" type="button" data-sheet-open={`experience-${entry.data.slug}`}>
+                                <span class="row__logo" aria-hidden="true">
+                                    {entry.data.logo ? <img src={entry.data.logo} alt="" width="28" height="28" loading="lazy" decoding="async" /> : <span>{entry.data.organization.charAt(0)}</span>}
+                                </span>
+                                <span class="row__main">
+                                    <span class="row__title">{entry.data.organization}</span>
+                                    <span class="row__sub">{entry.data.role}</span>
+                                </span>
+                                <span class="row__meta label">
+                                    {entry.data.startDate && isCurrent(entry.data.endDate) ? (
+                                        <span class="row__live">{t("experience.present")}</span>
+                                    ) : (
+                                        entry.data.startDate && period(entry.data.startDate, entry.data.endDate, year)
+                                    )}
+                                </span>
+                            </button>
+                        </li>
+                    ))}
+                </ul>
+            </article>
+
+            <article class="panel" id="education" aria-labelledby="education-title">
+                <header class="panel__head">
+                    <p class="label">{sectionNumber("about")}.3</p>
+                    <h2 class="panel__title" id="education-title">{t("education.title")}</h2>
+                    <p class="label">{years(education.map((entry) => entry.data.startDate))}</p>
+                </header>
+                <ul class="rows" role="list">
+                    {education.map((entry) => (
+                        <li>
+                            <button class="row" type="button" data-sheet-open={`education-${entry.data.slug}`}>
+                                <span class="row__main">
+                                    <span class="row__title">{entry.data.institution}</span>
+                                    <span class="row__sub">{entry.data.title}</span>
+                                </span>
+                                <span class="row__meta label">
+                                    {isCurrent(entry.data.endDate) ? (
+                                        <span class="row__live">{t("experience.present")}</span>
+                                    ) : (
+                                        period(entry.data.startDate, entry.data.endDate, year)
+                                    )}
+                                </span>
+                            </button>
+                        </li>
+                    ))}
+                    {certifications.length > 0 && (
+                        <li>
+                            <button class="row" type="button" data-sheet-open="education-certifications">
+                                <span class="row__main">
+                                    <span class="row__title">{t("education.certifications.title")}</span>
+                                    <span class="row__sub">{t("overview.certifications", { count: String(certifications.length) })}</span>
+                                </span>
+                                <span class="row__meta label">+</span>
+                            </button>
+                        </li>
+                    )}
+                </ul>
+            </article>
+        </div>
+
+        <div class="overview__captions" aria-hidden="true">
+            {places.map((place, index) => (
+                <div class="overview__caption" data-place={index} {...index === 0 ? { "data-active": "" } : {}}>
+                    <p class="overview__city">{place.city}</p>
+                    <p class="label">{place.landmark} · {place.coords}</p>
+                </div>
+            ))}
+        </div>
+
+        {/* El crédito no es decorado: la licencia lo exige. Va fuera del
+            `aria-hidden` y como enlace a la ficha de la foto. */}
+        <ul class="overview__credits" role="list">
+            {places.map((place, index) => (
+                <li data-place={index} {...index === 0 ? { "data-active": "" } : {}}>
+                    <a href={place.source} target="_blank" rel="noopener noreferrer">
+                        {place.city} — {t("overview.photoCredit", { author: place.author, license: place.license })}
+                    </a>
+                </li>
+            ))}
+        </ul>
+    </div>
+
+    {/* --- Fichas de detalle --- */}
+
+    {experience.map((entry) => (
+        <Sheet
+            id={`experience-${entry.data.slug}`}
+            locale={locale}
+            title={entry.data.role}
+            kicker={[entry.data.organization, period(entry.data.startDate, entry.data.endDate)].filter(Boolean).join(" · ")}
+        >
+            {(entry.data.employmentType || entry.data.location) && (
+                <p class="label">{[entry.data.employmentType, entry.data.location].filter(Boolean).join(" · ")}</p>
+            )}
+            <ul>
+                {entry.data.responsibilities.map((line) => <li set:html={line} />)}
+            </ul>
+            {entry.data.stack.length > 0 && (
+                <ul class="sheet__tags" role="list">
+                    {entry.data.stack.map((tech) => <li>{tech}</li>)}
+                </ul>
+            )}
+            {entry.data.images.length > 0 && (
+                <div class="sheet__gallery">
+                    {entry.data.images.map((image) => (
+                        <a href={image.src} target="_blank" rel="noopener noreferrer">
+                            <img src={image.src} alt={image.alt} width={image.width} height={image.height} loading="lazy" decoding="async" />
+                        </a>
+                    ))}
+                </div>
+            )}
+            {entry.data.url && (
+                <a class="sheet__link" href={entry.data.url} target="_blank" rel="noopener noreferrer">&gt; {entry.data.organization} ↗</a>
+            )}
+        </Sheet>
+    ))}
+
+    {education.map((entry) => (
+        <Sheet
+            id={`education-${entry.data.slug}`}
+            locale={locale}
+            title={entry.data.title}
+            kicker={[typeLabel[entry.data.type], entry.data.institution, period(entry.data.startDate, entry.data.endDate, year)].join(" · ")}
+        >
+            {entry.data.description.map((paragraph) => <p>{paragraph}</p>)}
+            {entry.data.images.length > 0 && (
+                <div class="sheet__gallery">
+                    {entry.data.images.map((image) => (
+                        <img src={image.src} alt={image.alt} loading="lazy" decoding="async" />
+                    ))}
+                </div>
+            )}
+            {entry.data.url && (
+                <a class="sheet__link" href={entry.data.url} target="_blank" rel="noopener noreferrer">&gt; {entry.data.institution} ↗</a>
+            )}
+            {entry.data.repoUrl && (
+                <a class="sheet__link" href={entry.data.repoUrl} target="_blank" rel="noopener noreferrer">&gt; {t("projects.viewRepo")} ↗</a>
+            )}
+        </Sheet>
+    ))}
+
+    {certifications.length > 0 && (
+        <Sheet id="education-certifications" locale={locale} title={t("education.certifications.title")} kicker={t("overview.certifications", { count: String(certifications.length) })}>
+            <ul class="certs" role="list">
+                {certifications.map((entry) => (
+                    <li>
+                        <span>
+                            {entry.data.url ? (
+                                <a href={entry.data.url} target="_blank" rel="noopener noreferrer">{entry.data.title}</a>
+                            ) : entry.data.title}
+                            <span class="label"> · {entry.data.institution}</span>
+                        </span>
+                        <span class="label">{monthYear.format(entry.data.startDate)}</span>
+                    </li>
+                ))}
+            </ul>
+        </Sheet>
+    )}
+</section>
+
+<script>
+    import { initOverview, destroyOverview } from "@/lib/overview";
+    initOverview();
+    document.addEventListener("astro:page-load", initOverview);
+    document.addEventListener("astro:before-swap", destroyOverview);
+</script>
+
+<style>
+    .overview {
+        position: relative;
+        /* Una pantalla por ciudad: es el recorrido que tarda en pasar Ourense →
+           A Coruña → Madrid con la sección clavada. */
+        block-size: calc(var(--places) * 100svh);
+    }
+
+    .overview__stage {
+        position: sticky;
+        inset-block-start: 0;
+        display: grid;
+        grid-template-rows: 1fr auto;
+        block-size: 100svh;
+        padding: calc(var(--header-height) + var(--space-4)) var(--gutter) calc(var(--hud-height) + var(--space-3));
+        overflow: hidden;
+        isolation: isolate;
+    }
+
+    /* --- Fotos de fondo --- */
+
+    .overview__backdrops {
+        position: absolute;
+        inset: 0;
+        z-index: -1;
+    }
+
+    .overview__backdrops::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background:
+            linear-gradient(to bottom, rgba(5, 5, 5, 0.75), transparent 30%, transparent 65%, rgba(5, 5, 5, 0.85)),
+            rgba(5, 5, 5, 0.15);
+    }
+
+    .overview__photo,
+    .overview__caption,
+    .overview__credits li {
+        opacity: 0;
+        transition: opacity var(--duration-slower) var(--ease-in-out);
+    }
+
+    .overview__photo[data-active],
+    .overview__caption[data-active],
+    .overview__credits li[data-active] {
+        opacity: 1;
+    }
+
+    .overview__photo {
+        position: absolute;
+        inset: 0;
+    }
+
+    .overview__photo img {
+        inline-size: 100%;
+        block-size: 100%;
+        object-fit: cover;
+    }
+
+    /* --- Paneles --- */
+
+    .overview__panels {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: var(--space-4);
+        align-items: start;
+        max-inline-size: 78rem;
+    }
+
+    .panel {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-4);
+        min-inline-size: 0;
+        max-block-size: calc(100svh - var(--header-height) - var(--hud-height) - 9rem);
+        padding: var(--space-5);
+        background: var(--color-glass-surface);
+        border: 1px solid var(--color-glass-border);
+        box-shadow: var(--shadow-glass);
+        backdrop-filter: blur(14px) saturate(110%);
+        -webkit-backdrop-filter: blur(14px) saturate(110%);
+        overflow-y: auto;
+        scrollbar-width: thin;
+    }
+
+    .panel__head {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        align-items: baseline;
+        column-gap: var(--space-3);
+        padding-block-end: var(--space-3);
+        border-block-end: 1px solid var(--color-border);
+    }
+
+    .panel__head > .label:last-child {
+        grid-column: 1 / -1;
+        margin-block-start: var(--space-1);
+    }
+
+    .panel__title {
+        font-size: var(--text-2xl);
+        color: var(--color-accent-strong);
+    }
+
+    .panel__lead {
+        font-family: var(--font-pixel);
+        font-size: var(--text-lg);
+        line-height: var(--leading-snug);
+        color: var(--color-text);
+    }
+
+    .panel__text {
+        color: var(--color-text-muted);
+        line-height: var(--leading-normal);
+    }
+
+    .panel__coords {
+        display: flex;
+        justify-content: space-between;
+        gap: var(--space-3);
+        padding-block: var(--space-3);
+        border-block: 1px solid var(--color-border);
+    }
+
+    .panel__coords dd {
+        margin: 0;
+        color: var(--color-text-muted);
+    }
+
+    .panel__languages {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-1);
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+
+    .panel__languages li {
+        display: flex;
+        justify-content: space-between;
+        gap: var(--space-3);
+    }
+
+    /* --- Filas de los paneles --- */
+
+    .rows {
+        display: flex;
+        flex-direction: column;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+
+    .row {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr) auto;
+        align-items: center;
+        gap: var(--space-3);
+        inline-size: 100%;
+        padding: var(--space-2) var(--space-1);
+        background: none;
+        border: 0;
+        border-block-end: 1px solid var(--color-border);
+        color: inherit;
+        font: inherit;
+        text-align: start;
+        cursor: pointer;
+        transition: background-color var(--duration-fast) var(--ease-out);
+    }
+
+    .row:not(:has(.row__logo)) {
+        grid-template-columns: minmax(0, 1fr) auto;
+    }
+
+    .row:hover,
+    .row:focus-visible {
+        background: var(--color-accent-dim);
+    }
+
+    .row__logo {
+        display: grid;
+        place-items: center;
+        inline-size: 28px;
+        block-size: 28px;
+        background: #f2f2f2;
+        overflow: hidden;
+    }
+
+    .row__logo img {
+        inline-size: 100%;
+        block-size: 100%;
+        object-fit: contain;
+        padding: 3px;
+    }
+
+    .row__logo span {
+        font-family: var(--font-pixel);
+        color: #050505;
+    }
+
+    .row__main {
+        display: flex;
+        flex-direction: column;
+        min-inline-size: 0;
+    }
+
+    .row__title {
+        overflow: hidden;
+        color: var(--color-text);
+        font-size: var(--text-sm);
+        white-space: nowrap;
+        text-overflow: ellipsis;
+    }
+
+    .row__sub {
+        overflow: hidden;
+        color: var(--color-text-subtle);
+        font-size: var(--text-xs);
+        white-space: nowrap;
+        text-overflow: ellipsis;
+    }
+
+    .row__meta {
+        white-space: nowrap;
+    }
+
+    .row__live {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4em;
+        color: var(--color-live);
+    }
+
+    .row__live::before {
+        content: "";
+        inline-size: 6px;
+        block-size: 6px;
+        background: currentColor;
+        box-shadow: 0 0 6px currentColor;
+    }
+
+    /* --- Ciudad y créditos --- */
+
+    .overview__captions {
+        position: relative;
+        align-self: end;
+        justify-self: end;
+        text-align: end;
+        min-block-size: 5rem;
+        min-inline-size: 20rem;
+        text-shadow: 0 2px 20px rgba(0, 0, 0, 0.8);
+    }
+
+    .overview__caption {
+        position: absolute;
+        inset-block-end: 0;
+        inset-inline-end: 0;
+    }
+
+    .overview__city {
+        font-family: var(--font-pixel);
+        font-size: clamp(2.5rem, 1.5rem + 4vw, 5rem);
+        line-height: 1;
+        text-transform: uppercase;
+        color: var(--color-accent-strong);
+    }
+
+    .overview__credits {
+        position: absolute;
+        inset-block-end: calc(var(--hud-height) + var(--space-1));
+        inset-inline-start: var(--gutter);
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        font-size: 0.6875rem;
+    }
+
+    .overview__credits li {
+        position: absolute;
+        inset-block-end: 0;
+        white-space: nowrap;
+    }
+
+    .overview__credits li:not([data-active]) {
+        visibility: hidden;
+    }
+
+    .overview__credits a {
+        color: var(--color-text-subtle);
+        text-decoration: none;
+    }
+
+    .overview__credits a:hover {
+        color: var(--color-text);
+    }
+
+    .certs {
+        padding: 0 !important;
+        list-style: none;
+    }
+
+    .certs li {
+        display: flex;
+        justify-content: space-between;
+        gap: var(--space-4);
+        padding-block: var(--space-2);
+        border-block-end: 1px solid var(--color-border);
+    }
+
+    .certs li::marker {
+        content: none;
+    }
+
+    /* --- Estrecho: sin clavar, paneles uno debajo de otro --- */
+    @media (max-width: 62rem) {
+        .overview {
+            block-size: auto;
+        }
+
+        .overview__stage {
+            position: relative;
+            block-size: auto;
+            min-block-size: 100svh;
+            gap: var(--space-6);
+        }
+
+        .overview__panels {
+            grid-template-columns: minmax(0, 1fr);
+        }
+
+        .panel {
+            max-block-size: none;
+            overflow: visible;
+        }
+
+        .overview__captions {
+            min-inline-size: 0;
+        }
+    }
+</style>

@@ -1,0 +1,234 @@
+---
+import CvViewer from "../CvViewer.astro";
+import { channels, isExternal } from "@/lib/channels";
+import { places } from "@/lib/places";
+import { sectionNumber } from "@/lib/sections";
+import { useTranslations, type Locale } from "@/i18n/index";
+
+interface Props {
+    locale: Locale;
+    showBlog?: boolean;
+}
+
+const { locale, showBlog = true } = Astro.props;
+const t = useTranslations(locale);
+
+const EMAIL = "lugarbayo@gmail.com";
+const links = channels.filter((channel) => channel.name !== "Email");
+// La ruta del globo: en el orden de la historia, no por distancia.
+const route = places.map((place) => {
+    const [lat, lon] = place.coords.split(",").map((part) => {
+        const value = Number.parseFloat(part);
+        return /[SW]/.test(part) ? -value : value;
+    });
+    return { name: place.city, lat, lon };
+});
+const origin = places[0]!;
+const last = places[places.length - 1]!;
+---
+
+<section class="contact" id="contact" aria-labelledby="contact-title">
+    <div class="contact__globe" data-contact-globe data-mask="/assets/ui/globe-land.png" data-route={JSON.stringify(route)}>
+        <img class="contact__still" src="/assets/ui/contact-globe.webp" alt={t("contact.globeAlt")} width="1400" height="1400" loading="lazy" decoding="async" />
+        <div class="contact__labels" data-globe-labels aria-hidden="true"></div>
+    </div>
+
+    <div class="contact__body">
+        <p class="label">{sectionNumber("contact", showBlog)}</p>
+        <h2 class="contact__title" id="contact-title">{t("contact.heading")}</h2>
+        <p class="contact__text">{t("contact.description")}</p>
+
+        <button class="contact__email" type="button" data-copy={EMAIL} data-copied-label={t("contact.copied")}>
+            <span>{EMAIL}</span>
+            <span class="label" data-copy-status>{t("contact.copy")}</span>
+        </button>
+
+        <ul class="contact__links" role="list">
+            {links.map((channel) => (
+                <li>
+                    <a
+                        href={channel.href}
+                        aria-label={t(channel.label)}
+                        data-track="channel_click"
+                        data-track-channel-name={channel.name}
+                        data-track-channel-surface="contact"
+                        {...isExternal(channel.href) ? { target: "_blank", rel: "noopener noreferrer" } : {}}
+                    >
+                        &gt; {channel.name}
+                    </a>
+                </li>
+            ))}
+            <li><a href={`mailto:${EMAIL}`}>&gt; Mail</a></li>
+        </ul>
+
+        <CvViewer locale={locale} compact />
+
+        <a class="contact__top label" href="#hero">&gt; {t("contact.backToTop")} ↑</a>
+    </div>
+
+    <p class="contact__coords label" aria-hidden="true">
+        {origin.city} {origin.coords} → {last.city} {last.coords}
+    </p>
+</section>
+
+<script>
+    import { initContact, destroyContact } from "@/lib/contact";
+    initContact();
+    document.addEventListener("astro:page-load", initContact);
+    document.addEventListener("astro:before-swap", destroyContact);
+</script>
+
+<style>
+    .contact {
+        position: relative;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr);
+        align-items: center;
+        min-block-size: 100svh;
+        padding: calc(var(--header-height) + var(--space-6)) var(--gutter) calc(var(--hud-height) + var(--space-8));
+        overflow: hidden;
+        isolation: isolate;
+    }
+
+    .contact__globe {
+        position: absolute;
+        inset-block: 0;
+        inset-inline: 30% 0;
+        z-index: -1;
+        display: grid;
+        place-items: center;
+    }
+
+    .contact__globe :global(canvas) {
+        position: absolute;
+        inset: 0;
+        inline-size: 100%;
+        block-size: 100%;
+    }
+
+    .contact__still {
+        inline-size: min(110%, 120svh);
+        max-inline-size: none;
+        transition: opacity var(--duration-slow) var(--ease-out);
+    }
+
+    .contact__globe[data-live] .contact__still {
+        opacity: 0;
+    }
+
+    .contact__labels {
+        position: absolute;
+        inset: 0;
+        /* Por encima del canvas, que se añade detrás en el DOM. */
+        z-index: 1;
+        pointer-events: none;
+    }
+
+    .contact__labels :global(.globe-label) {
+        position: absolute;
+        inset-block-start: 0;
+        inset-inline-start: 0;
+        padding-inline-start: 0.75rem;
+        font-family: var(--font-pixel);
+        font-size: var(--text-xs);
+        letter-spacing: var(--tracking-wide);
+        text-transform: uppercase;
+        color: var(--color-accent-strong);
+        text-shadow: 0 0 6px #000, 0 0 12px #000;
+        white-space: nowrap;
+        translate: 0 -50%;
+    }
+
+    .contact__labels :global(.globe-label[data-hidden]) {
+        opacity: 0;
+    }
+
+    .contact__body {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--space-4);
+        max-inline-size: 32rem;
+        text-shadow: 0 2px 18px rgba(0, 0, 0, 0.9);
+    }
+
+    .contact__title {
+        font-size: clamp(2.5rem, 1.5rem + 4vw, 4.75rem);
+        line-height: 1;
+        color: var(--color-accent-strong);
+    }
+
+    .contact__text {
+        color: var(--color-text-muted);
+    }
+
+    .contact__email {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--space-1);
+        padding: 0;
+        background: none;
+        border: 0;
+        color: var(--color-text);
+        font: inherit;
+        font-size: var(--text-base);
+        cursor: copy;
+    }
+
+    .contact__email:hover span:first-child {
+        text-decoration: underline;
+    }
+
+    .contact__links {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-1);
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+
+    .contact__links a,
+    .contact__top {
+        font-family: var(--font-pixel);
+        font-size: var(--text-xs);
+        letter-spacing: var(--tracking-wide);
+        text-transform: uppercase;
+        color: var(--color-text-muted);
+        text-decoration: none;
+    }
+
+    .contact__links a:hover,
+    .contact__top:hover {
+        color: var(--color-accent-strong);
+    }
+
+    .contact__top {
+        margin-block-start: var(--space-4);
+        color: var(--color-text);
+    }
+
+    .contact__coords {
+        position: absolute;
+        inset-block-end: calc(var(--hud-height) + var(--space-3));
+        inset-inline-end: var(--gutter);
+    }
+
+    @media (max-width: 62rem) {
+        .contact {
+            grid-template-columns: minmax(0, 1fr);
+            align-items: end;
+        }
+
+        .contact__globe {
+            inset-inline: 0;
+            inset-block: 0 40%;
+            opacity: 0.6;
+        }
+
+        .contact__coords {
+            display: none;
+        }
+    }
+</style>

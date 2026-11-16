@@ -2,7 +2,7 @@
 locale: en
 slug: main
 title: About me
-profileImage: /assets/ui/about-portrait.webp
+profileImage: /assets/ui/me.jpg
 profileImageAlt: Portrait of Luis Garbayo
 blocks:
   - body: >-

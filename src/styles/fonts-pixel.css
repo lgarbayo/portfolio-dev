@@ -1,0 +1,13 @@
+/*
+ * Departure Mono (Helena Zhang, SIL OFL 1.1 — ver public/fonts/departure-mono-LICENSE.txt).
+ * No está en Google Fonts, así que no la trae `scripts/fetch-fonts.mjs`: el
+ * woff2 sale tal cual de la release v1.500 de github.com/rektdeckard/departure-mono.
+ * Es pixelada y de un solo peso; los títulos no piden negrita.
+ */
+@font-face {
+    font-family: "Departure Mono";
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url("/fonts/departure-mono.woff2") format("woff2");
+}

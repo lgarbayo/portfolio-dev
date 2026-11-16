@@ -81,16 +81,8 @@ const defaultHref =
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 {/* Tiñe la barra del navegador en móvil con el fondo de la página, para que
     el borde superior no corte en seco. Mismo valor que `--color-bg`. */}
-<meta name="theme-color" content="#e6e6e6" />
-<script is:inline>
-    // Antes del primer pintado: evita el destello claro al recargar en oscuro.
-    (() => {
-        let theme = "light";
-        try { if (localStorage.getItem("portfolio-theme") === "dark") theme = "dark"; } catch {}
-        document.documentElement.dataset.theme = theme;
-        document.querySelector('meta[name="theme-color"]')?.setAttribute("content", theme === "dark" ? "#181a1d" : "#e6e6e6");
-    })();
-</script>
+<meta name="theme-color" content="#050505" />
+<meta name="color-scheme" content="dark" />
 <meta name="generator" content={Astro.generator} />
 
 <title>{title}</title>
@@ -123,8 +115,9 @@ const defaultHref =
 <link rel="apple-touch-icon" href="/favicon-180.png" />
 
 {/* Las fuentes se sirven desde aquí —ver `scripts/fetch-fonts.mjs`— y sus
-    `@font-face` entran con el CSS del sitio. Se precargan sólo los dos ficheros
-    latinos, que son los que necesita cualquier página desde el primer pintado:
+    `@font-face` entran con el CSS del sitio. Se precargan sólo la pixelada y la
+    monoespaciada latina, que son las que necesita cualquier página desde el
+    primer pintado:
     el navegador no descubriría que los quiere hasta terminar de leer el CSS, y
     para entonces ya ha perdido un viaje. Los `latin-ext` no se precargan porque
     la mayoría de páginas no llegan a pedirlos. */}
@@ -132,7 +125,7 @@ const defaultHref =
     rel="preload"
     as="font"
     type="font/woff2"
-    href="/fonts/space-grotesk-latin.woff2"
+    href="/fonts/departure-mono.woff2"
     crossorigin
 />
 <link

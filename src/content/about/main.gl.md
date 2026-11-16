@@ -2,7 +2,7 @@
 locale: gl
 slug: main
 title: Sobre min
-profileImage: /assets/ui/about-portrait.webp
+profileImage: /assets/ui/me.jpg
 profileImageAlt: Retrato de Luis Garbayo
 blocks:
   - body: >-

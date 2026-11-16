@@ -14,9 +14,11 @@ import { localeNames, useTranslations, type Locale } from "@/i18n/index";
  */
 interface Props {
     locale: Locale;
+    /** Sólo los enlaces, en una línea cada uno: es lo que cabe en un panel. */
+    compact?: boolean;
 }
 
-const { locale } = Astro.props;
+const { locale, compact = false } = Astro.props;
 const t = useTranslations(locale);
 
 const CV_LOCALES = ["en", "es"] as const satisfies readonly Locale[];
@@ -28,9 +30,26 @@ const files = CV_LOCALES.map((code) => ({ code, href: `/cv-${code}.pdf` })).filt
 
 {
     files.length > 0 && (
-        <div class="cv" data-reveal>
-            <h3 class="cv__title">{t("cv.title")}</h3>
+        <div class:list={["cv", { "cv--compact": compact }]} {...compact ? {} : { "data-reveal": "" }}>
+            {!compact && <h3 class="cv__title">{t("cv.title")}</h3>}
 
+            {compact ? (
+                <ul class="cv__inline" role="list">
+                    {files.map(({ code, href }) => (
+                        <li>
+                            <button
+                                class="cv__inline-button"
+                                type="button"
+                                data-cv-open={href}
+                                data-cv-label={localeNames[code]}
+                                aria-label={t("cv.open", { language: localeNames[code] })}
+                            >
+                                &gt; {t("overview.cv")} · {code.toUpperCase()}
+                            </button>
+                        </li>
+                    ))}
+                </ul>
+            ) : (
             <ul class="cv__list" role="list">
                 {files.map(({ code, href }) => (
                     <li>
@@ -70,6 +89,7 @@ const files = CV_LOCALES.map((code) => ({ code, href: `/cv-${code}.pdf` })).filt
                     </li>
                 ))}
             </ul>
+            )}
 
             {/*
                 Un solo diálogo para los dos: al abrirlo se le pone el PDF que toca.
@@ -111,6 +131,31 @@ const files = CV_LOCALES.map((code) => ({ code, href: `/cv-${code}.pdf` })).filt
 </script>
 
 <style>
+    .cv__inline {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--space-2) var(--space-5);
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+
+    .cv__inline-button {
+        padding: 0;
+        background: none;
+        border: 0;
+        color: var(--color-text-muted);
+        font-family: var(--font-pixel);
+        font-size: var(--text-xs);
+        letter-spacing: var(--tracking-wide);
+        text-transform: uppercase;
+        cursor: pointer;
+    }
+
+    .cv__inline-button:hover {
+        color: var(--color-accent-strong);
+    }
+
     .cv {
         margin-block-start: var(--space-7);
     }

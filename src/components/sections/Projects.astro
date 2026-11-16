@@ -1,8 +1,9 @@
 ---
-import Section from "../Section.astro";
-import ProjectCard from "../ProjectCard.astro";
+import Sheet from "../Sheet.astro";
 import { getLocalizedEntries, getPortfolioProjects } from "@/lib/content";
+import { sectionNumber } from "@/lib/sections";
 import { localeTags, useTranslations, type Locale } from "@/i18n/index";
+import type { CollectionEntry } from "astro:content";
 
 interface Props {
     locale: Locale;
@@ -11,7 +12,9 @@ interface Props {
 const { locale } = Astro.props;
 const t = useTranslations(locale);
 
-const orderedProjects = await getPortfolioProjects(locale);
+const projects = await getPortfolioProjects(locale);
+const featured = projects.filter((project) => project.data.featured);
+const others = projects.filter((project) => !project.data.featured);
 
 /*
  * Las actividades van aparte y al final. No son proyectos —no tienen repo, ni
@@ -26,135 +29,474 @@ const period = new Intl.DateTimeFormat(localeTags[locale], { month: "short", yea
 const formatPeriod = (start: Date, end?: Date) =>
     end ? `${period.format(start)} – ${period.format(end)}` : period.format(start);
 
+type Project = CollectionEntry<"projects">;
+
+const links = (data: Project["data"]) =>
+    [
+        data.demoUrl && { href: data.demoUrl, label: t("projects.viewDemo"), kind: "demo" },
+        data.videoUrl && { href: data.videoUrl, label: t("projects.viewVideo"), kind: "video" },
+        data.landingUrl && { href: data.landingUrl, label: t("projects.viewLanding"), kind: "landing" },
+        data.devpostUrl && { href: data.devpostUrl, label: t("projects.viewDevpost"), kind: "devpost" },
+        data.productHuntUrl && { href: data.productHuntUrl, label: t("projects.viewProductHunt"), kind: "producthunt" },
+        data.repoUrl && { href: data.repoUrl, label: t("projects.viewRepo"), kind: "repo" },
+    ].filter((link): link is { href: string; label: string; kind: string } => Boolean(link));
+
+// Capturas que no son 16:9 —un móvil en vertical, un mapa panorámico— se
+// enseñan enteras en vez de recortadas.
+const CONTAIN = new Set(["pepon-bot", "taiafox"]);
+const number = (index: number) => String(index + 1).padStart(2, "0");
+// «HackUDC 2026 · 2026» repite el año: si el contexto ya lo lleva, no se añade.
+const meta = (data: Project["data"]) =>
+    [data.context, data.year && !data.context?.includes(String(data.year)) ? data.year : null]
+        .filter(Boolean)
+        .join(" · ");
 ---
 
-<Section id="projects" title={t("projects.title")}>
-    <div class="projects__grid">
-        {orderedProjects.map((project) => (
-            <ProjectCard locale={locale} project={project} isFallback={project.isFallback} />
-        ))}
+<section class="work" id="projects" aria-labelledby="projects-title" style={`--count: ${featured.length}`} data-work>
+    <div class="work__pin">
+        <div class="work__stage">
+            <div class="work__index">
+                <header class="work__head">
+                    <p class="label">{sectionNumber("projects")}</p>
+                    <h2 class="work__title" id="projects-title">{t("projects.selected")}</h2>
+                </header>
+                <ol class="work__list" role="list">
+                    {featured.map((project, index) => (
+                        <li>
+                            <button
+                                class="work__item"
+                                type="button"
+                                data-work-pick={index}
+                                {...index === 0 ? { "aria-current": "true" } : {}}
+                            >
+                                <span class="work__number">[{number(index)}]</span>
+                                <span>{project.data.title}</span>
+                            </button>
+                        </li>
+                    ))}
+                </ol>
+                <p class="label work__hint">{t("projects.hint")}</p>
+            </div>
+
+            <ol class="work__slides" role="list">
+                {featured.map((project, index) => (
+                    <li class="slide" data-work-slide={index} {...index === 0 ? { "data-active": "" } : {}}>
+                        <div class="slide__screen">
+                            {project.data.thumbnail ? (
+                                <img
+                                    class:list={["slide__image", { "slide__image--contain": CONTAIN.has(project.data.slug) }]}
+                                    src={project.data.thumbnail}
+                                    alt={project.data.thumbnailAlt!}
+                                    loading="lazy"
+                                    decoding="async"
+                                />
+                            ) : (
+                                <span class="slide__placeholder">{project.data.title}</span>
+                            )}
+                        </div>
+                        <div class="slide__info">
+                            <p class="label">{number(index)} · {meta(project.data)}</p>
+                            <h3 class="slide__title">{project.data.title}</h3>
+                            <p class="slide__description">{project.data.description}</p>
+                            <div class="slide__actions">
+                                {links(project.data).map((link) => (
+                                    <a
+                                        class="slide__link"
+                                        href={link.href}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        data-track="project_link_click"
+                                        data-track-project-slug={project.data.slug}
+                                        data-track-link-kind={link.kind}
+                                    >
+                                        &gt; {link.label} ↗
+                                    </a>
+                                ))}
+                                <button class="slide__link slide__open" type="button" data-sheet-open={`project-${project.data.slug}`}>
+                                    {t("projects.open")} +
+                                </button>
+                            </div>
+                        </div>
+                    </li>
+                ))}
+            </ol>
+        </div>
     </div>
 
-    {
-        activities.length > 0 && (
-            <div class="activities">
-                <h3 class="activities__title" data-reveal>
-                    {t("projects.activities.title")}
-                </h3>
-                <ul class="activities__list" role="list">
-                    {activities.map((item) => (
-                        <li class="activities__item" data-reveal>
-                            <p class="activities__name">{item.data.title}</p>
-                            <p class="activities__meta">
-                                {item.data.context && <>{item.data.context} · </>}
-                                <span class="activities__period">
-                                    {formatPeriod(item.data.startDate, item.data.endDate)}
-                                </span>
-                            </p>
-                            {item.data.description && (
-                                <p class="activities__description">{item.data.description}</p>
-                            )}
-                            {item.data.award && (
-                                <p class="activities__award">{item.data.award}</p>
-                            )}
+    <div class="work__more">
+        {others.length > 0 && (
+            <div class="more">
+                <h3 class="label more__title">{t("projects.others")}</h3>
+                <ul class="more__list" role="list">
+                    {others.map((project) => (
+                        <li>
+                            <button class="more__row" type="button" data-sheet-open={`project-${project.data.slug}`}>
+                                <span class="more__name">{project.data.title}</span>
+                                <span class="more__tags">{project.data.tags.slice(0, 3).join(" · ")}</span>
+                                <span class="label">{project.data.year ?? ""} +</span>
+                            </button>
                         </li>
                     ))}
                 </ul>
             </div>
-        )
-    }
-</Section>
+        )}
+
+        {activities.length > 0 && (
+            <div class="more">
+                <h3 class="label more__title">{t("projects.activities.title")}</h3>
+                <ul class="more__list" role="list">
+                    {activities.map((item) => (
+                        <li class="activity">
+                            <div>
+                                <p class="more__name">{item.data.title}</p>
+                                {item.data.description && <p class="activity__text">{item.data.description}</p>}
+                                {item.data.award && <p class="activity__award">★ {item.data.award}</p>}
+                            </div>
+                            <p class="label">
+                                {item.data.context && <>{item.data.context} · </>}
+                                {formatPeriod(item.data.startDate, item.data.endDate)}
+                            </p>
+                        </li>
+                    ))}
+                </ul>
+            </div>
+        )}
+    </div>
+
+    {projects.map((project) => (
+        <Sheet id={`project-${project.data.slug}`} locale={locale} title={project.data.title} kicker={meta(project.data)}>
+            {project.isFallback && <p class="label">{t("content.fallbackNotice")}</p>}
+            {project.data.thumbnail && (
+                <img class="sheet-shot" src={project.data.thumbnail} alt={project.data.thumbnailAlt!} loading="lazy" decoding="async" />
+            )}
+            <p>{project.data.description}</p>
+            {project.data.highlights.length > 0 && (
+                <>
+                    <p class="label">{t("projects.highlights")}</p>
+                    <ul>{project.data.highlights.map((line) => <li>{line}</li>)}</ul>
+                </>
+            )}
+            <p class="label">{t("projects.tags")}</p>
+            <ul class="sheet__tags" role="list">{project.data.tags.map((tag) => <li>{tag}</li>)}</ul>
+            {links(project.data).map((link) => (
+                <a class="sheet__link" href={link.href} target="_blank" rel="noopener noreferrer"
+                    data-track="project_link_click" data-track-project-slug={project.data.slug} data-track-link-kind={link.kind}>
+                    &gt; {link.label} ↗
+                </a>
+            ))}
+        </Sheet>
+    ))}
+</section>
+
+<script>
+    import { initWork, destroyWork } from "@/lib/work";
+    initWork();
+    document.addEventListener("astro:page-load", initWork);
+    document.addEventListener("astro:before-swap", destroyWork);
+</script>
 
 <style>
-    .activities {
-        margin-block-start: var(--space-8);
+    /* --- Clavado: una franja de scroll por proyecto destacado --- */
+
+    .work__pin {
+        position: relative;
+        block-size: calc(var(--count) * 55svh + 45svh);
     }
 
-    .activities__title {
-        margin-block-end: var(--space-4);
-        font-family: var(--font-mono);
-        font-size: var(--text-sm);
-        letter-spacing: var(--tracking-wide);
-        text-transform: uppercase;
-        color: var(--color-text-subtle);
-    }
-
-    .activities__list {
+    .work__stage {
+        position: sticky;
+        inset-block-start: 0;
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
-        gap: var(--space-4);
+        grid-template-columns: minmax(16rem, 0.8fr) minmax(0, 2fr);
+        align-items: center;
+        gap: var(--space-8);
+        block-size: 100svh;
+        padding: calc(var(--header-height) + var(--space-4)) var(--gutter) calc(var(--hud-height) + var(--space-4));
+    }
+
+    .work__head {
+        display: flex;
+        align-items: baseline;
+        gap: var(--space-3);
+        margin-block-end: var(--space-5);
+    }
+
+    .work__title {
+        font-size: var(--text-2xl);
+        color: var(--color-accent-strong);
+    }
+
+    .work__list {
+        display: flex;
+        flex-direction: column;
         margin: 0;
         padding: 0;
         list-style: none;
     }
 
-    .activities__item {
-        padding: var(--space-4);
-        background: var(--color-glass-surface);
-        border: 1px solid var(--color-glass-border);
-        border-radius: 1.25rem;
-        box-shadow: var(--shadow-glass);
-        backdrop-filter: blur(16px) saturate(120%);
-        -webkit-backdrop-filter: blur(16px) saturate(120%);
+    .work__item {
+        display: flex;
+        gap: var(--space-3);
+        inline-size: 100%;
+        padding: var(--space-2) 0;
+        background: none;
+        border: 0;
+        border-block-end: 1px solid var(--color-border);
+        color: var(--color-text-subtle);
+        font-family: var(--font-pixel);
+        font-size: var(--text-sm);
+        letter-spacing: var(--tracking-wide);
+        text-align: start;
+        text-transform: uppercase;
+        cursor: pointer;
+        transition: color var(--duration-fast) var(--ease-out);
     }
 
-    .activities__name {
-        font-size: var(--text-sm);
-        font-weight: var(--weight-medium);
+    .work__item:hover,
+    .work__item[aria-current] {
+        color: var(--color-accent-strong);
+    }
+
+    .work__item[aria-current] .work__number::before {
+        content: "▸ ";
+    }
+
+    .work__hint {
+        margin-block-start: var(--space-4);
+    }
+
+    /* --- Diapositivas: todas en la misma celda, se ve la activa --- */
+
+    .work__slides {
+        display: grid;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        perspective: 1600px;
+    }
+
+    .slide {
+        grid-area: 1 / 1;
+        display: grid;
+        gap: var(--space-5);
+        opacity: 0;
+        visibility: hidden;
+        transition:
+            opacity var(--duration-slow) var(--ease-out),
+            visibility var(--duration-slow);
+    }
+
+    .slide[data-active] {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    /* La pantalla curva: girada hacia dentro, con viñeta y líneas, como un
+       monitor de tubo visto de lado. */
+    .slide__screen {
+        position: relative;
+        aspect-ratio: 16 / 9;
+        max-block-size: 52svh;
+        background: #000;
+        border: 1px solid var(--color-border-strong);
+        border-radius: 14px / 22px;
+        box-shadow:
+            0 30px 80px rgba(0, 0, 0, 0.7),
+            0 0 0 6px rgba(255, 255, 255, 0.02);
+        overflow: hidden;
+        transform: rotateY(-10deg) rotateX(2deg);
+        transform-origin: left center;
+        transition: transform var(--duration-slower) var(--ease-out);
+    }
+
+    .slide[data-active] .slide__screen:hover {
+        transform: rotateY(-4deg) rotateX(1deg);
+    }
+
+    .slide__screen::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background:
+            repeating-linear-gradient(to bottom, rgba(255, 255, 255, 0.035) 0 1px, transparent 1px 3px),
+            radial-gradient(ellipse at center, transparent 55%, rgba(0, 0, 0, 0.55) 100%);
+        pointer-events: none;
+    }
+
+    .slide__image {
+        inline-size: 100%;
+        block-size: 100%;
+        object-fit: cover;
+        object-position: top;
+    }
+
+    .slide__image--contain {
+        object-fit: contain;
+        object-position: center;
+    }
+
+    .slide__placeholder {
+        display: grid;
+        place-items: center;
+        block-size: 100%;
+        font-family: var(--font-pixel);
+        font-size: var(--text-2xl);
+        text-transform: uppercase;
+    }
+
+    .slide__info {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-2);
+        max-inline-size: 48rem;
+    }
+
+    .slide__title {
+        font-family: var(--font-pixel);
+        font-size: var(--text-xl);
+        font-weight: 400;
+        text-transform: uppercase;
+        color: var(--color-accent-strong);
+    }
+
+    .slide__description {
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        color: var(--color-text-muted);
+    }
+
+    .slide__actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--space-2) var(--space-5);
+        margin-block-start: var(--space-2);
+    }
+
+    .slide__link {
+        padding: 0;
+        background: none;
+        border: 0;
+        color: var(--color-text);
+        font-family: var(--font-pixel);
+        font-size: var(--text-xs);
+        letter-spacing: var(--tracking-wide);
+        text-transform: uppercase;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+    .slide__link:hover {
+        color: var(--color-accent-strong);
+        text-decoration: underline;
+    }
+
+    /* --- Más proyectos y actividades --- */
+
+    .work__more {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: var(--space-7);
+        padding: var(--space-6) var(--gutter) var(--space-9);
+    }
+
+    .more__title {
+        margin-block-end: var(--space-3);
+    }
+
+    .more__list {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        border-block-start: 1px solid var(--color-border);
+    }
+
+    .more__row,
+    .activity {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: var(--space-1) var(--space-4);
+        inline-size: 100%;
+        padding: var(--space-3) var(--space-1);
+        border-block-end: 1px solid var(--color-border);
+    }
+
+    .more__row {
+        grid-template-columns: minmax(0, 1fr) auto auto;
+        align-items: baseline;
+        background: none;
+        border-inline: 0;
+        border-block-start: 0;
+        color: inherit;
+        font: inherit;
+        text-align: start;
+        cursor: pointer;
+    }
+
+    .more__row:hover {
+        background: var(--color-accent-dim);
+    }
+
+    .more__name {
         color: var(--color-text);
     }
 
-    .activities__meta {
+    .more__tags {
+        color: var(--color-text-subtle);
+        font-size: var(--text-xs);
+    }
+
+    .activity__text {
         margin-block-start: var(--space-1);
-        font-size: var(--text-xs);
         color: var(--color-text-muted);
-    }
-
-    .activities__period {
-        font-family: var(--font-mono);
-        color: var(--color-text-subtle);
-    }
-
-    .activities__description {
-        margin-block-start: var(--space-2);
-        font-size: var(--text-sm);
-        color: var(--color-text-muted);
-    }
-
-    .activities__award {
-        margin-block-start: var(--space-2);
         font-size: var(--text-xs);
-        font-style: italic;
-        color: var(--color-text-subtle);
     }
 
-    .projects__grid {
-        display: grid;
-        grid-template-columns: repeat(10, minmax(0, 1fr));
-        gap: var(--space-5);
+    .activity__award {
+        margin-block-start: var(--space-1);
+        color: var(--color-text);
+        font-size: var(--text-xs);
     }
 
-    .projects__grid > :global(.card) {
-        grid-column: span 6;
+    .sheet-shot {
+        inline-size: 100%;
+        border: 1px solid var(--color-border);
     }
 
-    .projects__grid > :global(.card:nth-child(4n + 2)),
-    .projects__grid > :global(.card:nth-child(4n + 3)) {
-        grid-column: span 4;
-    }
-
-    @media (max-width: 80rem) {
-        .projects__grid {
-            grid-template-columns: repeat(2, minmax(0, 1fr));
+    /* --- Estrecho: sin clavar, una ficha por proyecto --- */
+    @media (max-width: 62rem) {
+        .work__pin {
+            block-size: auto;
         }
 
-        .projects__grid > :global(.card:nth-child(n)) {
-            grid-column: auto;
+        .work__stage {
+            position: relative;
+            grid-template-columns: minmax(0, 1fr);
+            block-size: auto;
+            gap: var(--space-5);
         }
-    }
 
-    @media (max-width: 48rem) {
-        .projects__grid {
+        .work__list,
+        .work__hint {
+            display: none;
+        }
+
+        .work__slides {
+            gap: var(--space-8);
+        }
+
+        .slide {
+            grid-area: auto;
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .slide__screen {
+            transform: none;
+        }
+
+        .work__more {
             grid-template-columns: minmax(0, 1fr);
         }
     }

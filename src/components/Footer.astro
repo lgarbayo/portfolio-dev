@@ -48,9 +48,10 @@ const GITHUB_ICON = "/assets/ui/github-mark-white.svg";
 
 <style>
     .footer {
-        margin-block-start: var(--section-gap);
         border-block-start: 1px solid var(--color-border);
-        padding-block: var(--space-6);
+        /* Por debajo va la barra fija del contador: se le deja su hueco. */
+        padding-block: var(--space-5) calc(var(--hud-height) + var(--space-4));
+        font-size: var(--text-xs);
         /* Punto de anclaje propio: sin él, con el anclaje obligatorio activo, el
            pie queda pegado al final de la última sección y cuesta llegar. */
         scroll-snap-align: start;

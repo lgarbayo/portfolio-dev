@@ -1,756 +1,201 @@
 ---
-import { getLocalizedEntry } from "@/lib/content";
-import { publicAssetExists } from "@/lib/assets";
-import { channels } from "@/lib/channels";
-import { localizedPath, useTranslations, type Locale } from "@/i18n/index";
+import { byCurrentThenRecent, getLocalizedEntries } from "@/lib/content";
+import { useTranslations, type Locale } from "@/i18n/index";
 
 interface Props {
     locale: Locale;
-    /** El blog sólo tiene ficha si ese idioma tiene algún post publicado. */
-    showBlog?: boolean;
 }
 
-const { locale, showBlog = false } = Astro.props;
+const { locale } = Astro.props;
 const t = useTranslations(locale);
 
-const hero = await getLocalizedEntry("hero", locale);
-
 /*
- * La figura del centro: un fotograma fijo en el HTML y el vídeo encima cuando
- * el navegador y el visitante dan para ello.
- *
- * El póster es el que manda para que la bienvenida esté completa desde el primer
- * pintado; el vídeo lo sustituye después y añade el giro hacia el cursor. Cada
- * uno entra si su fichero existe, así que quitar el mp4 deja la web entera.
- *
- * El vídeo no se reproduce nunca: `src/lib/hero-video.ts` lo lleva pausado y le
- * mueve el `currentTime` con la X del cursor. Por eso el número de fotogramas
- * viaja en el marcado, al lado del fichero que los contiene.
+ * A la derecha, lo que estoy haciendo ahora: el puesto en curso más reciente y
+ * la titulación que sigue abierta. Salen del contenido, no del marcado, para
+ * que el hero no se quede contando un trabajo que ya terminó.
  */
-const HERO_POSTER = "/assets/ui/hero-figure.webp";
-/* El mismo fotograma recortado para pantalla estrecha, donde el robot tiene que
-   ir centrado y no a la derecha. No es un peso añadido: ahí se pide éste EN
-   LUGAR del otro, y el vídeo no se pide nunca. El porqué del recorte está en
-   `scripts/make-hero-figure.mjs`. */
-const HERO_POSTER_NARROW = "/assets/ui/hero-figure-narrow.webp";
-const HERO_VIDEO = "/assets/ui/hero-figure.mp4";
-const HERO_VIDEO_DARK = "/assets/ui/hero-figure-dark.mp4";
-/* La placa buena, en AV1 y al doble de resolución. La elige `hero-video.ts` si
-   el navegador la sabe decodificar; las de arriba quedan de reserva para Safari
-   anterior al 17 y los Mac Intel. El porqué está en `make-hero-figure.mjs`. */
-const HERO_VIDEO_AV1 = "/assets/ui/hero-figure.av1.mp4";
-const HERO_VIDEO_AV1_DARK = "/assets/ui/hero-figure-dark.av1.mp4";
-const HERO_POSTER_DARK = "/assets/ui/hero-figure-dark.webp";
-const HERO_POSTER_NARROW_DARK = "/assets/ui/hero-figure-narrow-dark.webp";
-const HERO_FRAMES = "54";
-const HERO_FPS = "24";
-/* Dónde cae el frontal dentro del arco. No es el primer fotograma: el clip gira
-   la cabeza hacia un lado antes de llegar a él y hacia el otro después, y es esa
-   bisagra la que permite que el robot mire a izquierda Y derecha. */
-const HERO_REST = "14";
-/* Dónde cae el robot, de 0 a 1. El mismo número en tres sitios a propósito: el
-   recorte de `scripts/make-hero-figure.mjs` lo deja en el 70% de la placa, el
-   `object-position` del CSS pide el 70%, y con `cover` esa coincidencia es la
-   que hace que caiga en el 70% de la PANTALLA sea cual sea la forma de la
-   ventana. Esto es lo que lee el seguimiento para saber contra qué punto mide
-   la distancia del cursor. */
-const HERO_ANCHOR = "0.70";
-const poster = publicAssetExists(HERO_POSTER) ? HERO_POSTER : null;
-const posterNarrow = publicAssetExists(HERO_POSTER_NARROW) ? HERO_POSTER_NARROW : null;
-const video = publicAssetExists(HERO_VIDEO) ? HERO_VIDEO : null;
-const videoDark = publicAssetExists(HERO_VIDEO_DARK) ? HERO_VIDEO_DARK : null;
-const videoAv1 = publicAssetExists(HERO_VIDEO_AV1) ? HERO_VIDEO_AV1 : null;
-const videoAv1Dark = publicAssetExists(HERO_VIDEO_AV1_DARK) ? HERO_VIDEO_AV1_DARK : null;
-const posters = [
-    { theme: "light", wide: poster, narrow: posterNarrow },
-    { theme: "dark", wide: publicAssetExists(HERO_POSTER_DARK) ? HERO_POSTER_DARK : poster,
-        narrow: publicAssetExists(HERO_POSTER_NARROW_DARK) ? HERO_POSTER_NARROW_DARK : posterNarrow },
-];
+const now = new Date();
+const currentJob = (await getLocalizedEntries("experience", locale))
+    .filter((entry) => entry.data.startDate && !entry.data.endDate && entry.data.order === 0)
+    .sort(byCurrentThenRecent)[0];
+const currentDegree = (await getLocalizedEntries("education", locale)).find(
+    (entry) => entry.data.type === "degree" && (!entry.data.endDate || entry.data.endDate > now),
+);
 
-const contact = channels.find((channel) => channel.name === "X")!;
+const lines = [
+    currentJob &&
+        t("hero.roleAt", { role: currentJob.data.role, organization: currentJob.data.organization }),
+    currentDegree && `${currentDegree.data.title}, ${currentDegree.data.institution}.`,
+].filter((line): line is string => Boolean(line));
 
-/*
- * Las fichas que flotan alrededor: una por sección, más el blog.
- *
- * `x` e `y` son su sitio en el escenario, en porcentaje. Están todas en el
- * cuadrante de abajo a la izquierda, que es el único hueco libre: la mitad
- * derecha es del robot, que llega hasta el borde de abajo, y el arranque de la
- * izquierda lo ocupa la columna del saludo —que con la línea de arriba, el
- * lema y las píldoras llega hasta el 47% del alto—. Una ficha por encima de ese
- * 47% se monta sobre las píldoras, que es justo lo que pasaba con `projects`.
- *
- * `float` y `delay` los desincronizan: con el mismo periodo todas subirían y
- * bajarían a la vez, y eso no flota, late.
- *
- * El blog es el único destino que no es un ancla de esta misma página, así que
- * cada ficha lleva su `href` en vez de construirlo a partir del `id`.
- */
-const tiles = [
-    { id: "about", label: t("nav.about"), href: "#about", x: 9, y: 57, float: 7.5, delay: -0.5 },
-    { id: "projects", label: t("nav.projects"), href: "#projects", x: 31, y: 52, float: 8.5, delay: -2.5 },
-    { id: "stack", label: t("nav.stack"), href: "#stack", x: 6, y: 76, float: 6.5, delay: -4 },
-    { id: "experience", label: t("nav.experience"), href: "#experience", x: 26, y: 69, float: 9, delay: -1.5 },
-    { id: "education", label: t("nav.education"), href: "#education", x: 15, y: 90, float: 7, delay: -3 },
-    // Abajo del todo, donde el robot ya no llega.
-    ...(showBlog
-        ? [{
-              id: "blog",
-              label: t("nav.blog"),
-              href: localizedPath(locale, "blog"),
-              x: 40,
-              y: 83,
-              float: 8,
-              delay: -5.5,
-          }]
-        : []),
-];
+const STATIC = "/assets/ui/hero-portrait.webp";
+const VOXELS = "/assets/ui/portrait-voxels.png";
 ---
 
-<section class="hero" id="hero">
-    <div class="hero__stage">
-        <div class="hero__center">
-            {/* Quién soy, en una línea, antes del saludo: el saludo es simpático
-                pero no informa, y esto llega enfocándose como si entrara el
-                plano. Lo lee también el JSON-LD, así que no es decorado. */}
-            <p class="hero__overline">{t("hero.role")}</p>
-
-            <h1 class="hero__greeting">{hero?.data.greeting ?? t("hero.greeting")}</h1>
-
-            {/*
-              El lema se escribe solo, como en una terminal. Son dos copias con
-              un trabajo cada una y por eso no sobra ninguna: el fantasma es
-              texto transparente que reserva la caja exacta —así escribir no
-              mueve nada de lo que hay debajo, a cualquier ancho— y es además la
-              copia que leen los lectores de pantalla, que no deben recibir una
-              frase a medias. La de encima es la que se ve teclearse.
-
-              Sin JS, el fantasma sigue reservando y la de encima se queda con
-              la frase entera: lo que se ve es lo mismo, sin la animación.
-            */}
-            <p class="hero__statement">
-                <span class="hero__statement-ghost">{hero?.data.statement ?? t("hero.statement")}</span>
-                <span class="hero__statement-typed" aria-hidden="true" data-hero-type>{hero?.data.statement ?? t("hero.statement")}</span>
-            </p>
-
-            {/* Accesos directos a los proyectos, el contacto y el blog. */}
-            <div class="hero__actions">
-                <a
-                    class="button button--primary"
-                    href="#projects"
-                    data-track="hero_cta_click"
-                    data-track-cta="projects"
-                >
-                    {t("hero.cta.projects")}
-                </a>
-                <a
-                    class="button button--ghost hero__contact"
-                    href={contact.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label={t(contact.label)}
-                    data-track="hero_cta_click"
-                    data-track-cta="contact"
-                >
-                    <span class="hero__contact-icon" aria-hidden="true"></span>
-                    <span class="hero__contact-label" aria-hidden="true">{t("hero.cta.contact")}</span>
-                    <span class="hero__contact-address">@LuisGarbayo</span>
-                </a>
-                {showBlog && (
-                    <a
-                        class="button button--ghost"
-                        href={localizedPath(locale, "blog")}
-                        data-track="hero_cta_click"
-                        data-track-cta="blog"
-                    >
-                        {t("hero.cta.blog")}
-                    </a>
-                )}
-            </div>
-        </div>
-
-        {/*
-          Hermana del texto, no hija: dentro de `.hero__center` heredaba su tapa
-          de 30rem y no había manera de que creciera. También en móvil permanece como fondo del escenario.
-        */}
-        <div
-            class="hero__figure"
-            data-hero-figure
-            data-frames={HERO_FRAMES}
-            data-fps={HERO_FPS}
-            data-anchor={HERO_ANCHOR}
-            data-rest={HERO_REST}
-            {...video ? { "data-video": video } : {}}
-            {...videoDark ? { "data-video-dark": videoDark } : {}}
-            {...videoAv1 ? { "data-video-av1": videoAv1 } : {}}
-            {...videoAv1Dark ? { "data-video-av1-dark": videoAv1Dark } : {}}
-        >
-            {
-                posters.map((variant) => variant.wide && (
-                    <picture class:list={["hero__poster", `hero__poster--${variant.theme}`]}>
-                        <source media="(max-width: 48rem)" srcset={variant.wide} />
-                        {/* El corte es el mismo que usan el reapilado y la
-                            puerta de `hero-video.ts`: donde deja de haber vídeo
-                            empieza a hacer falta el recorte centrado. */}
-                        {variant.narrow && (
-                            <source media="(max-width: 56rem)" srcset={variant.narrow} />
-                        )}
-                        <img
-                            class="hero__figure-poster"
-                            src={variant.wide}
-                            alt=""
-                            width="960"
-                            height="546"
-                            fetchpriority="high"
-                        />
-                    </picture>
-                ))
-            }
-        </div>
-
-        <ul class="hero__tiles" role="list">
-            {
-                tiles.map((tile) => (
-                    <li
-                        class="hero__tile"
-                        style={`--x:${tile.x}%; --y:${tile.y}%; --mobile-x:${["about", "projects", "stack"].includes(tile.id) ? 12 : 88}%; --mobile-y:${({ about: 16, projects: 34, stack: 52, experience: 16, education: 34, blog: 52 } as Record<string, number>)[tile.id]}%; --float:${tile.float}s; --delay:${tile.delay}s`}
-                    >
-                        <a
-                            class="hero__tile-link"
-                            href={tile.href}
-                            data-track="hero_tile_click"
-                            data-track-tile-id={tile.id}
-                        >
-                            <span class="hero__tile-icon" aria-hidden="true">
-                                {tile.id === "about" && (
-                                    <svg viewBox="0 0 24 24" focusable="false">
-                                        <circle cx="12" cy="8.5" r="3.5" />
-                                        <path d="M4.8 20a7.2 7.2 0 0 1 14.4 0" />
-                                    </svg>
-                                )}
-                                {tile.id === "projects" && (
-                                    <svg viewBox="0 0 24 24" focusable="false">
-                                        <path d="M3 6.8h5.6l2 2.6H21v9a1.6 1.6 0 0 1-1.6 1.6H4.6A1.6 1.6 0 0 1 3 18.4z" />
-                                    </svg>
-                                )}
-                                {tile.id === "stack" && (
-                                    <svg viewBox="0 0 24 24" focusable="false">
-                                        <path d="m12 3 9 5-9 5-9-5z" />
-                                        <path d="m3 13.5 9 5 9-5" />
-                                    </svg>
-                                )}
-                                {tile.id === "experience" && (
-                                    <svg viewBox="0 0 24 24" focusable="false">
-                                        <rect x="3" y="7.5" width="18" height="12" rx="1.6" />
-                                        <path d="M9 7.5V6a1.6 1.6 0 0 1 1.6-1.6h2.8A1.6 1.6 0 0 1 15 6v1.5" />
-                                    </svg>
-                                )}
-                                {tile.id === "education" && (
-                                    <svg viewBox="0 0 24 24" focusable="false">
-                                        <path d="M12 4 2.5 9 12 14l9.5-5z" />
-                                        <path d="M6.5 11.4V16c0 1.6 2.5 2.9 5.5 2.9s5.5-1.3 5.5-2.9v-4.6" />
-                                    </svg>
-                                )}
-                                {tile.id === "blog" && (
-                                    <svg viewBox="0 0 24 24" focusable="false">
-                                        <path d="M6 3.5h7.5L19 9v11.5H6z" />
-                                        <path d="M13.2 3.7V9H18.6" />
-                                        <path d="M9 13h6M9 16.5h4" />
-                                    </svg>
-                                )}
-                            </span>
-                            <span class="hero__tile-label">{tile.label}</span>
-                        </a>
-                    </li>
-                ))
-            }
-        </ul>
+<section class="hero" id="hero" aria-labelledby="hero-title">
+    {/*
+      El retrato: la imagen fija va en el HTML y la escena de cubos la sustituye
+      en escritorio (`hero-portrait.ts`). La imagen es la misma malla dibujada
+      plana, así que el cambio no se nota más que en que empieza a moverse.
+    */}
+    <div class="hero__portrait" data-hero-portrait data-voxels={VOXELS}>
+        <img
+            class="hero__portrait-still"
+            src={STATIC}
+            alt={t("hero.portraitAlt")}
+            width="1056"
+            height="1260"
+            fetchpriority="high"
+            decoding="async"
+        />
     </div>
 
+    <div class="hero__intro">
+        <h1 class="hero__name" id="hero-title">Luis Garbayo</h1>
+        <p class="hero__meta label">
+            <span>// {t("hero.role")}</span>
+            <span>{t("hero.location")}</span>
+        </p>
+    </div>
 
+    {lines.length > 0 && (
+        <div class="hero__now">
+            <p class="label">{t("hero.currently")}</p>
+            {lines.map((line) => <p class="hero__now-line">{line}</p>)}
+        </div>
+    )}
+
+    <a class="hero__scroll label" href="#about" aria-hidden="true" tabindex="-1">{t("hero.scroll")} ↓</a>
 </section>
+
+<script>
+    import { initHeroPortrait, destroyHeroPortrait } from "@/lib/hero-portrait";
+    // Después del primer pintado: el retrato fijo ya está, la escena puede
+    // esperar a que el navegador respire.
+    const start = () => {
+        const idle = window.requestIdleCallback ?? ((cb: () => void) => setTimeout(cb, 200));
+        idle(() => void initHeroPortrait());
+    };
+    start();
+    document.addEventListener("astro:page-load", start);
+    document.addEventListener("astro:before-swap", destroyHeroPortrait);
+</script>
 
 <style>
     .hero {
-        /* Primera pantalla completa, y sólo la bienvenida: lo de debajo se ve al
-           hacer scroll, no asomando por el borde. */
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        min-block-size: calc(100svh - var(--header-height));
-        /* En una variable porque la figura la necesita en negativo para
-           sangrarse por encima de ella, y las dos tienen que moverse juntas. */
-        --hero-pad: var(--space-6);
-        padding-block: var(--hero-pad);
-        /* El robot asoma por debajo del escenario y lo corta este borde, que es
-           el filo de la pantalla. Sin esto se colaría en la sección siguiente. */
+        position: relative;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        align-items: center;
+        min-block-size: 100svh;
+        padding-inline: var(--gutter);
+        padding-block: var(--header-height) var(--hud-height);
         overflow: hidden;
-        /* Lo pone `hero-fade.ts` al hacer scroll. Sin JS se queda en 1. */
-        opacity: var(--hero-fade, 1);
-        scroll-snap-align: start;
+        isolation: isolate;
     }
 
-    /*
-     * El escenario es el sistema de referencia de las fichas: van colocadas en
-     * porcentaje sobre él, así que su reparto se mantiene igual en cualquier
-     * pantalla en vez de depender de píxeles.
-     */
-    .hero__stage {
-        position: relative;
-        /* Ancho completo: el vídeo es el fondo del hero y tiene que llegar a los
-           dos bordes. Quien respeta el margen es la columna de texto, no esto. */
-        inline-size: 100%;
-        block-size: 100%;
-        min-block-size: min(42rem, calc(100svh - var(--header-height) - var(--space-8)));
-        /* Que llene el hero: el suelo del escenario es contra lo que se ancla el
-           robot, y tiene que coincidir con el borde de abajo de la pantalla. */
-        flex: 1;
-    }
-
-    /* Columna de contenido, pegada a la izquierda y centrada en vertical. El
-       ancho sigue tapado, pero ahora es el de una columna de texto y no el de
-       todo el hero: la figura ya no cuelga de aquí. */
-    .hero__center {
+    .hero__portrait {
         position: absolute;
-        inset-block-start: 32%;
-        inset-inline-start: var(--gutter);
-        translate: 0 -50%;
-        inline-size: min(100% - var(--gutter) * 2, 30rem);
-        /*
-         * Por encima del vídeo —que ahora es el fondo— y también por encima de
-         * las fichas, que van después en el DOM y con el mismo nivel ganaban el
-         * empate: una ficha flotando cortaba el correo por la mitad. Las
-         * coordenadas ya las separan, pero flotan ±6px y el margen no se fía.
-         */
-        z-index: 2;
-        text-align: start;
-    }
-
-    /*
-     * Entra desenfocado y se enfoca, como si el plano hiciera el foco sobre él.
-     * El desenfoque es sólo de entrada y nunca es el estado final: texto
-     * permanentemente borroso es texto que no se puede leer.
-     */
-    .hero__overline {
-        margin-block-end: var(--space-3);
-        font-family: var(--font-mono);
-        font-size: var(--text-xs);
-        letter-spacing: 0.08em;
-        color: var(--color-text-subtle);
-        animation: hero-focus var(--duration-slower) var(--ease-out) both;
-    }
-
-    @keyframes hero-focus {
-        from {
-            opacity: 0;
-            filter: blur(6px);
-        }
-        to {
-            opacity: 1;
-            filter: blur(0);
-        }
-    }
-
-    .hero__greeting {
-        font-size: var(--text-2xl);
-        font-weight: var(--weight-medium);
-        color: var(--color-accent);
-    }
-
-    /* Un lema de una línea, no un párrafo: cualquier cosa más larga aquí crece
-       hacia abajo hasta empujar las píldoras contra las fichas. */
-    .hero__statement {
-        position: relative;
-        margin-block-start: var(--space-2);
-        text-wrap: balance;
-        font-size: var(--text-base);
-        color: var(--color-text-muted);
-    }
-
-    /* Transparente y no `visibility: hidden` a propósito: así sigue en el árbol
-       de accesibilidad —es la copia que se lee— y a la vez reserva la caja. Sin
-       `user-select` la frase se copiaría dos veces al seleccionarla. */
-    .hero__statement-ghost {
-        color: transparent;
-        user-select: none;
-    }
-
-    .hero__statement-typed {
-        position: absolute;
-        inset: 0;
-    }
-
-    /* El cursor del teclado. Vive en el `::after` del texto escrito, así que
-       sigue al final de la frase sola, sin medir nada. */
-    .hero__statement-typed::after {
-        content: "";
-        display: inline-block;
-        inline-size: 0.5em;
-        block-size: 1em;
-        margin-inline-start: 0.1em;
-        translate: 0 0.15em;
-        background: var(--color-accent);
-        animation: hero-caret 1.1s steps(1) infinite;
-    }
-
-    @keyframes hero-caret {
-        0%,
-        45% {
-            opacity: 1;
-        }
-        50%,
-        95% {
-            opacity: 0;
-        }
-    }
-
-    /* Sin JS no hay nada escribiéndose, así que el cursor sobraría parpadeando
-       al final de una frase ya acabada. Lo enciende el módulo al empezar. */
-    .hero__statement-typed:not([data-typing])::after {
-        display: none;
-    }
-
-    .hero__actions {
-        display: flex;
-        flex-wrap: wrap;
-        gap: var(--space-3);
-        margin-block-start: var(--space-5);
-    }
-
-    /* La dirección en monoespaciada y el verbo en la tipografía del resto: lo
-       que es un dato se lee como un dato. */
-    .hero__contact-icon {
-        flex: 0 0 1rem;
-        inline-size: 1rem;
-        block-size: 1rem;
-        background: currentColor;
-        mask: url("/assets/ui/x.svg") center / contain no-repeat;
-    }
-
-    .hero__contact-address {
-        font-family: var(--font-mono);
-        font-size: var(--text-xs);
-        color: var(--color-text-subtle);
-    }
-
-    .hero__contact:hover .hero__contact-address,
-    .hero__contact:focus-visible .hero__contact-address {
-        color: var(--color-accent);
-    }
-
-    /*
-     * El vídeo no es una figura recortada: es el FONDO del hero. Cubre la
-     * sección entera y el texto y las fichas flotan encima.
-     *
-     * Así desaparece el problema que tenía el recorte: no hay dos fondos que
-     * casar —el del clip y el de la página— porque sólo hay uno. El encuadre y
-     * el espejo vienen horneados en `scripts/make-hero-figure.mjs`, que coloca
-     * al robot sobre el 62% del ancho y mirando hacia el contenido.
-     */
-    .hero__figure {
-        position: absolute;
-        /*
-         * A sangre sobre el relleno del hero. El escenario respeta ese relleno
-         * —es donde se colocan las fichas— pero el fondo no debe: dejaba una
-         * franja de página de 32px arriba y otra abajo, y la de abajo era la
-         * que impedía que el robot muriera contra el filo de la pantalla en vez
-         * de cortarse en el aire. El `overflow: hidden` del hero lo recorta.
-         */
-        inset-block: calc(var(--hero-pad) * -1);
+        inset-block: var(--header-height) 0;
         inset-inline: 0;
-        overflow: hidden;
-        /* El fondo del clip no es plano del todo y contra el gris liso de la
-           página, en el filo de arriba del hero, se notaba un escalón. Unos
-           píxeles de fundido ahí lo quitan. */
-        -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 3%, #000 100%);
-        mask-image: linear-gradient(to bottom, transparent 0, #000 3%, #000 100%);
+        z-index: -1;
+        display: flex;
+        justify-content: center;
+        align-items: flex-end;
     }
 
-    /*
-     * Póster y vídeo comparten encuadre: son el mismo plano, y cualquier
-     * diferencia entre los dos se vería como un salto en el relevo.
-     *
-     * `cover` anclado arriba: lo que sobra se recorta por abajo, que es donde
-     * están las piernas, y la cabeza nunca se toca. Sin máscaras —los bordes del
-     * vídeo son los del hero— y sin `scaleX(-1)`, que ahora va horneado en el
-     * fichero.
-     */
-    .hero__figure-poster,
-    .hero__figure :global(.hero__figure-video) {
+    .hero__portrait :global(canvas) {
         position: absolute;
         inset: 0;
         inline-size: 100%;
         block-size: 100%;
-        object-fit: cover;
-        /*
-         * El 70% no es un gusto: es la fracción en la que el recorte deja al
-         * robot dentro de la placa, y con `cover` pedir esa misma fracción aquí
-         * es lo único que lo clava en el 70% de la pantalla con cualquier
-         * ventana. Con cualquier otro valor la posición deriva con la forma del
-         * hueco — con el encuadre pegado a la izquierda que había antes, a 1024
-         * de ancho el robot se salía por la derecha.
-         *
-         * `top` porque lo que sobra de alto se recorta por abajo, que es donde
-         * están las piernas: la cabeza no se toca nunca.
-         */
-        object-position: 70% top;
     }
 
-    .hero__figure-poster {
+    .hero__portrait-still {
+        block-size: 92%;
+        inline-size: auto;
+        max-inline-size: 100%;
+        object-fit: contain;
+        object-position: bottom;
+        /* Se funde con el negro por abajo, igual que la escena. */
+        mask-image: linear-gradient(to top, transparent, #000 18%);
         transition: opacity var(--duration-slow) var(--ease-out);
     }
 
-    .hero__poster--dark { display: none; }
-    :global(html[data-theme="dark"]) .hero__poster--light { display: none; }
-    :global(html[data-theme="dark"]) .hero__poster--dark { display: block; }
-
-    /* El póster se retira sólo cuando hay un fotograma pintado que lo
-       sustituya, y con un fundido: el vídeo arranca en esa misma pose, así que
-       el relevo no debería moverse, pero el fundido cubre cualquier resto. */
-    .hero__figure[data-hero-live] .hero__figure-poster {
+    .hero__portrait[data-live] .hero__portrait-still {
         opacity: 0;
     }
 
-    /* El vídeo lo crea `hero-video.ts`, así que su regla va en `:global`. Queda
-       debajo del póster mientras éste se desvanece. */
-    .hero__figure :global(.hero__figure-video) {
-        pointer-events: none;
+    .hero__intro {
+        align-self: center;
+        text-shadow: 0 2px 18px rgba(0, 0, 0, 0.8);
     }
 
-    /* Sin `position` a propósito: las fichas se colocan en porcentaje y lo que
-       tiene que servirles de referencia es el escenario, no esta lista. Darle
-       posición aquí las amontonaba todas en la esquina. */
-    .hero__tiles {
-        margin: 0;
-        padding: 0;
-        list-style: none;
+    .hero__name {
+        font-size: clamp(2.25rem, 1.4rem + 3.2vw, 4.25rem);
+        line-height: 1;
+        color: var(--color-accent-strong);
     }
 
-    .hero__tile {
-        position: absolute;
-        /* Por encima del vídeo, que es el fondo de la sección. */
-        z-index: 1;
-        inset-block-start: var(--y);
-        inset-inline-start: var(--x);
-        translate: -50% -50%;
-        animation: hero-float var(--float) var(--ease-in-out, ease-in-out) var(--delay) infinite;
+    .hero__meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--space-2) var(--space-6);
+        margin-block-start: var(--space-3);
     }
 
-    /* Sube y baja, y de paso se ladea un poco: sólo vertical parece un ascensor. */
-    @keyframes hero-float {
-        0%,
-        100% {
-            transform: translateY(-6px) rotate(-1.5deg);
-        }
-        50% {
-            transform: translateY(6px) rotate(1.5deg);
-        }
+    .hero__now {
+        justify-self: end;
+        max-inline-size: 22rem;
+        text-align: end;
+        text-shadow: 0 2px 18px rgba(0, 0, 0, 0.8);
     }
 
-    .hero__tile-link {
-        display: grid;
-        place-items: center;
-        inline-size: clamp(3.25rem, 4.5vw, 4.25rem);
-        aspect-ratio: 1;
-        border: 1px solid var(--color-border-strong);
-        border-radius: var(--radius-lg);
-        background: var(--color-surface-raised);
+    .hero__now-line {
+        margin-block-start: var(--space-2);
+        font-family: var(--font-pixel);
+        font-size: var(--text-sm);
+        text-transform: uppercase;
+        letter-spacing: var(--tracking-wide);
         color: var(--color-text);
-        text-decoration: none;
-        box-shadow: 0 0 0 rgba(38, 38, 38, 0);
-        transition:
-            box-shadow var(--duration-base) var(--ease-out),
-            border-color var(--duration-fast) var(--ease-out),
-            color var(--duration-fast) var(--ease-out),
-            scale var(--duration-fast) var(--ease-out);
     }
 
-    .hero__tile-link:hover,
-    .hero__tile-link:focus-visible {
-        border-color: var(--color-accent-border);
-        color: var(--color-accent);
-        scale: 1.08;
-        /* Sobre fondo claro una ficha no se enciende: se levanta. Una sombra
-           difusa más una corta pegada hacen ese despegue, que es el equivalente
-           del resplandor que tenía esto cuando la página era oscura. */
-        box-shadow:
-            0 0 24px rgba(38, 38, 38, 0.14),
-            0 6px 14px rgba(38, 38, 38, 0.10);
-    }
-
-    .hero__tile-icon svg {
-        inline-size: 1.6rem;
-        block-size: 1.6rem;
-        fill: none;
-        stroke: currentColor;
-        stroke-width: 1.5;
-        stroke-linecap: round;
-        stroke-linejoin: round;
-    }
-
-    /* El nombre de la sección aparece al apuntar o al recibir foco. Existe
-       siempre en el DOM: es el nombre accesible del enlace. */
-    .hero__tile-label {
+    .hero__scroll {
         position: absolute;
-        inset-block-start: calc(100% + var(--space-2));
+        inset-block-end: calc(var(--hud-height) + var(--space-3));
         inset-inline-start: 50%;
-        translate: -50%;
-        white-space: nowrap;
-        font-family: var(--font-mono);
-        font-size: var(--text-xs);
-        color: var(--color-text-muted);
-        opacity: 0;
-        transition: opacity var(--duration-fast) var(--ease-out);
+        translate: -50% 0;
+        text-decoration: none;
+        animation: hero-blink 2.4s steps(2, jump-none) infinite;
     }
 
-    .hero__tile-link:hover .hero__tile-label,
-    .hero__tile-link:focus-visible .hero__tile-label {
-        opacity: 1;
-    }
-
-    /* Figura de fondo y saludo abajo en pantallas estrechas. */
-    @media (max-width: 56rem) {
-        .hero {
-            --hero-pad: var(--space-4);
-        }
-
-        .hero__stage {
-            min-block-size: max(32rem, calc(100svh - var(--header-height) - var(--hero-pad) * 2));
-        }
-
-        .hero__center {
-            inset-block-start: auto;
-            inset-block-end: var(--space-7);
-            translate: none;
-            inline-size: min(100% - var(--gutter) * 2, 30rem);
-            text-align: start;
-        }
-
-        .hero__overline {
-            color: var(--color-text-muted);
-        }
-
-        .hero__statement {
-            color: var(--color-text);
-        }
-
-        .hero__figure-poster,
-        .hero__figure :global(.hero__figure-video) {
-            object-position: 50% top;
-            -webkit-mask-image: linear-gradient(to bottom, #000 55%, transparent 100%);
-            mask-image: linear-gradient(to bottom, #000 55%, transparent 100%);
-        }
-
-        .hero__actions {
-            gap: var(--space-2);
-            margin-block-start: var(--space-4);
-        }
-
-        .hero__contact {
-            flex-wrap: wrap;
-            padding-block: var(--space-2);
-        }
-
-        .hero__tile {
-            inset-inline-start: var(--mobile-x);
-            inset-block-start: var(--mobile-y);
-        }
-
-        .hero__tile-link {
-            inline-size: 2.875rem;
-        }
-
-        .hero__tile-icon svg {
-            inline-size: 1.35rem;
-            block-size: 1.35rem;
-        }
-
-        .hero__tile-label {
-            opacity: 1;
-            font-size: 0.625rem;
-            padding: 0.1rem 0.25rem;
-            border-radius: var(--radius-full);
-            background: var(--color-bg);
+    @keyframes hero-blink {
+        50% {
+            opacity: 0.35;
         }
     }
 
-    @media (max-width: 56rem) and (max-height: 44rem) {
-        .hero__tile {
-            inset-block-start: calc(var(--mobile-y) * 0.9);
-        }
-    }
-
-    /* En móvil la navegación queda en el menú de la cabecera. */
+    /* En estrecho, como en un móvil de verdad: nombre arriba, retrato en medio
+       y lo de ahora abajo, cada cosa en su franja. */
     @media (max-width: 48rem) {
-        .hero__figure-poster,
-        .hero__figure :global(.hero__figure-video) {
-            /* El póster ancho deja gris a la izquierda. El desplazamiento
-               mantiene el robot en el borde derecho también en móviles altos. */
-            object-position: calc(70% + 18vw + 16svh) top;
+        .hero {
+            grid-template-columns: minmax(0, 1fr);
+            grid-template-rows: auto 1fr auto;
+            align-items: start;
+            padding-block: calc(var(--header-height) + var(--space-4)) calc(var(--hud-height) + var(--space-4));
         }
 
-        .hero__tiles {
+        .hero__portrait {
+            inset-block: 22% 12%;
+        }
+
+        .hero__now {
+            grid-row: 3;
+            justify-self: end;
+        }
+
+        .hero__scroll {
             display: none;
         }
-
-        .hero__tile {
-            animation: none;
-        }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-        .hero__tile,
-        .hero__overline,
-        .hero__statement-typed::after {
-            animation: none;
-        }
-    }
-</style>
-
-<style is:global>
-    /* Los botones se comparten entre secciones; viven en global para no
-       duplicar la misma regla en cinco componentes. */
-    .button {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: var(--space-2);
-        min-block-size: var(--tap-target);
-        padding-inline: var(--space-5);
-        border: 1px solid var(--color-border-strong);
-        border-radius: var(--radius-full);
-        background: transparent;
-        color: var(--color-text);
-        font-size: var(--text-sm);
-        font-weight: var(--weight-medium);
-        text-decoration: none;
-        cursor: pointer;
-        transition:
-            border-color var(--duration-fast) var(--ease-out),
-            color var(--duration-fast) var(--ease-out),
-            background-color var(--duration-fast) var(--ease-out);
-    }
-
-    .button:hover {
-        border-color: var(--color-accent);
-        color: var(--color-accent);
-    }
-
-    .button--primary {
-        background: var(--color-accent);
-        border-color: var(--color-accent);
-        color: var(--color-bg);
-        font-weight: var(--weight-semibold);
-    }
-
-    .button--primary:hover {
-        background: var(--color-accent-strong);
-        border-color: var(--color-accent-strong);
-        color: var(--color-bg);
-    }
-
-    .button--ghost {
-        border-style: dashed;
-        color: var(--color-text-muted);
-        font-family: var(--font-mono);
     }
 </style>

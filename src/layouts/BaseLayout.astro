@@ -2,7 +2,7 @@
 import BaseHead from "@/components/BaseHead.astro";
 import Header from "@/components/Header.astro";
 import Footer from "@/components/Footer.astro";
-import GameLauncher from "@/components/GameLauncher.astro";
+import Hud from "@/components/Hud.astro";
 import GameOverlay from "@/components/GameOverlay.astro";
 import PageTransition from "@/components/PageTransition.astro";
 import Analytics from "@/components/Analytics.astro";
@@ -40,6 +40,13 @@ const {
 } = Astro.props;
 
 const t = useTranslations(locale);
+// Fuera de la home la barra de abajo no tiene secciones que contar: dice dónde
+// se está en su lugar.
+const pageLabel = onHome
+    ? undefined
+    : Astro.url.pathname.includes("/blog")
+      ? t("nav.blog")
+      : title;
 ---
 
 <!doctype html>
@@ -73,8 +80,8 @@ const t = useTranslations(locale);
         </main>
 
         <Footer locale={locale} />
+        <Hud locale={locale} pageLabel={pageLabel} />
 
-        <GameLauncher locale={locale} />
         <GameOverlay locale={locale} />
         <PageTransition />
         <ConsentBanner locale={locale} />
@@ -89,12 +96,10 @@ const t = useTranslations(locale);
             import { initSectionTransition } from "@/lib/section-transition";
             import { initShortcuts } from "@/lib/shortcuts";
             import { initLocaleLinks } from "@/lib/locale-links";
-            import { initHeroVideo, destroyHeroVideo } from "@/lib/hero-video";
-            import { initHeroFade, destroyHeroFade } from "@/lib/hero-fade";
-            import { initHeroType, destroyHeroType } from "@/lib/hero-type";
             import { initPostMotion, destroyPostMotion } from "@/lib/post-motion";
             import { initAnalytics, destroyAnalytics } from "@/lib/analytics";
             import { initConsentBanner } from "@/lib/consent";
+            import { initSheets } from "@/lib/sheets";
 
             /*
              * En la primera carga esto corría dos veces: una al evaluarse el
@@ -115,10 +120,8 @@ const t = useTranslations(locale);
                 initLocaleLinks();
                 void initPageTransition();
                 initSectionTransition();
-                initHeroVideo();
-                initHeroFade();
-                initHeroType();
                 initPostMotion();
+                initSheets();
                 // Al final del arranque: la vista de página se manda con el
                 // DOM de la página nueva ya montado.
                 initAnalytics();
@@ -132,9 +135,6 @@ const t = useTranslations(locale);
             document.addEventListener("astro:before-swap", () => {
                 booted = false;
                 destroyReveal();
-                destroyHeroVideo();
-                destroyHeroFade();
-                destroyHeroType();
                 destroyPostMotion();
                 destroyAnalytics();
             });

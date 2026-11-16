@@ -1,4 +1,5 @@
 @import "./fonts.css";
+@import "./fonts-pixel.css";
 @import "./tokens.css";
 
 /* --- Reset --- */
@@ -19,42 +20,18 @@ html {
        siempre en claro, que daba igual mientras la página fue clara y dejaría
        de darlo en cuanto no lo sea. */
     color-scheme: var(--color-scheme);
-    /* El header pegajoso taparía el destino de cada ancla sin esto. */
-    scroll-padding-block-start: var(--header-height);
+    /* La cabecera es transparente y va por encima: el destino de un ancla
+       puede quedar debajo de ella sin taparse nada que importe. */
+    scroll-padding-block-start: 0;
     -webkit-text-size-adjust: 100%;
 }
 
-/* --- Una sección por pantalla ---
-   Sólo en la home, que es donde existen esas secciones: el `:has()` deja fuera
-   al blog y al 404, donde encajar el contenido en pantallas no tendría sentido.
-
-   `mandatory` asusta menos de lo que parece con secciones largas —Proyectos o
-   Experiencia no caben en una pantalla—: cuando un área de anclaje es más alta
-   que el viewport, la especificación deja parar en cualquier punto dentro de
-   ella. Así las cortas se encajan de una en una y las largas se recorren
-   normal, y el anclaje vuelve a actuar al salir. */
-html:has(.section) {
-    scroll-snap-type: y mandatory;
-}
-
 /*
- * En táctil, no.
- *
- * El anclaje obligatorio se pelea con el navegador del móvil: al tocar un enlace
- * la barra de direcciones se retrae, cambia el alto del viewport y el navegador
- * vuelve a anclar a la sección más cercana a donde estaba. El salto se deshace
- * solo. Por eso desde la bienvenida únicamente funcionaba "Sobre mí": era la
- * única lo bastante cerca como para sobrevivir a la corrección.
- *
- * Se pierde poco. El anclaje está para que en un monitor cada sección entre
- * encajada, y en un móvil casi ninguna cabe en una pantalla: ahí ya se recorren
- * con scroll normal, que es justo lo que hace esto.
+ * Sin anclaje de scroll. Lo hubo —una sección por pantalla, `mandatory`— pero
+ * ahora hay secciones que se quedan clavadas mientras se recorren (las ciudades
+ * de "Sobre mí", los proyectos), y el anclaje obligatorio se pelea con eso:
+ * salta al principio de la siguiente en vez de dejar avanzar dentro.
  */
-@media (pointer: coarse) {
-    html:has(.section) {
-        scroll-snap-type: none;
-    }
-}
 
 /* El pie, abajo del todo.
    Con el documento en columna y el contenido reclamando el espacio sobrante, el
@@ -67,10 +44,20 @@ body {
     display: flex;
     flex-direction: column;
     min-block-size: 100dvh;
-    background: var(--color-bg);
+    /* La rejilla del fondo, fija: no se desplaza con el contenido, así que se
+       lee como la pantalla y no como el papel. */
+    background-color: var(--color-bg);
+    background-image:
+        linear-gradient(var(--grid-line) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+    background-size: var(--grid-size) var(--grid-size);
+    background-position: center top;
+    background-attachment: fixed;
     color: var(--color-text);
-    font-family: var(--font-sans);
-    font-size: var(--text-base);
+    /* Monoespaciada para todo el texto de la web, blog incluido: es una
+       interfaz, no una revista. */
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
     line-height: var(--leading-normal);
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
@@ -127,8 +114,18 @@ h3,
 h4 {
     line-height: var(--leading-tight);
     letter-spacing: var(--tracking-tight);
-    font-weight: var(--weight-semibold);
+    font-weight: var(--weight-medium);
     text-wrap: balance;
+}
+
+/* Los títulos grandes, en la pixelada y en mayúsculas: es lo que hace que la
+   web se lea como una pantalla. La pixelada tiene un solo peso. */
+h1,
+h2 {
+    font-family: var(--font-pixel);
+    font-weight: 400;
+    letter-spacing: 0;
+    text-transform: uppercase;
 }
 
 h1 {
@@ -172,6 +169,44 @@ samp {
     outline: 2px solid var(--color-focus);
     outline-offset: 3px;
     border-radius: var(--radius-sm);
+}
+
+/* --- Capa de pantalla ---
+   Scanlines muy tenues y un viñeteado en los bordes, por encima de todo y sin
+   recibir eventos. Es lo que da el aire de monitor sin tocar la legibilidad: las
+   líneas son de un 3 %, y con movimiento reducido no cambia nada porque no se
+   mueve. */
+body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-overlay);
+    pointer-events: none;
+    background:
+        repeating-linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 0 1px, transparent 1px 3px),
+        radial-gradient(ellipse at center, transparent 60%, rgba(0, 0, 0, 0.55) 100%);
+}
+
+/* Etiqueta de interfaz: pixelada, pequeña, en mayúsculas y espaciada. La usan
+   las cabeceras de panel, el contador, los metadatos de cada fila. */
+.label {
+    font-family: var(--font-pixel);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+    color: var(--color-text-subtle);
+}
+
+/* Etiqueta de tecnología: un recuadro fino, sin relleno, como una tecla
+   dibujada. La usan el Stack y las fichas. */
+.tag {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.2rem 0.55rem;
+    border: 1px solid var(--color-border-strong);
+    color: var(--color-text-muted);
+    font-size: var(--text-xs);
+    white-space: nowrap;
 }
 
 /* --- Utilidades --- */

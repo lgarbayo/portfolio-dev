@@ -3,20 +3,16 @@
  * tocar ni un componente — si algún componente necesita un literal, es que
  * falta un token.
  *
- * La web va en escala de grises: gris claro de fondo y negros como acento. Sin
- * matiz que valga —los canales R, G y B valen lo mismo en cada tono—, porque un
- * gris con una pizca de azul deja de leerse como neutro en cuanto se pone al
- * lado de uno que no la tiene.
- *
- * El fondo es gris claro y no blanco porque es el fondo del clip del hero,
- * graduado para que coincida: así el rectángulo del vídeo desaparece dentro de
- * la página en vez de haber que recortar al personaje. Si este valor cambia,
- * cambia con él la graduación de `scripts/make-hero-figure.mjs`.
+ * La web es oscura, sin tema claro: negro de terminal de fondo, una rejilla
+ * tenue encima y blancos rotos para el texto. Va en escala de grises —los
+ * canales R, G y B valen lo mismo en cada tono—, porque un gris con una pizca
+ * de azul deja de leerse como neutro al lado de uno que no la tiene. El color
+ * lo ponen las fotos de las ciudades y nada más; la única excepción es
+ * `--color-live`, el punto verde de lo que está en curso.
  *
  * Sin color con el que marcar jerarquía, la marca el brillo: el acento es lo más
- * oscuro de la página, el texto corriente queda un escalón por encima, y de ahí
- * hacia arriba los apagados. Por eso `--color-text` no es negro: si lo fuese, un
- * título en acento y un párrafo se verían igual.
+ * claro de la página, el texto corriente queda un escalón por debajo, y de ahí
+ * hacia abajo los apagados.
  *
  * El modo juego no pasa por aquí: conserva su paleta en `game-modals.css` y en
  * las escenas de Phaser.
@@ -26,44 +22,54 @@
  */
 
 :root {
-    --color-scheme: light;
-    /* --- Color: superficies --- */
-    --color-bg: #e6e6e6;
-    --color-surface: #f0f0f0;
-    --color-surface-raised: #fafafa;
-    --color-border: rgba(38, 38, 38, 0.12);
-    --color-border-strong: rgba(38, 38, 38, 0.22);
-    --color-glass-surface: linear-gradient(135deg, rgba(207, 211, 216, 0.86), rgba(153, 160, 169, 0.68));
-    --color-glass-border: rgba(255, 255, 255, 0.6);
-    --shadow-glass: inset 0 1px 0 rgba(255, 255, 255, 0.6), 0 6px 24px rgba(38, 38, 38, 0.06);
+    --color-scheme: dark;
+    /* --- Color: superficies ---
+       Negro de terminal, no gris pizarra: la web es oscura y punto, y el fondo
+       es casi negro para que la rejilla, los vóxeles del retrato y las fotos de
+       las ciudades sean lo único que tenga luz. */
+    --color-bg: #050505;
+    --color-surface: #0e0e0e;
+    --color-surface-raised: #161616;
+    --color-border: rgba(235, 235, 235, 0.12);
+    --color-border-strong: rgba(235, 235, 235, 0.26);
+    /* Los paneles van sobre fotos: negro translúcido con desenfoque, como una
+       pantalla puesta delante de la ciudad. */
+    --color-glass-surface: rgba(8, 8, 8, 0.72);
+    --color-glass-border: rgba(235, 235, 235, 0.14);
+    --shadow-glass: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 12px 40px rgba(0, 0, 0, 0.5);
 
-    /* --- Color: texto ---
-       Las alfas son más altas que las que había en oscuro (.78/.58 frente a
-       .68/.45) a propósito: oscuro sobre claro pierde contraste más deprisa por
-       cada punto de alfa que claro sobre oscuro, así que con las mismas los
-       apagados se habrían quedado por debajo de donde estaban. */
-    --color-text: #262626;
-    --color-text-muted: rgba(38, 38, 38, 0.78);
-    --color-text-subtle: rgba(38, 38, 38, 0.58);
+    /* --- Color: texto --- */
+    --color-text: #e6e6e6;
+    --color-text-muted: rgba(230, 230, 230, 0.74);
+    --color-text-subtle: rgba(230, 230, 230, 0.5);
 
     /* --- Color: acento --- */
-    --color-accent: #0f0f0f;
-    --color-accent-strong: #000000;
-    --color-accent-dim: rgba(15, 15, 15, 0.1);
-    --color-accent-border: rgba(15, 15, 15, 0.28);
+    --color-accent: #f2f2f2;
+    --color-accent-strong: #ffffff;
+    --color-accent-dim: rgba(242, 242, 242, 0.08);
+    --color-accent-border: rgba(242, 242, 242, 0.3);
+    /* El único color que no es gris: el punto de «en curso» y el de contacto. */
+    --color-live: #3ddc84;
+
+    /* --- Rejilla de fondo --- */
+    --grid-size: 72px;
+    --grid-line: rgba(235, 235, 235, 0.05);
 
     /* --- Color: acentos secundarios (heredados de los mundos del juego) --- */
     --color-world-about: #cfcfcf;
     --color-world-projects: #b4b4b4;
     --color-world-experience: #9a9a9a;
     --color-world-contact: #808080;
-
-    --color-focus: #0f0f0f;
+    --color-focus: #f2f2f2;
 
     /* --- Tipografía --- */
     --font-sans: "Space Grotesk", "Inter", system-ui, -apple-system, BlinkMacSystemFont,
         "Segoe UI", sans-serif;
     --font-mono: "JetBrains Mono", "SFMono-Regular", ui-monospace, "Cascadia Mono", monospace;
+    /* Pixelada, para títulos, etiquetas y todo lo que hace de interfaz. Es la
+       misma familia de los sprites del modo juego: la web y el juego hablan con
+       la misma letra. */
+    --font-pixel: "Departure Mono", "JetBrains Mono", ui-monospace, monospace;
 
     /* Escala fluida: cada paso interpola entre móvil y escritorio, así que no
        hacen falta breakpoints tipográficos. */
@@ -119,7 +125,9 @@
      * exactamente el hueco que queda debajo del header y no un pelo más: si
      * midiera 100svh, asomaría por abajo el principio de la siguiente.
      */
-    --header-height: 4.25rem;
+    --header-height: 4rem;
+    /* La barra de abajo: contador de sección y hora de Ourense. */
+    --hud-height: 2.75rem;
     --gutter: clamp(1.5rem, 5vw, 7rem);
 
     /* --- Radios --- */
@@ -129,9 +137,9 @@
     --radius-full: 9999px;
 
     /* --- Sombras --- */
-    --shadow-sm: 0 1px 2px rgba(38, 38, 38, 0.1);
-    --shadow-md: 0 8px 24px rgba(38, 38, 38, 0.14);
-    --shadow-lg: 0 24px 60px rgba(38, 38, 38, 0.18);
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+    --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.5);
+    --shadow-lg: 0 24px 60px rgba(0, 0, 0, 0.6);
 
     /* --- Movimiento ---
        Las duraciones son tokens para que la política de reduced-motion pueda
@@ -163,25 +171,3 @@
     --tap-target: 44px;
 }
 
-:root[data-theme="dark"] {
-    --color-scheme: dark;
-    --color-bg: #181a1d;
-    --color-surface: #22252a;
-    --color-surface-raised: #2c3036;
-    --color-border: rgba(235, 237, 240, 0.14);
-    --color-border-strong: rgba(235, 237, 240, 0.28);
-    --color-text: #ebedf0;
-    --color-text-muted: rgba(235, 237, 240, 0.8);
-    --color-text-subtle: rgba(235, 237, 240, 0.64);
-    --color-accent: #f4f5f7;
-    --color-accent-strong: #ffffff;
-    --color-accent-dim: rgba(235, 237, 240, 0.1);
-    --color-accent-border: rgba(235, 237, 240, 0.3);
-    --color-focus: #f4f5f7;
-    --color-glass-surface: linear-gradient(135deg, rgba(89, 96, 106, 0.7), rgba(47, 53, 62, 0.68));
-    --color-glass-border: rgba(235, 237, 240, 0.22);
-    --shadow-glass: inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 6px 24px rgba(0, 0, 0, 0.16);
-    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.25);
-    --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.32);
-    --shadow-lg: 0 24px 60px rgba(0, 0, 0, 0.4);
-}

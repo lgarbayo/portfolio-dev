@@ -1,0 +1,166 @@
+---
+import { useTranslations, type Locale } from "@/i18n/index";
+
+/**
+ * Ficha de detalle: un `<dialog>` nativo con cabecera y botón de cerrar.
+ *
+ * Los paneles de la home enseñan una línea por entrada; el detalle —tareas,
+ * fotos, enlaces— vive aquí. El `<dialog>` modal da gratis lo difícil: el foco
+ * atrapado dentro, Escape para cerrar y el resto de la página inerte. Se abre
+ * con cualquier botón `data-sheet-open="<id>"` (ver `lib/sheets.ts`).
+ */
+interface Props {
+    id: string;
+    locale: Locale;
+    title: string;
+    /** Línea pequeña sobre el título: tipo, periodo… */
+    kicker?: string;
+}
+
+const { id, locale, title, kicker } = Astro.props;
+const t = useTranslations(locale);
+---
+
+<dialog class="sheet" id={id} aria-labelledby={`${id}-title`}>
+    <div class="sheet__frame">
+        <header class="sheet__head">
+            <div>
+                {kicker && <p class="label">{kicker}</p>}
+                <h3 class="sheet__title" id={`${id}-title`}>{title}</h3>
+            </div>
+            <button class="sheet__close label" type="button" data-sheet-close>
+                {t("overview.close")} · Esc
+            </button>
+        </header>
+        <div class="sheet__body">
+            <slot />
+        </div>
+    </div>
+</dialog>
+
+<style>
+    .sheet {
+        /* El reset global quita los márgenes, y son los que centran un
+           `<dialog>` modal: sin esto se abre pegado arriba a la izquierda. */
+        margin: auto;
+        inline-size: min(100% - 2rem, 46rem);
+        max-block-size: min(100% - 4rem, 52rem);
+        padding: 0;
+        color: var(--color-text);
+        background: var(--color-surface);
+        border: 1px solid var(--color-border-strong);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .sheet::backdrop {
+        background: rgba(0, 0, 0, 0.72);
+        backdrop-filter: blur(4px);
+    }
+
+    .sheet[open] {
+        animation: sheet-in var(--duration-base) var(--ease-out);
+    }
+
+    @keyframes sheet-in {
+        from {
+            opacity: 0;
+            translate: 0 0.75rem;
+        }
+    }
+
+    .sheet__frame {
+        display: flex;
+        flex-direction: column;
+        max-block-size: inherit;
+    }
+
+    .sheet__head {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: var(--space-4);
+        padding: var(--space-5);
+        border-block-end: 1px solid var(--color-border);
+    }
+
+    .sheet__title {
+        margin-block-start: var(--space-2);
+        font-family: var(--font-pixel);
+        font-size: var(--text-lg);
+        font-weight: 400;
+        text-transform: uppercase;
+        letter-spacing: var(--tracking-wide);
+    }
+
+    .sheet__close {
+        flex: none;
+        padding: var(--space-2) 0;
+        background: none;
+        border: 0;
+        cursor: pointer;
+    }
+
+    .sheet__close:hover {
+        color: var(--color-accent-strong);
+    }
+
+    .sheet__body {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-4);
+        padding: var(--space-5);
+        overflow-y: auto;
+        line-height: var(--leading-normal);
+    }
+
+    .sheet__body :global(ul) {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-2);
+        padding-inline-start: 1.1rem;
+    }
+
+    .sheet__body :global(li::marker) {
+        content: "› ";
+        color: var(--color-text-subtle);
+    }
+
+    .sheet__body :global(.sheet__gallery) {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr));
+        gap: var(--space-3);
+    }
+
+    .sheet__body :global(.sheet__gallery img) {
+        inline-size: 100%;
+        aspect-ratio: 4 / 3;
+        object-fit: cover;
+        border: 1px solid var(--color-border);
+    }
+
+    .sheet__body :global(.sheet__tags) {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--space-2);
+        padding: 0;
+        list-style: none;
+    }
+
+    .sheet__body :global(.sheet__tags li) {
+        padding: 0.15rem 0.5rem;
+        border: 1px solid var(--color-border-strong);
+        font-size: var(--text-xs);
+    }
+
+    .sheet__body :global(.sheet__tags li::marker) {
+        content: none;
+    }
+
+    .sheet__body :global(.sheet__link) {
+        font-family: var(--font-pixel);
+        font-size: var(--text-xs);
+        text-transform: uppercase;
+        letter-spacing: var(--tracking-wide);
+        text-decoration: none;
+    }
+</style>

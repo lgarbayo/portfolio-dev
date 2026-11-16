@@ -4,25 +4,34 @@
 
 [Visit lgarbayo.com](https://lgarbayo.com) · [Blog](https://lgarbayo.com/en/blog/)
 
-![Desktop hero in light mode, with Luis's introduction, project and blog links, and an interactive robot](docs/images/hero-light.png)
+![Hero: Luis's name on the left, a voxel portrait in the centre and his current role on the right, on a black grid](docs/images/hero.png)
 
 ## About
 
 My personal portfolio brings together my work in software and AI, with a particular
 interest in healthcare and building technology that improves people's lives.
 
-The site is available in **English, Spanish and Galician**, with a responsive layout,
-light and dark themes, and a blog. Its original 2D game remains available through
+The site is available in **English, Spanish and Galician**, dark only, and styled like a
+screen: a black grid, a pixel typeface, a fixed header and a bottom bar with the current
+section and the time in Ourense. Its original 2D game remains available through
 **Game Mode**, using the same portfolio content as the main website.
 
 ## Website previews
 
-### Projects
+### About, experience and education
 
-Silver glass cards show project screenshots, descriptions and links to repositories,
-demos and other resources. Cards highlight on hover and keyboard focus.
+Three glass panels over photos of Ourense, A Coruña and Madrid. The section stays pinned
+while the cities change behind it; each entry opens a detail sheet with tasks, photos and
+links.
 
-![Project cards featuring Agentic Smart Health and Taiafox](docs/images/projects.png)
+![Three panels — About, Experience, Education — over a dusk photo of the Ponte do Milenio in Ourense](docs/images/about.jpg)
+
+### Selected work
+
+A numbered list of featured projects next to a tilted screen. Scrolling or picking a
+project changes the screen; *Open +* shows its key points, stack and links.
+
+![Selected work: a list of eight projects and the Agentic Smart Health viewer on a tilted screen](docs/images/projects.png)
 
 ### Interactive stack
 
@@ -33,14 +42,15 @@ readable when WebGL or animation is unavailable.
 ![Interactive 3D keyboard surrounded by technology categories](docs/images/stack.png)
 
 <details>
-<summary>Dark theme and mobile hero</summary>
+<summary>Contact and mobile hero</summary>
 
-The hero has matching light and dark media. On mobile, it uses a still image and
-the header menu provides section navigation.
+A dotted globe facing Galicia draws the route Ourense → A Coruña → Madrid.
 
-![Desktop hero in dark mode with the robot's background matched to the page](docs/images/hero-dark.png)
+![Contact: email, links and résumé on the left, a dotted globe with the route on the right](docs/images/contact.png)
 
-<img src="docs/images/hero-mobile.png" alt="Mobile hero with introduction, project, contact and blog buttons" width="390" />
+On mobile the portrait is a still image and the header menu provides section navigation.
+
+<img src="docs/images/hero-mobile.png" alt="Mobile hero with the name, the voxel portrait and the current role" width="390" />
 
 </details>
 
@@ -48,14 +58,14 @@ Screenshots are stored in `docs/images/` and show the local production build.
 
 ## Portfolio sections
 
-- **About:** a short introduction, Ourense location link, portrait and English/Spanish CVs.
-- **Experience:** current and previous roles, organization logos and selected project images.
-- **Projects:** featured work and smaller cards for other activities.
-- **Stack:** an interactive keyboard and technology categories.
-- **Education:** degrees with image galleries, language cards and certifications.
-- **In the press:** links to coverage in HISTORA, Faro de Vigo, La Voz de Galicia,
-  Atlántico and La Región.
-- **Blog:** article cards with linked motion previews and localized RSS feeds.
+1. **Home:** name, a voxel portrait built from a photo, and the current role and degree.
+2. **About:** About, Experience and Education as panels over three cities, with
+   languages, certifications and English/Spanish CVs.
+3. **Projects:** featured work on a tilted screen, more projects and other activities.
+4. **Stack:** an interactive keyboard and technology categories.
+5. **In the press:** coverage in HISTORA, Faro de Vigo, La Voz de Galicia, Atlántico and La Región.
+6. **Blog:** the latest articles; the full index and localized RSS feeds live under `/blog`.
+7. **Contact:** email (click to copy), links and the globe.
 
 ## Game Mode
 
@@ -69,11 +79,13 @@ experience, education, languages, certifications, activities and press links.
 ## Tech Stack
 
 **Astro** and **TypeScript** for the site, **Phaser 3** for the game, **GSAP** and
-**Three.js** for the motion layer.
+**Three.js** for the motion layer. Titles and labels use **Departure Mono**; body text
+uses **JetBrains Mono**.
 
-The engines load on demand: Phaser only when you open game mode, Three.js only when the
-sections that need it scroll into view. `npm run build` fails if either one ends up in a
-page's initial payload.
+The engines load on demand: Phaser only when you open game mode, Three.js only for the
+hero portrait, the keyboard and the globe — on desktop, with WebGL and without reduced
+motion; everyone else gets a still image of the same scene. `npm run build` fails if
+either engine ends up in a page's initial payload.
 
 ## Development
 
@@ -85,7 +97,7 @@ npm run preview  # serve the production build
 ```
 
 The development server defaults to `http://localhost:4321`. Opening `/` selects
-the visitor's language and lands on the hero; the header portrait also returns there.
+the visitor's language and lands on the hero; the name in the header also returns there.
 
 For a quick validation without generating a production build:
 
@@ -100,12 +112,12 @@ npm run coverage:i18n
 src/
   content/      portfolio content as validated collections (one file per entry, per locale)
   i18n/         interface strings (en.json is the contract; es.json and gl.json translate it)
-  components/   layout, sections and the game launcher
+  components/   layout, sections, the header menu and the bottom bar
   game/         the Phaser game — host.ts is its only entry point
-  lib/          shared data and client behaviour (press, profile, themes, 3D, game lifecycle)
-public/assets/  committed images, video, logos, flags and game assets
+  lib/          shared data and client behaviour (sections, places, press, 3D, game lifecycle)
+public/assets/  committed images, logos, flags, city photos and game assets
 docs/images/    website screenshots used in this README
-scripts/        build-time checks and optional hero media processing
+scripts/        build-time checks and the portrait and globe asset generators
 ```
 
 Adding a project, a job or a blog post means adding a file under `src/content/` — no
@@ -141,8 +153,8 @@ reduced motion.
 
 Every locale gets a feed at `/<locale>/rss.xml`. Opening one in a browser shows a readable
 page rather than raw XML — that is `public/rss/styles.xsl`, a stylesheet the browser applies
-on its own, leaving the file itself untouched for feed readers. The Blog link appears in the
-header only once a published post exists.
+on its own, leaving the file itself untouched for feed readers. The Blog section and menu
+entry appear only once a published post exists.
 
 ## Analytics
 
@@ -163,7 +175,7 @@ Two things the default GA setup would get wrong here, both handled in code:
   `astro:page-load`, after the swap, which is the only moment the title is right. Turn off
   *Page changes based on browser history events* in Enhanced Measurement or every navigation
   counts twice.
-- **Most of the site isn't a link.** The QR, the CV viewer, game mode, the 3D figure, the
+- **Most of the site isn't a link.** The QR, the CV viewer, game mode, the detail sheets, the
   keyboard scene, the shortcuts — none of them change the URL. They send their own events,
   declared either as `data-track` attributes in the markup or as `track()` calls in the
   module that owns the interaction.
@@ -173,58 +185,31 @@ advertising signals stay denied for good and are never asked about.
 
 `src/lib/analytics.ts` has the full reasoning and the event list.
 
-## Hero media
+## Generated media
 
-The hero plates and posters are committed in `public/assets/ui`, so a build never
-touches an AI service or re-encodes anything. Four videos ship, one per theme and
-codec:
+Everything the site serves is committed, so a build never runs a model or downloads
+anything. Two scripts regenerate the generated pieces; their sources live in the
+gitignored `assets-src/`.
 
-| | AV1 (1920×1092) | H.264 (960×546) |
-| --- | --- | --- |
-| light | `hero-figure.av1.mp4` | `hero-figure.mp4` |
-| dark | `hero-figure-dark.av1.mp4` | `hero-figure-dark.mp4` |
-
-AV1 is what almost everyone gets; H.264 is the fallback for Safari below 17 and
-Intel Macs, which cannot decode AV1. `src/lib/hero-video.ts` asks `canPlayType`
-rather than sniffing versions, because AV1 support depends on the hardware. Every
-frame is a keyframe in both — the video is never played, it is scrubbed frame by
-frame against the cursor, and without all-intra encoding seeking stutters.
-
-### Regenerating them
-
-Three steps, and only the first needs a GPU. Sources live in the gitignored
-`assets-src/`.
+**Hero portrait** — `scripts/portrait/make_portrait.py` turns
+`assets-src/portrait/luis-source.jpg` into `public/assets/ui/portrait-voxels.png`, an
+88×105 image where each pixel is a cube (red: grey level, green: depth, blue: mask), plus
+`hero-portrait.webp`, the same grid drawn flat for mobile and reduced motion. The person
+mask comes from DeepLabV3 (torchvision) and the depth from Depth Anything V2; both are
+cached next to the source, so tuning contrast does not need a GPU.
 
 ```bash
-# 1. One-off: 1280×720 render -> 2560×1440 source. Needs an NVIDIA GPU,
-#    PyTorch with CUDA and spandrel.
-python3 scripts/upscale-hero-source.py
-
-# 2. Light plates and posters. Needs FFmpeg with libsvtav1 and libx264.
-node scripts/make-hero-figure.mjs
-
-# 3. Dark plates and posters, derived from the light AV1 one.
-#    Also needs NumPy and OpenCV.
-python3 scripts/make-hero-dark.py
+python scripts/portrait/make_portrait.py            # uses the cached mask and depth
+python scripts/portrait/make_portrait.py --refresh  # runs both models again (CUDA if available)
 ```
 
-Step 1 exists because the plate is the hero's *background*, so it stretches to the
-window width: at 960px that was a 3.1× upscale on a 14" MacBook Pro and 5.3× on a
-5K display. Real-ESRGAN reconstructs the detail that plain interpolation only
-blurs. Each script's header explains the measurements behind its constants.
+**Contact globe** — `scripts/globe/make_globe.py` rasterizes Natural Earth's 1:50m land
+polygons (downloaded on first run) into a 720×360 mask, `globe-land.png`, which the browser
+samples into dots, and draws the static `contact-globe.webp`.
 
-The model weights are **not** committed — 64 MB for a step that runs once. Fetch
-them into the ignored `assets-src/models/` before running step 1:
-
-```bash
-hf download ai-forever/Real-ESRGAN RealESRGAN_x2.pth --local-dir assets-src/models
-```
-
-`upscale-hero-source.py` takes an alternative path as its first argument if you
-keep them elsewhere.
-
-Step 3 replaces the background with `#181a1d` using a foreground mask, preserving
-the robot's eyes and highlights. The theme picks the matching video and stills.
+**City photos** — `public/assets/places/` holds the three backgrounds of the About section,
+resized and slightly darkened. Their authors, licences and source pages are in
+`public/assets/places/sources.json` and are credited on the page.
 
 ## License
 
@@ -235,5 +220,9 @@ MIT — see [LICENSE.md](LICENSE.md).
 ## Additional Credits
 
 - **Character Sprite**: Custom design by Luis Garbayo Fernández
+- **Typeface**: [Departure Mono](https://departuremono.com) by Helena Zhang, SIL Open Font License 1.1
+- **City photos** (Wikimedia Commons): *Ponte do Milenio, Ourense* by Gregorio Puga Bailón (CC BY 2.0);
+  *Torre de Hércules* by Galajatuna (CC BY-SA 3.0 ES); *Edificio España and Gran Vía at night* by Tim Adams (CC BY 3.0)
+- **Land polygons**: [Natural Earth](https://www.naturalearthdata.com), public domain
 - **Game Inspiration**: Super Mario Bros® is a registered trademark of Nintendo Co., Ltd.
   This project is a personal portfolio and is not affiliated with, endorsed by, or connected to Nintendo.

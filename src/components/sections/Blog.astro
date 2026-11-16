@@ -1,0 +1,101 @@
+---
+import Section from "../Section.astro";
+import { getPublishedPosts } from "@/lib/content";
+import { readingMinutes } from "@/lib/reading-time";
+import { localeTags, localizedPath, useTranslations, type Locale } from "@/i18n/index";
+
+interface Props {
+    locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = useTranslations(locale);
+
+// Los últimos cuatro: el índice completo está a un clic, aquí basta con que se
+// vea que el blog está vivo y de qué va.
+const posts = (await getPublishedPosts(locale)).slice(0, 4);
+const date = new Intl.DateTimeFormat(localeTags[locale], { day: "2-digit", month: "short", year: "numeric" });
+---
+
+<Section id="blog" title={t("blog.latest")} description={t("blog.description")}>
+    <ul class="posts" role="list">
+        {posts.map((post) => (
+            <li data-reveal>
+                <a class="posts__row" href={localizedPath(post.data.locale, `blog/${post.data.slug}`)}>
+                    <time class="label" datetime={post.data.pubDate.toISOString()}>{date.format(post.data.pubDate)}</time>
+                    <span class="posts__main">
+                        <span class="posts__title" lang={post.data.locale}>{post.data.title}</span>
+                        <span class="posts__description">{post.data.description}</span>
+                    </span>
+                    <span class="label">{t("blog.readingTime", { minutes: String(readingMinutes(post.body ?? "")) })}</span>
+                </a>
+            </li>
+        ))}
+    </ul>
+    <a class="posts__all label" href={localizedPath(locale, "blog")}>&gt; {t("blog.all")} →</a>
+</Section>
+
+<style>
+    .posts {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+
+    .posts__row {
+        display: grid;
+        grid-template-columns: 9rem minmax(0, 1fr) auto;
+        align-items: baseline;
+        gap: var(--space-2) var(--space-5);
+        padding: var(--space-4) var(--space-2);
+        border-block-end: 1px solid var(--color-border);
+        color: var(--color-text);
+        text-decoration: none;
+        transition: background-color var(--duration-fast) var(--ease-out);
+    }
+
+    .posts__row:hover,
+    .posts__row:focus-visible {
+        background: var(--color-accent-dim);
+    }
+
+    .posts__main {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-1);
+    }
+
+    .posts__title {
+        font-family: var(--font-pixel);
+        font-size: var(--text-base);
+        text-transform: uppercase;
+        letter-spacing: var(--tracking-wide);
+        color: var(--color-accent-strong);
+    }
+
+    .posts__description {
+        color: var(--color-text-muted);
+    }
+
+    .posts__all {
+        display: inline-block;
+        margin-block-start: var(--space-5);
+        color: var(--color-text);
+        text-decoration: none;
+    }
+
+    .posts__all:hover {
+        color: var(--color-accent-strong);
+    }
+
+    @media (max-width: 48rem) {
+        .posts__row {
+            grid-template-columns: minmax(0, 1fr) auto;
+        }
+
+        .posts__main {
+            grid-column: 1 / -1;
+            grid-row: 2;
+        }
+    }
+</style>

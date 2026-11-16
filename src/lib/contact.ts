@@ -5,8 +5,8 @@ import { supportsWebGL } from "./three/support";
  * Contacto: copiar el correo con un clic y montar el globo cuando se ve.
  *
  * El globo sigue la misma regla que el retrato del hero: la imagen fija va en
- * el HTML, y la escena sólo se carga en escritorio, con WebGL, sin movimiento
- * reducido y cuando la sección se acerca a la pantalla.
+ * el HTML, y la escena se carga —en cualquier pantalla, también táctil— con
+ * WebGL, sin movimiento reducido y cuando la sección se acerca a la pantalla.
  */
 
 let cleanup: (() => void) | null = null;
@@ -52,7 +52,6 @@ export function initContact(): void {
         container &&
         labels &&
         !prefersReducedMotion() &&
-        window.matchMedia("(min-width: 48rem) and (any-pointer: fine)").matches &&
         "IntersectionObserver" in window;
 
     if (canMount) {

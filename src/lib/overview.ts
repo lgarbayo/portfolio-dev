@@ -6,7 +6,8 @@ import { prefersReducedMotion } from "./reduced-motion";
  * La sección mide una pantalla por ciudad y su escenario va clavado (`sticky`).
  * Aquí sólo se calcula en qué tercio del recorrido se está y se marca con
  * `data-active` la foto, el rótulo y el crédito que tocan; el fundido lo hace
- * el CSS. En estrecho la sección no se clava y se queda la primera ciudad.
+ * el CSS. En estrecho la sección no se clava —los paneles van uno debajo de
+ * otro—, pero la foto de fondo sí, y la ciudad cambia igual según lo recorrido.
  */
 
 let cleanup: (() => void) | null = null;
@@ -20,7 +21,6 @@ export function initOverview(): void {
     const count = new Set(groups.map((el) => el.dataset.place)).size;
     if (count < 2) return;
 
-    const pinned = window.matchMedia("(min-width: 62.0625rem)");
     let current = 0;
     let frame = 0;
     let crtTimer = 0;
@@ -43,7 +43,6 @@ export function initOverview(): void {
 
     const measure = () => {
         frame = 0;
-        if (!pinned.matches) return show(0);
         const rect = section.getBoundingClientRect();
         const travel = rect.height - window.innerHeight;
         if (travel <= 0) return show(0);

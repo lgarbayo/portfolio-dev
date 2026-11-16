@@ -10,7 +10,8 @@ import { prefersReducedMotion } from "./reduced-motion";
  * y el 2.5D de la primera versión—:
  *  - Al entrar, se resuelve de mosaico grueso a nítido, a saltos.
  *  - Sigue al cursor entera, como una tarjeta: se desplaza e inclina un pelo,
- *    sin que cambie nada dentro. Sin cursor, se balancea sola.
+ *    sin que cambie nada dentro. En móvil sigue la inclinación del teléfono,
+ *    donde el navegador la da sin pedir permiso. Si no, se balancea sola.
  *  - De vez en cuando, un fallo de CRT: franjas desplazadas y los canales de
  *    color separados durante un instante.
  *
@@ -193,6 +194,19 @@ export async function initHeroPortrait(): Promise<void> {
         look.ty = Math.max(-1, Math.min(1, (event.clientY - (box.top + box.height / 2)) / (window.innerHeight / 2)));
     };
 
+    // El móvil inclinado hace de cursor. iOS sólo da la orientación tras pedir
+    // permiso con un toque, y no merece un diálogo: ahí se queda el balanceo.
+    let tiltBase: number | null = null;
+    const onTilt = (event: DeviceOrientationEvent) => {
+        if (event.gamma === null || event.beta === null) return;
+        // La primera lectura es la postura en la que se sostiene el móvil: se
+        // cuenta desde ahí, no desde el móvil plano sobre la mesa.
+        tiltBase ??= event.beta;
+        hasPointer = true;
+        look.tx = Math.max(-1, Math.min(1, event.gamma / 25));
+        look.ty = Math.max(-1, Math.min(1, (event.beta - tiltBase) / 25));
+    };
+
     const render = (now: number) => {
         frame = visible ? requestAnimationFrame(render) : 0;
         const t = now - start;
@@ -231,6 +245,7 @@ export async function initHeroPortrait(): Promise<void> {
     const resize = new ResizeObserver(layout);
     resize.observe(still);
     window.addEventListener("pointermove", onPointer, { passive: true });
+    window.addEventListener("deviceorientation", onTilt);
 
     // Fuera de pantalla no se dibuja nada.
     const io = new IntersectionObserver(([entry]) => {
@@ -245,6 +260,7 @@ export async function initHeroPortrait(): Promise<void> {
         resize.disconnect();
         io.disconnect();
         window.removeEventListener("pointermove", onPointer);
+        window.removeEventListener("deviceorientation", onTilt);
         gl.getExtension("WEBGL_lose_context")?.loseContext();
         canvas.remove();
     };

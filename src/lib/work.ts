@@ -7,6 +7,9 @@ import { prefersReducedMotion } from "./reduced-motion";
  * calcula el tramo y se marca la diapositiva y la entrada de la lista. Pulsar
  * un proyecto de la lista no cambia la diapositiva a mano: desplaza hasta su
  * tramo, para que el scroll y la lista no se lleven nunca la contraria.
+ *
+ * Es igual en todos los tamaños: en estrecho la lista se queda en una fila de
+ * números, pero el escenario se clava y los proyectos pasan con el scroll.
  */
 
 let cleanup: (() => void) | null = null;
@@ -22,7 +25,6 @@ export function initWork(): void {
     const count = slides.length;
     if (count === 0) return;
 
-    const pinned = window.matchMedia("(min-width: 62.0625rem)");
     let current = 0;
     let frame = 0;
 
@@ -40,7 +42,6 @@ export function initWork(): void {
 
     const measure = () => {
         frame = 0;
-        if (!pinned.matches) return;
         const distance = travel();
         if (distance <= 0) return show(0);
         const progress = Math.min(0.9999, Math.max(0, -pin.getBoundingClientRect().top / distance));
@@ -55,7 +56,6 @@ export function initWork(): void {
         const pick = (event.target as HTMLElement).closest<HTMLButtonElement>("[data-work-pick]");
         if (!pick) return;
         const index = Number(pick.dataset.workPick);
-        if (!pinned.matches) return show(index);
         const top = pin.getBoundingClientRect().top + window.scrollY;
         window.scrollTo({
             top: top + ((index + 0.5) / count) * travel(),

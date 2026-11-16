@@ -606,9 +606,30 @@ const last = places[places.length - 1]!;
             block-size: auto;
             min-block-size: 100svh;
             gap: var(--space-6);
+            /* `clip` y no `hidden`: con `hidden` el escenario sería su propio
+               contenedor de scroll y la foto de abajo no se quedaría clavada. */
+            overflow: clip;
         }
 
+        /* La foto va clavada detrás mientras los paneles pasan por encima, y
+           va cambiando de ciudad con el scroll como en ancho. Ocupa todas las
+           filas para poder quedarse quieta durante toda la sección; los
+           márgenes negativos la sacan del relleno del escenario, a sangre. */
+        .overview__backdrops {
+            position: sticky;
+            inset: auto;
+            inset-block-start: 0;
+            grid-area: 1 / 1 / -1 / -1;
+            align-self: start;
+            block-size: 100svh;
+            margin-block-start: calc(-1 * (var(--header-height) + var(--space-4)));
+            margin-inline: calc(-1 * var(--gutter));
+        }
+
+        /* Con la foto ocupando toda la rejilla, el resto va en su sitio a
+           mano: si no, la colocación automática los echaría a otra celda. */
         .overview__panels {
+            grid-area: 1 / 1;
             grid-template-columns: minmax(0, 1fr);
         }
 
@@ -618,6 +639,7 @@ const last = places[places.length - 1]!;
         }
 
         .overview__captions {
+            grid-area: 2 / 1;
             min-inline-size: 0;
         }
     }

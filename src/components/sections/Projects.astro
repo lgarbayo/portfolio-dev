@@ -517,40 +517,97 @@ const meta = (data: Project["data"]) =>
         border: 1px solid var(--color-border);
     }
 
-    /* --- Estrecho: sin clavar, una ficha por proyecto --- */
+    /* --- Estrecho: clavado igual, en una columna ---
+       Arriba el título y la lista convertida en una fila de números; debajo la
+       ventana del proyecto. Los proyectos pasan con el scroll como en ancho, y
+       tocar un número lleva a su tramo. */
     @media (max-width: 62rem) {
-        .work__pin {
-            block-size: auto;
-        }
-
         .work__stage {
-            position: relative;
             grid-template-columns: minmax(0, 1fr);
-            block-size: auto;
-            gap: var(--space-5);
+            grid-template-rows: auto auto;
+            align-items: start;
+            align-content: center;
+            gap: var(--space-4);
         }
 
-        .work__list,
+        .work__head {
+            margin-block-end: var(--space-3);
+        }
+
+        .work__list {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            column-gap: var(--space-5);
+        }
+
         .work__hint {
             display: none;
         }
 
-        .work__slides {
-            gap: var(--space-8);
-        }
-
         .slide {
-            grid-area: auto;
-            opacity: 1;
-            visibility: visible;
+            gap: var(--space-3);
         }
 
-        .slide__screen {
+        .slide__screen,
+        .slide[data-active] .slide__screen:hover {
             transform: none;
+        }
+
+        .slide__view {
+            max-block-size: 34svh;
         }
 
         .work__more {
             grid-template-columns: minmax(0, 1fr);
+        }
+    }
+
+    /* En móvil la lista son sólo los números: con los nombres no cabría la
+       ventana debajo. El nombre del activo ya sale en la ficha. */
+    @media (max-width: 36rem) {
+        .work__title {
+            font-size: var(--text-xl);
+        }
+
+        .work__list {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            gap: var(--space-1);
+        }
+
+        .work__item {
+            inline-size: auto;
+            padding: var(--space-1) var(--space-2);
+            border: 1px solid var(--color-border);
+        }
+
+        .work__item > span:not(.work__number),
+        .work__item[aria-current] .work__number::before {
+            display: none;
+        }
+
+        .work__item[aria-current] {
+            border-color: var(--color-live);
+        }
+
+        .slide__view {
+            max-block-size: 30svh;
+        }
+
+        .slide__title {
+            font-size: var(--text-lg);
+        }
+    }
+
+    /* Pantallas bajas: la descripción se queda en dos líneas. */
+    @media (max-width: 62rem) and (max-height: 46rem) {
+        .slide__description {
+            -webkit-line-clamp: 2;
+        }
+
+        .slide__view {
+            max-block-size: 26svh;
         }
     }
 

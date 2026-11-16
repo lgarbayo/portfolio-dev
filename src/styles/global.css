@@ -265,6 +265,53 @@ samp {
     }
 }
 
+/* --- Esqueletos (`lib/skeleton.ts`) ---
+   `.skeleton` es la placa que reserva el sitio de algo que todavía no ha
+   llegado. Las imágenes diferidas la llevan solas mientras cargan
+   (`img[data-loading]`): el fondo de un `<img>` se ve hasta que se pinta la
+   foto, así que no hace falta envolverlas en nada. La franja avanza a saltos,
+   no en continuo, como el resto de cosas que se mueven en la web. */
+.skeleton,
+img[data-loading] {
+    background-color: var(--skeleton-base);
+    background-image: var(--skeleton-sweep), var(--pixel-grid);
+    background-size:
+        300% 100%,
+        24px 24px;
+    background-repeat: no-repeat, repeat;
+    animation: skeleton-sweep 1.5s steps(15) infinite;
+}
+
+/* Mientras no hay foto, ni el icono de imagen rota ni el texto alternativo:
+   sólo la placa. */
+img[data-loading] {
+    color: transparent;
+}
+
+@keyframes skeleton-sweep {
+    from {
+        background-position:
+            100% 0,
+            0 0;
+    }
+    to {
+        background-position:
+            0 0,
+            0 0;
+    }
+}
+
+/* Cuando llega, la foto entra en tres pasos, como un canal que sintoniza. */
+img[data-loaded] {
+    animation: skeleton-in 0.24s steps(3, end);
+}
+
+@keyframes skeleton-in {
+    from {
+        opacity: 0;
+    }
+}
+
 /* --- Ventana de macOS ---
    Cromo compartido: el hero (Terminal), la pantalla de proyectos (Safari), las
    fichas y la página de enlaces. Cada sitio pone su contenido; esto pone el

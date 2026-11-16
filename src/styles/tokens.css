@@ -61,6 +61,21 @@
     --pixel-grid: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24'><rect width='2' height='2' fill='%23ebebeb' fill-opacity='.09'/></svg>");
     --pixel-lit: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='264' height='264'><rect x='120' y='48' width='2' height='2' fill='%23ebebeb' fill-opacity='.3'/><rect x='240' y='0' width='2' height='2' fill='%23ebebeb' fill-opacity='.22'/><rect x='192' y='24' width='2' height='2' fill='%23ebebeb' fill-opacity='.3'/><rect x='216' y='0' width='2' height='2' fill='%23ebebeb' fill-opacity='.4'/><rect x='72' y='0' width='2' height='2' fill='%23ebebeb' fill-opacity='.22'/><rect x='144' y='144' width='2' height='2' fill='%23ebebeb' fill-opacity='.22'/><rect x='72' y='24' width='2' height='2' fill='%23ebebeb' fill-opacity='.4'/></svg>");
 
+    /* --- Esqueletos ---
+       Lo que ocupa el sitio de algo que aún está cargando: una placa algo más
+       clara que el fondo, con la misma rejilla de píxeles, por la que pasa a
+       saltos una franja con un deje morado. */
+    --skeleton-base: #0f0e12;
+    --skeleton-lit: #24202b;
+    --skeleton-sweep: linear-gradient(
+        100deg,
+        transparent 42%,
+        rgba(191, 90, 242, 0.1) 47%,
+        rgba(235, 235, 235, 0.08) 50%,
+        rgba(191, 90, 242, 0.1) 53%,
+        transparent 58%
+    );
+
     /* --- Velos ---
        El fondo de la página medio transparente: el degradado de la cabecera y
        de la barra de abajo, y el menú a pantalla completa. */

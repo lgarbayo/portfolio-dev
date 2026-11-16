@@ -1,4 +1,5 @@
 import { prefersReducedMotion } from "./reduced-motion";
+import { supportsWebGL } from "./three/support";
 
 /**
  * Contacto: copiar el correo con un clic y montar el globo cuando se ve.
@@ -60,7 +61,6 @@ export function initContact(): void {
             async (entries, self) => {
                 if (!entries.some((entry) => entry.isIntersecting)) return;
                 self.disconnect();
-                const { supportsWebGL } = await import("./three/renderer");
                 if (mine !== generation || !supportsWebGL()) return;
                 const { createGlobeScene } = await import("./three/globe-scene");
                 if (mine !== generation) return;

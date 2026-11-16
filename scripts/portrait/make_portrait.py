@@ -6,7 +6,8 @@ mosaico y algún fallo de CRT). Sale de aquí:
 
     portrait.webp   la foto recortada, con alfa (fuera de la persona,
                     transparente). Es también lo que se ve sin WebGL.
-    portrait.json   su tamaño, para el `<img>`.
+    portrait.json   su tamaño, para el `<img>`, y la silueta a bloques que hace
+                    de esqueleto mientras arranca la escena.
 
 El recorte sale de SAM (Segment Anything) con una caja alrededor de la persona y
 unos puntos: positivos sobre la cara, el pelo, el brazo, la camiseta y el
@@ -46,6 +47,9 @@ CROP = (500, 90, 1540, 1333)
 # Ancho de la foto publicada: de sobra para la mitad de una pantalla grande con
 # densidad 2x.
 OUT_WIDTH = 900
+# Lado de cada bloque de la silueta de carga, en px de la foto publicada: del
+# orden del primer paso del mosaico de entrada, para que una cosa lleve a la otra.
+SILHOUETTE_BLOCK = 25
 
 # Puntos para SAM, en coordenadas de la foto original.
 BOX = (520, 140, 1520, 1333)
@@ -102,6 +106,44 @@ def load_inputs(refresh: bool) -> tuple[Image.Image, Image.Image]:
     return img, Image.open(CACHE_MASK).convert("L")
 
 
+def silhouette(alpha: np.ndarray) -> dict[str, object]:
+    """
+    La persona en bloques: un trazado SVG con los bloques que caen dentro del
+    recorte y, aparte, unos pocos de ellos repartidos en tres grupos que se
+    encienden por turnos. Coordenadas en px de la foto publicada, para que el
+    `viewBox` sea el mismo que el de la imagen.
+    """
+    b = SILHOUETTE_BLOCK
+    rows = -(-alpha.shape[0] // b)
+    cols = -(-alpha.shape[1] // b)
+    filled = np.zeros((rows, cols), dtype=bool)
+    for r in range(rows):
+        for c in range(cols):
+            filled[r, c] = alpha[r * b : (r + 1) * b, c * b : (c + 1) * b].mean() > 127
+
+    def path(cells: np.ndarray) -> str:
+        # Una fila de bloques seguidos va en un solo rectángulo.
+        out = []
+        for r in range(rows):
+            c = 0
+            while c < cols:
+                if not cells[r, c]:
+                    c += 1
+                    continue
+                start = c
+                while c < cols and cells[r, c]:
+                    c += 1
+                w = (c - start) * b
+                out.append(f"M{start * b} {r * b}h{w}v{b}h-{w}z")
+        return "".join(out)
+
+    # Hash fijo por bloque: el dibujo no cambia de una ejecución a otra.
+    rr, cc = np.mgrid[0:rows, 0:cols]
+    h = np.modf(np.abs(np.sin(rr * 311.7 + cc * 127.1) * 43758.5453))[0]
+    lit = [filled & (h >= lo) & (h < lo + 0.07) for lo in (0.0, 0.33, 0.66)]
+    return {"path": path(filled), "lit": [path(cells) for cells in lit]}
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--refresh", action="store_true", help="vuelve a pasar el modelo")
@@ -124,7 +166,8 @@ def main() -> None:
     rgba = np.dstack([rgb, alpha])
     Image.fromarray(rgba, "RGBA").save(OUT_COLOR, "WEBP", quality=86, method=6, exact=False)
 
-    OUT_META.write_text(json.dumps({"width": width, "height": height}) + "\n")
+    meta = {"width": width, "height": height, "silhouette": silhouette(alpha)}
+    OUT_META.write_text(json.dumps(meta) + "\n")
     print(f"{width}x{height} → {OUT_COLOR.relative_to(ROOT)}")
 
 

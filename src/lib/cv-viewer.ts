@@ -25,7 +25,11 @@ export function initCvViewer(): void {
     const newTab = dialog.querySelector<HTMLAnchorElement>("[data-cv-tab]");
     if (!frame) return;
 
+    // Hasta que el visor pinta el PDF, el hueco lleva la placa de carga.
+    const onFrameLoad = () => frame.classList.remove("skeleton");
+
     const open = (href: string, label: string) => {
+        frame.classList.add("skeleton");
         frame.src = href;
         if (title) title.textContent = label;
         download?.setAttribute("href", href);
@@ -62,17 +66,20 @@ export function initCvViewer(): void {
 
     // Al cerrar —por Escape, por el botón o por el fondo— se suelta el PDF.
     const onClose = () => {
+        frame.classList.remove("skeleton");
         frame.removeAttribute("src");
     };
 
     document.addEventListener("click", onClick);
     dialog.addEventListener("click", onDialogClick);
     dialog.addEventListener("close", onClose);
+    frame.addEventListener("load", onFrameLoad);
 
     cleanup = () => {
         document.removeEventListener("click", onClick);
         dialog.removeEventListener("click", onDialogClick);
         dialog.removeEventListener("close", onClose);
+        frame.removeEventListener("load", onFrameLoad);
         if (dialog.open) dialog.close();
         cleanup = null;
     };

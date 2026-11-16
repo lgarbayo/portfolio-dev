@@ -102,6 +102,7 @@ const pageLabel = onHome
             import { initSheets } from "@/lib/sheets";
             import { initSectionFx, destroySectionFx } from "@/lib/section-fx";
             import { initSectionSeams, destroySectionSeams } from "@/lib/section-seams";
+            import { initSkeletons, destroySkeletons } from "@/lib/skeleton";
 
             /*
              * En la primera carga esto corría dos veces: una al evaluarse el
@@ -116,6 +117,9 @@ const pageLabel = onHome
             const boot = () => {
                 if (booted) return;
                 booted = true;
+                // Lo primero: cuanto antes se marquen las imágenes que faltan,
+                // menos tiempo se ve un hueco vacío antes de la placa.
+                initSkeletons();
                 void initReveal();
                 initGameMode();
                 initShortcuts();
@@ -142,6 +146,7 @@ const pageLabel = onHome
                 destroyPostMotion();
                 destroySectionFx();
                 destroySectionSeams();
+                destroySkeletons();
                 destroyAnalytics();
             });
         </script>

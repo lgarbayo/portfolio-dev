@@ -21,18 +21,7 @@ export interface SceneHandle {
     destroy: () => void;
 }
 
-/** ¿Puede este navegador pintar WebGL? Si no, cada isla usa su respaldo estático. */
-export function supportsWebGL(): boolean {
-    try {
-        const canvas = document.createElement("canvas");
-        return Boolean(
-            window.WebGLRenderingContext &&
-                (canvas.getContext("webgl2") || canvas.getContext("webgl")),
-        );
-    } catch {
-        return false;
-    }
-}
+export { supportsWebGL } from "./support";
 
 interface CreateOptions {
     container: HTMLElement;

@@ -1,5 +1,6 @@
 import { track } from "./analytics";
 import { prefersReducedMotion } from "./reduced-motion";
+import { supportsWebGL } from "./three/support";
 
 /**
  * Monta la escena del teclado cuando la sección entra en pantalla, y sólo si el
@@ -20,6 +21,8 @@ let observer: IntersectionObserver | null = null;
 let claimObserver: IntersectionObserver | null = null;
 /** Deshace lo que enganchó `wireControls` al DOM de la sección. */
 let unwireControls: (() => void) | null = null;
+/** La placa que ocupa el sitio del teclado mientras baja Three. */
+let skeleton: HTMLElement | null = null;
 /**
  * Cuenta los montajes para poder abandonar los que se quedaron a medias.
  *
@@ -60,26 +63,29 @@ export function initStackScene(): void {
             if (!entries.some((entry) => entry.isIntersecting) || scene) return;
             self.disconnect();
 
-            const { supportsWebGL } = await import("./three/renderer");
-            if (mine !== generation) return;
             if (!supportsWebGL()) {
                 track("stack_scene", { scene_status: "skipped_webgl" });
                 return;
             }
 
-            const { createKeyboardScene } = await import("./three/keyboard-scene");
-            const { loadSoundPreference, setSoundEnabled, soundEnabled } = await import(
-                "./three/key-sound"
-            );
-            if (mine !== generation) return;
-
             // La escena reserva su alto sólo cuando sabe que va a pintar: así el
             // respaldo no deja un hueco vacío en las páginas donde no carga.
             // El teclado es la pieza central de la sección, no una franja
             // decorativa: ocupa el ancho de la pantalla (ver el `100vw` del CSS)
-            // y buena parte del alto.
+            // y buena parte del alto. Mientras baja Three, el sitio lo ocupa el
+            // esqueleto de un teclado.
             container.style.blockSize = "clamp(260px, 70vw, min(62svh, 640px))";
             container.style.marginBlockEnd = "var(--space-2)";
+            skeleton = document.createElement("div");
+            skeleton.className = "stack__skeleton";
+            skeleton.setAttribute("aria-hidden", "true");
+            container.append(skeleton);
+
+            const [{ createKeyboardScene }, { loadSoundPreference, setSoundEnabled, soundEnabled }] =
+                await Promise.all([import("./three/keyboard-scene"), import("./three/key-sound")]);
+            if (mine !== generation) return;
+            skeleton?.remove();
+            skeleton = null;
 
             const instance = createKeyboardScene(container, keycaps);
             scene = instance;
@@ -204,6 +210,8 @@ export function destroyStackScene(): void {
     claimObserver?.disconnect();
     claimObserver = null;
     unwireControls?.();
+    skeleton?.remove();
+    skeleton = null;
     scene?.destroy();
     scene = null;
     document.body.removeAttribute("data-scene-keyboard");

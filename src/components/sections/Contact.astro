@@ -98,6 +98,11 @@ const last = places[places.length - 1]!;
         transition: opacity var(--duration-slow) var(--ease-out);
     }
 
+    /* Mientras carga, la placa tiene la forma del globo. */
+    .contact__still[data-loading] {
+        border-radius: 50%;
+    }
+
     .contact__globe[data-live] .contact__still {
         opacity: 0;
     }

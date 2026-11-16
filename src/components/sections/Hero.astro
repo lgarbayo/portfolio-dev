@@ -36,6 +36,7 @@ const PROMPT = "luis@garbayo ~ %";
 import portraitMeta from "../../../public/assets/ui/portrait.json";
 const PORTRAIT_WIDTH = portraitMeta.width;
 const PORTRAIT_HEIGHT = portraitMeta.height;
+const SILHOUETTE = portraitMeta.silhouette;
 ---
 
 <section class="hero" id="hero" aria-labelledby="hero-title">
@@ -98,6 +99,16 @@ const PORTRAIT_HEIGHT = portraitMeta.height;
       esta misma foto, fija.
     */}
     <div class="hero__portrait" data-hero-portrait>
+        {/* El esqueleto: la silueta en bloques, mientras llega la escena. */}
+        <svg
+            class="hero__portrait-skeleton"
+            viewBox={`0 0 ${PORTRAIT_WIDTH} ${PORTRAIT_HEIGHT}`}
+            preserveAspectRatio="xMidYMax meet"
+            aria-hidden="true"
+        >
+            <path class="skel-base" d={SILHOUETTE.path} />
+            {SILHOUETTE.lit.map((d) => <path class="skel-lit" d={d} />)}
+        </svg>
         <img
             class="hero__portrait-still"
             src="/assets/ui/portrait.webp"
@@ -275,6 +286,63 @@ const PORTRAIT_HEIGHT = portraitMeta.height;
     @keyframes portrait-fallback {
         to {
             opacity: 1;
+        }
+    }
+
+    /* La silueta ocupa la misma caja que la foto (abajo y centrada, sin pasar
+       de su tamaño natural) y sólo se ve mientras la foto espera. Si la escena
+       no llega, se va a la vez que aparece la foto fija. */
+    .hero__portrait-skeleton {
+        position: absolute;
+        inset-block-end: 0;
+        inset-inline: 0;
+        margin-inline: auto;
+        inline-size: 100%;
+        block-size: 100%;
+        max-inline-size: 900px;
+        max-block-size: 1076px;
+        mask-image: linear-gradient(to top, transparent, #000 16%);
+        pointer-events: none;
+        visibility: hidden;
+    }
+
+    .hero__portrait[data-pending] .hero__portrait-skeleton {
+        visibility: visible;
+        animation: skeleton-out 0s 2.5s forwards;
+    }
+
+    @keyframes skeleton-out {
+        to {
+            visibility: hidden;
+        }
+    }
+
+    .skel-base {
+        fill: var(--skeleton-base);
+    }
+
+    /* Unos pocos bloques se encienden por turnos, a golpes. */
+    .skel-lit {
+        fill: var(--skeleton-lit);
+        opacity: 0;
+        animation: skel-blink 1.2s steps(1) infinite;
+    }
+
+    .skel-lit:nth-child(3) {
+        animation-delay: 0.4s;
+    }
+
+    .skel-lit:nth-child(4) {
+        animation-delay: 0.8s;
+    }
+
+    @keyframes skel-blink {
+        0%,
+        33% {
+            opacity: 1;
+        }
+        34% {
+            opacity: 0;
         }
     }
 

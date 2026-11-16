@@ -44,8 +44,12 @@ body {
     display: flex;
     flex-direction: column;
     min-block-size: 100dvh;
-    /* Negro plano: sin rejilla ni degradados. */
+    /* Negro con una rejilla de píxeles, fija: no se desplaza con el
+       contenido, así que se lee como la pantalla y no como el papel. */
     background-color: var(--color-bg);
+    background-image: var(--pixel-lit), var(--pixel-grid);
+    background-position: 11px 11px, 11px 11px;
+    background-attachment: fixed;
     color: var(--color-text);
     /* Monoespaciada para todo el texto de la web, blog incluido: es una
        interfaz, no una revista. */
@@ -184,6 +188,71 @@ samp {
     color: var(--color-text-muted);
     font-size: var(--text-xs);
     white-space: nowrap;
+}
+
+/* --- Al cambiar de sección (`lib/section-fx.ts`) ---
+   La franja de barrido: una banda clara con líneas de barrido que baja por la
+   pantalla una vez, por encima de todo y sin recibir eventos. */
+.fx-roll {
+    position: fixed;
+    inset-inline: 0;
+    inset-block-start: 0;
+    z-index: var(--z-overlay);
+    block-size: 22vh;
+    pointer-events: none;
+    opacity: 0;
+    background:
+        repeating-linear-gradient(to bottom, rgba(255, 255, 255, 0.07) 0 1px, transparent 1px 3px),
+        linear-gradient(to bottom, transparent, rgba(235, 235, 235, 0.07) 45%, rgba(235, 235, 235, 0.12) 50%, transparent);
+    mix-blend-mode: screen;
+}
+
+.fx-roll[data-run] {
+    animation: fx-roll 0.62s cubic-bezier(0.4, 0, 0.6, 1) forwards;
+}
+
+@keyframes fx-roll {
+    0% {
+        opacity: 1;
+        transform: translateY(-25vh);
+    }
+    85% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(105vh);
+    }
+}
+
+/* Lo que queda por teclear de un título: está, pero no se ve. */
+.fx-rest {
+    color: transparent;
+}
+
+/* El cursor de bloque: sin ancho propio, para que el título no se mueva
+   mientras avanza. */
+.fx-cursor {
+    position: relative;
+    display: inline-block;
+    inline-size: 0;
+}
+
+.fx-cursor::after {
+    content: "";
+    position: absolute;
+    inset-block-end: -0.05em;
+    inset-inline-start: 0.04em;
+    inline-size: 0.55em;
+    block-size: 0.95em;
+    background: currentColor;
+    animation: fx-blink 0.7s steps(1) infinite;
+}
+
+@keyframes fx-blink {
+    50% {
+        opacity: 0;
+    }
 }
 
 /* --- Ventana de macOS ---

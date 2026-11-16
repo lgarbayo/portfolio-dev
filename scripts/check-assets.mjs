@@ -21,9 +21,8 @@ const expected = [
     // acompañan a la tarjeta salen en inglés y la imagen tiene que ir a juego.
     { path: "og-image.jpg", why: "imagen de previsualización al compartir enlaces" },
     { path: "favicon-32.png", why: "el icono de la pestaña" },
-    { path: "assets/ui/hero-portrait.webp", why: "el retrato ASCII ya dibujado, para sin JS; se genera con scripts/portrait/make_portrait.py" },
-    { path: "assets/ui/portrait-ascii.json", why: "las letras del retrato ASCII del hero, del mismo script" },
-    { path: "assets/ui/portrait-ascii.png", why: "los colores del retrato ASCII del hero, del mismo script" },
+    { path: "assets/ui/portrait.webp", why: "el retrato recortado del hero; se genera con scripts/portrait/make_portrait.py" },
+    { path: "assets/ui/portrait.json", why: "el tamaño del retrato, del mismo script" },
     { path: "fonts/departure-mono.woff2", why: "la fuente pixelada de títulos y etiquetas" },
     { path: "assets/places/ourense.webp", why: "la foto de fondo de Ourense en «Sobre mí»" },
     { path: "assets/places/coruna.webp", why: "la foto de fondo de A Coruña en «Sobre mí»" },

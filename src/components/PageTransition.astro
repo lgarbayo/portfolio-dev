@@ -1,33 +1,20 @@
 ---
 /*
- * La capa del wipe SVG: una sola para todo el sitio, la usan tanto las
- * navegaciones entre páginas como los saltos entre secciones (ver `wipe.ts`).
+ * La capa de la cortina de píxeles: una sola para todo el sitio, la usan tanto
+ * las navegaciones entre páginas como los saltos entre secciones (ver
+ * `wipe.ts`).
  *
- * La técnica viene del repo de referencia: se mide cada trazo con
- * `getTotalLength()`, se le pone un `strokeDasharray`/`strokeDashoffset` igual a
- * esa longitud para ocultarlo, y luego se anima el offset mientras el
- * `stroke-width` se ensancha hasta cubrir la pantalla.
- *
- * Lo que NO se copia de la referencia es su router: interceptaba clics,
- * llamaba a `history.pushState()` y cambiaba el DOM a mano. Eso pelearía con el
- * routing de Astro y rompería el botón atrás. Aquí la navegación la hace el
- * ClientRouter y esto sólo se engancha a sus eventos de ciclo de vida.
+ * La navegación la hace el ClientRouter de Astro y esto sólo se engancha a sus
+ * eventos de ciclo de vida: nada de interceptar clics ni de `pushState` propio,
+ * que pelearía con el router y rompería el botón atrás.
  */
 ---
-
 {/* `transition:persist` va aquí, en el elemento, no en el componente: el swap
     del router sustituye el body entero, y sin esto la capa que se anima al
     salir sería un nodo ya desechado cuando toca destaparla — la pantalla se
     quedaría tapada y aparecería la página nueva de golpe. */}
 <div class="transition" data-page-transition aria-hidden="true" transition:persist>
-    <svg
-        class="transition__svg"
-        viewBox="0 0 100 100"
-        preserveAspectRatio="none"
-        focusable="false"
-    >
-        <path class="transition__path" data-transition-path d="M -10 50 L 110 50" />
-    </svg>
+    <canvas class="transition__canvas" data-transition-canvas></canvas>
 </div>
 
 <style>
@@ -45,22 +32,37 @@
         opacity: 1;
     }
 
-    .transition__svg {
-        inline-size: 100%;
-        block-size: 100%;
+    /* Bloques duros: el navegador no debe suavizar el canvas al escalarlo. */
+    .transition__canvas {
+        display: block;
+        image-rendering: pixelated;
     }
 
-    .transition__path {
-        fill: none;
-        stroke: var(--color-accent);
-        stroke-width: 0;
-        /* Ojo con `vector-effect: non-scaling-stroke` aquí: pasa el trazo a
-           píxeles de pantalla, y con él el patrón de guiones. El dasharray que
-           esconde la línea vale 120 unidades del viewBox —su longitud entera—,
-           así que interpretado en píxeles deja de ser un trazo escondido y se
-           convierte en un rayado de 120px. Todo el dibujo va en unidades del
-           viewBox, que con `preserveAspectRatio="none"` es justo lo que hace que
-           la cortina se estire a cualquier pantalla. */
+    /* La imagen que vuelve tras la cortina: unos fotogramas de temblor y de
+       canales de color separados, como un CRT que se enciende. */
+    :global(html[data-crt] main),
+    :global(html[data-crt] .header),
+    :global(html[data-crt] .hud) {
+        animation: crt-on 0.42s steps(6, end);
+    }
+
+    @keyframes crt-on {
+        0% {
+            transform: translateX(-3px) scaleY(1.01);
+            filter: drop-shadow(3px 0 0 rgba(255, 0, 60, 0.55)) drop-shadow(-3px 0 0 rgba(0, 160, 255, 0.55)) brightness(1.4);
+        }
+        35% {
+            transform: translateX(2px);
+            filter: drop-shadow(-2px 0 0 rgba(255, 0, 60, 0.4)) drop-shadow(2px 0 0 rgba(0, 160, 255, 0.4)) brightness(1.15);
+        }
+        70% {
+            transform: translateX(-1px);
+            filter: drop-shadow(1px 0 0 rgba(255, 0, 60, 0.25)) drop-shadow(-1px 0 0 rgba(0, 160, 255, 0.25));
+        }
+        100% {
+            transform: none;
+            filter: none;
+        }
     }
 
     /* Sin movimiento, la capa no existe: la navegación es un cambio de página

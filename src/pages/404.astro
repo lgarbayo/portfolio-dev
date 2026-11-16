@@ -1,5 +1,9 @@
 ---
 import BaseLayout from "@/layouts/BaseLayout.astro";
+import PageTrail from "@/components/PageTrail.astro";
+import PageLinks from "@/components/PageLinks.astro";
+import { channels } from "@/lib/channels";
+import { getPublishedPosts } from "@/lib/content";
 import { defaultLocale, localizedPath, useTranslations } from "@/i18n/index";
 
 /*
@@ -9,6 +13,7 @@ import { defaultLocale, localizedPath, useTranslations } from "@/i18n/index";
  */
 const locale = defaultLocale;
 const t = useTranslations(locale);
+const posts = await getPublishedPosts(locale);
 ---
 
 <BaseLayout locale={locale} title={t("notFound.title")} description={t("notFound.description")}>
@@ -17,9 +22,24 @@ const t = useTranslations(locale);
         nada. Con el grupo aparte, el informe de páginas de la 404 es la
         lista de enlaces rotos que apuntan al sitio. */}
     <div class="container notfound" data-not-found>
+        <PageTrail
+            locale={locale}
+            back={{ label: t("nav.home"), href: localizedPath(locale) }}
+            crumbs={[{ label: "404" }]}
+        />
         <h1>{t("notFound.title")}</h1>
         <p>{t("notFound.description")}</p>
-        <a class="button button--primary" href={localizedPath(locale)}>{t("notFound.home")}</a>
+        {/* Una 404 no tiene «atrás»: se ofrecen las tres puertas del sitio. */}
+        <PageLinks
+            locale={locale}
+            links={[
+                { href: localizedPath(locale), kicker: t("notFound.home"), title: t("nav.home"), meta: "lgarbayo.com" },
+                ...(posts.length > 0
+                    ? [{ href: localizedPath(locale, "blog"), kicker: t("nav.blog"), title: t("blog.all"), meta: t("blog.count", { count: posts.length }) }]
+                    : []),
+                { href: "/links/", kicker: t("links.title"), title: t("qr.title"), meta: t("links.count", { count: channels.length }) },
+            ]}
+        />
     </div>
 </BaseLayout>
 
@@ -27,9 +47,8 @@ const t = useTranslations(locale);
     .notfound {
         display: flex;
         flex-direction: column;
-        align-items: flex-start;
         gap: var(--space-4);
-        padding-block: var(--space-10);
+        padding-block: calc(var(--header-height) + var(--space-4)) var(--space-10);
     }
 
     .notfound p {

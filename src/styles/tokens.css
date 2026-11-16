@@ -3,12 +3,13 @@
  * tocar ni un componente — si algún componente necesita un literal, es que
  * falta un token.
  *
- * La web es oscura, sin tema claro: negro puro y plano de fondo —toda la web,
- * la página de enlaces incluida— y blancos rotos para el texto. Va en escala de grises —los
+ * La web es oscura, sin tema claro: negro puro de fondo con una rejilla de
+ * píxeles —toda la web, la página de enlaces incluida— y blancos rotos para el
+ * texto. Va en escala de grises —los
  * canales R, G y B valen lo mismo en cada tono—, porque un gris con una pizca
  * de azul deja de leerse como neutro al lado de uno que no la tiene. El color
  * lo ponen las fotos de las ciudades y nada más; la única excepción es
- * `--color-live`, el punto verde de lo que está en curso.
+ * `--color-live`, el morado de lo que está en curso y del prompt.
  *
  * Sin color con el que marcar jerarquía, la marca el brillo: el acento es lo más
  * claro de la página, el texto corriente queda un escalón por debajo, y de ahí
@@ -48,9 +49,17 @@
     --color-accent-strong: #ffffff;
     --color-accent-dim: rgba(242, 242, 242, 0.08);
     --color-accent-border: rgba(242, 242, 242, 0.3);
-    /* El único color que no es gris: el punto de «en curso» y el de contacto. */
-    --color-live: #3ddc84;
+    /* El único color que no es gris: el punto de «en curso», el de contacto y el
+       prompt de la terminal. Es el morado de sistema de macOS en modo oscuro. */
+    --color-live: #bf5af2;
 
+
+    /* --- Fondo de píxeles ---
+       Una rejilla de puntos de 2 px cada 24 px y, por encima, unos pocos más
+       encendidos en una baldosa grande, para que no se lea como una malla
+       perfecta sino como una pantalla. */
+    --pixel-grid: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24'><rect width='2' height='2' fill='%23ebebeb' fill-opacity='.09'/></svg>");
+    --pixel-lit: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='264' height='264'><rect x='120' y='48' width='2' height='2' fill='%23ebebeb' fill-opacity='.3'/><rect x='240' y='0' width='2' height='2' fill='%23ebebeb' fill-opacity='.22'/><rect x='192' y='24' width='2' height='2' fill='%23ebebeb' fill-opacity='.3'/><rect x='216' y='0' width='2' height='2' fill='%23ebebeb' fill-opacity='.4'/><rect x='72' y='0' width='2' height='2' fill='%23ebebeb' fill-opacity='.22'/><rect x='144' y='144' width='2' height='2' fill='%23ebebeb' fill-opacity='.22'/><rect x='72' y='24' width='2' height='2' fill='%23ebebeb' fill-opacity='.4'/></svg>");
 
     /* --- Velos ---
        El fondo de la página medio transparente: el degradado de la cabecera y

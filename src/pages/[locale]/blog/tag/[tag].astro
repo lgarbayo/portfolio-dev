@@ -1,6 +1,8 @@
 ---
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import PostList from "@/components/PostList.astro";
+import PageTrail from "@/components/PageTrail.astro";
+import PageLinks from "@/components/PageLinks.astro";
 import { getPublishedPosts } from "@/lib/content";
 import { locales, localizedPath, useTranslations, type Locale } from "@/i18n/index";
 
@@ -28,19 +30,32 @@ const { posts, tag } = Astro.props;
 const locale = Astro.params.locale as Locale;
 const t = useTranslations(locale);
 const title = t("blog.tag.title", { tag });
+const blogPath = localizedPath(locale, "blog");
+const total = (await getPublishedPosts(locale)).length;
 ---
 
 <BaseLayout locale={locale} title={`${title} — ${t("site.title")}`} description={title} showBlog>
     <div class="container tagpage">
+        <PageTrail
+            locale={locale}
+            back={{ label: t("blog.all"), href: blogPath }}
+            crumbs={[{ label: "blog", href: blogPath }, { label: "tag" }, { label: tag }]}
+        />
         <h1>{title}</h1>
         <PostList locale={locale} posts={posts} emptyMessage={t("blog.empty")} />
-        <a class="tagpage__back" href={localizedPath(locale, "blog")}>← {t("blog.backToIndex")}</a>
+        <PageLinks
+            locale={locale}
+            links={[
+                { href: blogPath, kicker: t("pageLinks.back"), title: t("blog.all"), meta: t("blog.count", { count: total }), direction: "back" },
+                { href: localizedPath(locale), kicker: t("pageLinks.more"), title: t("nav.home"), meta: "lgarbayo.com" },
+            ]}
+        />
     </div>
 </BaseLayout>
 
 <style>
     .tagpage {
-        padding-block: var(--space-8) var(--section-gap);
+        padding-block: calc(var(--header-height) + var(--space-4)) var(--section-gap);
     }
 
     .tagpage h1 {
@@ -48,12 +63,4 @@ const title = t("blog.tag.title", { tag });
         margin-block-end: var(--space-6);
     }
 
-    .tagpage__back {
-        display: inline-flex;
-        align-items: center;
-        min-block-size: var(--tap-target);
-        margin-block-start: var(--space-7);
-        font-family: var(--font-mono);
-        font-size: var(--text-sm);
-    }
 </style>

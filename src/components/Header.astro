@@ -27,21 +27,23 @@ const onBlog = Astro.url.pathname.includes("/blog");
 ---
 
 {/*
-  Cabecera: el avatar y el usuario a un lado; al otro, los idiomas, el QR y el
-  menú. El menú no ocupa la pantalla: es un desplegable como los de la barra de
+  Cabecera de pantalla: el nombre a un lado y, al otro, los idiomas, el QR, el
+  contacto y el menú, en la pixelada. Va fija y transparente por encima de todo,
+  como el marco de un monitor. El menú es un desplegable como los de la barra de
   menús de macOS, con la sección actual marcada y su atajo de teclado.
 */}
 <header class="header">
-    <a class="header__brand" href={anchor("hero")} aria-label="Luis Garbayo">
-        <img class="header__avatar" src="/assets/ui/avatar-pixel.png" alt="" width="28" height="28" />
-        <span>lgarbayo</span>
-    </a>
+    <a class="header__brand" href={anchor("hero")}>Luis Garbayo</a>
 
     <div class="header__actions">
         <div class="header__lang">
             <LanguageSelector locale={locale} counterpartPaths={counterpartPaths} />
         </div>
         <QrButton locale={locale} />
+        <a class="header__contact" href={anchor("contact")} data-track="nav_click" data-track-nav-target="contact">
+            {t("nav.contact")}
+            <span class="header__dot" aria-hidden="true"></span>
+        </a>
         <button
             class="header__toggle"
             type="button"
@@ -50,7 +52,7 @@ const onBlog = Astro.url.pathname.includes("/blog");
             data-menu-toggle
         >
             <span aria-hidden="true">{t("nav.menu")}</span>
-            <span class="header__chevron" aria-hidden="true">⌄</span>
+            <span class="header__bars" aria-hidden="true">≡</span>
             <span class="visually-hidden" data-menu-label-open={t("nav.menu.open")}
                 data-menu-label-close={t("nav.menu.close")}>{t("nav.menu.open")}</span>
         </button>
@@ -94,6 +96,10 @@ const onBlog = Astro.url.pathname.includes("/blog");
                 <span class="menu__label">{t("blog.all")}</span>
             </a>
         )}
+        <a class="menu__item" href="/links/" data-track="nav_click" data-track-nav-target="links">
+            <span class="menu__check" aria-hidden="true">✓</span>
+            <span class="menu__label">{t("qr.title")}</span>
+        </a>
         <button class="menu__item" type="button" data-open-game>
             <span class="menu__check" aria-hidden="true"></span>
             <span class="menu__label">{t("game.launcher.label")}</span>
@@ -129,7 +135,10 @@ const onBlog = Astro.url.pathname.includes("/blog");
         /* Un degradado y no un fondo: la cabecera no es una barra, es texto
            sobre la pantalla, pero tiene que leerse encima de una foto. */
         background: linear-gradient(to bottom, var(--color-scrim), transparent);
+        font-family: var(--font-pixel);
         font-size: var(--text-xs);
+        letter-spacing: var(--tracking-wide);
+        text-transform: uppercase;
         pointer-events: none;
     }
 
@@ -138,6 +147,7 @@ const onBlog = Astro.url.pathname.includes("/blog");
     }
 
     .header__brand,
+    .header__contact,
     .header__toggle {
         display: inline-flex;
         align-items: center;
@@ -148,55 +158,59 @@ const onBlog = Astro.url.pathname.includes("/blog");
     }
 
     .header__brand {
-        gap: var(--space-3);
-        font-family: var(--font-mono);
         font-size: var(--text-sm);
-        font-weight: var(--weight-medium);
-    }
-
-    .header__avatar {
-        inline-size: 28px;
-        block-size: 28px;
-        border-radius: 50%;
-        box-shadow: 0 0 0 0.5px var(--mac-border);
     }
 
     .header__actions {
         display: inline-flex;
         align-items: center;
-        gap: var(--space-2);
+        gap: var(--space-4);
     }
 
-    /* El botón del menú, como uno de la barra de menús: sin borde hasta que se
-       pasa por encima o está abierto. */
+    /* Los idiomas y el QR, en el mismo tono apagado que el contacto: son
+       herramientas, no navegación. */
+    .header__lang :global(.lang) {
+        font-family: var(--font-pixel);
+    }
+
+    .header__actions :global(.qr__trigger svg) {
+        inline-size: 16px;
+        block-size: 16px;
+    }
+
+    .header__contact {
+        color: var(--color-text-muted);
+    }
+
+    .header__contact:hover {
+        color: var(--color-accent-strong);
+    }
+
+    .header__dot {
+        inline-size: 6px;
+        block-size: 6px;
+        background: var(--color-live);
+        box-shadow: 0 0 8px var(--color-live);
+    }
+
     .header__toggle {
-        gap: var(--space-1);
-        padding: 0 var(--space-3);
+        padding: 0;
         background: none;
         border: 0;
-        border-radius: 6px;
-        font-family: var(--font-system);
-        font-size: 0.875rem;
-        font-weight: 500;
+        letter-spacing: inherit;
+        text-transform: inherit;
+        font: inherit;
         cursor: pointer;
-        transition: background-color var(--duration-fast) var(--ease-out);
     }
 
     .header__toggle:hover,
     .header__toggle[aria-expanded="true"] {
-        background: rgba(255, 255, 255, 0.1);
+        color: var(--color-accent-strong);
     }
 
-    .header__chevron {
-        font-size: 1.1em;
+    .header__bars {
+        font-size: 1.25em;
         line-height: 1;
-        translate: 0 -0.2em;
-        transition: rotate var(--duration-fast) var(--ease-out);
-    }
-
-    .header__toggle[aria-expanded="true"] .header__chevron {
-        rotate: 180deg;
-        translate: 0 0.15em;
     }
 
     /* --- El menú: un desplegable de macOS --- */
@@ -307,7 +321,8 @@ const onBlog = Astro.url.pathname.includes("/blog");
     }
 
     @media (max-width: 48rem) {
-        .header__lang {
+        .header__lang,
+        .header__contact {
             display: none;
         }
 

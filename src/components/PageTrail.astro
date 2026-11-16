@@ -1,0 +1,89 @@
+---
+import { localizedPath, useTranslations, type Locale } from "@/i18n/index";
+
+/**
+ * Lo primero de cada página que no es la portada: volver atrás y la ruta en la
+ * que se está, escrita como en el prompt de la barra de abajo (`~ / blog / …`).
+ * Cada tramo de la ruta lleva a su página, así que desde cualquier sitio se
+ * sube un nivel o se vuelve a casa de un clic.
+ */
+interface Crumb {
+    label: string;
+    /** Sin `href`, el tramo es sólo texto (la página actual o un nivel sin índice). */
+    href?: string;
+}
+
+interface Props {
+    locale: Locale;
+    back: { label: string; href: string };
+    /** Los tramos después de `~`, que siempre es la portada. */
+    crumbs: Crumb[];
+}
+
+const { locale, back, crumbs } = Astro.props;
+const t = useTranslations(locale);
+const path: Crumb[] = [{ label: "~", href: localizedPath(locale) }, ...crumbs];
+---
+
+<nav class="trail" aria-label={t("trail.label")}>
+    <a class="trail__back" href={back.href}>← {back.label}</a>
+    <ol class="trail__path" role="list">
+        {path.map((crumb, index) => {
+            const last = index === path.length - 1;
+            return (
+                <li>
+                    {crumb.href && !last ? (
+                        <a href={crumb.href}>{crumb.label}</a>
+                    ) : (
+                        <span aria-current={last ? "page" : undefined}>{crumb.label}</span>
+                    )}
+                </li>
+            );
+        })}
+    </ol>
+</nav>
+
+<style>
+    .trail {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--space-2) var(--space-5);
+        margin-block-end: var(--space-6);
+        padding-block-end: var(--space-3);
+        border-block-end: 0.5px solid var(--color-border);
+        font-family: var(--font-mono);
+        font-size: var(--text-xs);
+    }
+
+    .trail a {
+        color: var(--color-text-muted);
+        text-decoration: none;
+    }
+
+    .trail a:hover {
+        color: var(--color-accent-strong);
+    }
+
+    .trail__path {
+        display: flex;
+        flex-wrap: wrap;
+        min-inline-size: 0;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        color: var(--color-text-subtle);
+    }
+
+    .trail__path li + li::before {
+        content: "/";
+        margin-inline: 0.6ch;
+        color: var(--color-text-subtle);
+    }
+
+    .trail__path [aria-current] {
+        color: var(--color-text);
+        overflow-wrap: anywhere;
+    }
+</style>

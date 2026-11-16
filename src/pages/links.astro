@@ -2,6 +2,7 @@
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import { channels, isExternal } from "@/lib/channels";
 import { publicAssetExists } from "@/lib/assets";
+import { getPublishedPosts } from "@/lib/content";
 import { defaultLocale, locales, localizedPath, useTranslations } from "@/i18n/index";
 
 /*
@@ -20,6 +21,7 @@ import { defaultLocale, locales, localizedPath, useTranslations } from "@/i18n/i
  */
 const locale = defaultLocale;
 const t = useTranslations(locale);
+const posts = await getPublishedPosts(locale);
 
 // Retrato propio de esta página, no el de la sección Sobre mí: allí va una foto
 // y aquí un avatar, que aguanta mejor el recorte redondo y el tamaño pequeño.
@@ -110,6 +112,22 @@ const counterpartPaths = Object.fromEntries(
                             <span class="links__chevron" aria-hidden="true">›</span>
                         </a>
                     </li>
+                    {posts.length > 0 && (
+                        <li>
+                            <a
+                                class="links__link"
+                                href={localizedPath(locale, "blog")}
+                                data-track="channel_click"
+                                data-track-channel-name="Blog"
+                                data-track-channel-surface="links"
+                            >
+                                <span class="links__badge links__badge--blog" aria-hidden="true">✎</span>
+                                <span class="links__name">{t("nav.blog")}</span>
+                                <span class="links__count">{t("blog.count", { count: posts.length })}</span>
+                                <span class="links__chevron" aria-hidden="true">›</span>
+                            </a>
+                        </li>
+                    )}
                 </ul>
             </div>
         </div>
@@ -211,8 +229,17 @@ const counterpartPaths = Object.fromEntries(
         background: var(--mac-blue);
     }
 
+    .links__badge--blog {
+        background: #ff9f0a;
+    }
+
     .links__name {
         flex: 1;
+    }
+
+    .links__count {
+        font-size: 0.8125rem;
+        color: var(--color-text-subtle);
     }
 
     .links__chevron {

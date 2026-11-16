@@ -120,7 +120,7 @@
     "nav.menu": "Menu",
     "nav.menu.extras": "More",
     "hero.location": "Ourense, Galicia",
-    "hero.portraitAlt": "Colour ASCII-art portrait of Luis Garbayo, smiling, wearing a headset microphone",
+    "hero.portraitAlt": "Luis Garbayo smiling, wearing a headset microphone, with a hand raised to the ear",
     "overview.label": "Galicia → Madrid",
     "overview.lead": "Born in Ourense, Galicia. I build software and AI, with a soft spot for healthcare.",
     "overview.cv": "Full résumé",
@@ -142,5 +142,14 @@
     "contact.copied": "Copied",
     "contact.backToTop": "Scroll back",
     "contact.globeAlt": "Dotted globe with a route between Ourense, A Coruña and Madrid",
-    "hero.roleAt": "{role} at {organization}."
+    "hero.roleAt": "{role} at {organization}.",
+    "trail.label": "Page path",
+    "pageLinks.label": "Keep browsing",
+    "pageLinks.previous": "Previous",
+    "pageLinks.next": "Next",
+    "pageLinks.back": "Back",
+    "pageLinks.more": "More",
+    "blog.count": "{count} articles",
+    "links.count": "{count} channels",
+    "footer.nav": "Site map"
 }

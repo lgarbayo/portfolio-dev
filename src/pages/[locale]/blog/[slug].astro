@@ -2,6 +2,9 @@
 import { getCollection, render } from "astro:content";
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import ArticleSchema from "@/components/ArticleSchema.astro";
+import PageTrail from "@/components/PageTrail.astro";
+import PageLinks, { type PageLink } from "@/components/PageLinks.astro";
+import { getPublishedPosts } from "@/lib/content";
 import { readingMinutes } from "@/lib/reading-time";
 import { localeTags, localizedPath, otherLocales, useTranslations, type Locale } from "@/i18n/index";
 
@@ -57,6 +60,34 @@ const formatter = new Intl.DateTimeFormat(localeTags[locale], {
     month: "long",
     year: "numeric",
 });
+
+/*
+ * Al final, el artículo anterior y el siguiente de este idioma, como en
+ * cualquier blog: quien ha llegado al final de uno es quien más probablemente
+ * lea otro. En los extremos de la lista, el hueco lo ocupan el índice del blog
+ * o la portada.
+ */
+const blogPath = localizedPath(locale, "blog");
+const list = await getPublishedPosts(locale);
+const position = list.findIndex((entry) => entry.data.slug === post.data.slug);
+const older = position >= 0 ? list[position + 1] : undefined;
+const newer = position > 0 ? list[position - 1] : undefined;
+const postLink = (entry: (typeof list)[number], kicker: string, direction: "back" | "forward"): PageLink => ({
+    href: localizedPath(entry.data.locale, `blog/${entry.data.slug}`),
+    kicker,
+    title: entry.data.title,
+    meta: formatter.format(entry.data.pubDate),
+    direction,
+    lang: entry.data.locale,
+});
+const nextLinks: PageLink[] = [
+    older
+        ? postLink(older, t("pageLinks.previous"), "back")
+        : { href: blogPath, kicker: t("pageLinks.back"), title: t("blog.all"), meta: t("blog.count", { count: list.length }), direction: "back" },
+    newer
+        ? postLink(newer, t("pageLinks.next"), "forward")
+        : { href: localizedPath(locale), kicker: t("pageLinks.more"), title: t("nav.home"), meta: "lgarbayo.com" },
+];
 ---
 
 <BaseLayout
@@ -83,6 +114,11 @@ const formatter = new Intl.DateTimeFormat(localeTags[locale], {
     />
 
     <article class="container post">
+        <PageTrail
+            locale={locale}
+            back={{ label: t("blog.all"), href: blogPath }}
+            crumbs={[{ label: "blog", href: blogPath }, { label: post.data.slug }]}
+        />
         <header class="post__head">
             <p class="post__meta">
                 <time datetime={post.data.pubDate.toISOString()}>
@@ -130,13 +166,13 @@ const formatter = new Intl.DateTimeFormat(localeTags[locale], {
             <Content />
         </div>
 
-        <a class="post__back" href={localizedPath(locale, "blog")}>← {t("blog.backToIndex")}</a>
+        <PageLinks locale={locale} links={nextLinks} />
     </article>
 </BaseLayout>
 
 <style>
     .post {
-        padding-block: var(--space-8) var(--section-gap);
+        padding-block: calc(var(--header-height) + var(--space-4)) var(--section-gap);
     }
 
     .post__head {
@@ -234,12 +270,4 @@ const formatter = new Intl.DateTimeFormat(localeTags[locale], {
         color: var(--color-text-subtle);
     }
 
-    .post__back {
-        display: inline-flex;
-        align-items: center;
-        min-block-size: var(--tap-target);
-        margin-block-start: var(--space-7);
-        font-family: var(--font-mono);
-        font-size: var(--text-sm);
-    }
 </style>

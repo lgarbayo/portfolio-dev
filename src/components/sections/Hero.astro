@@ -32,7 +32,10 @@ const lines = [
 ].filter((line): line is string => Boolean(line));
 
 const PROMPT = "luis@garbayo ~ %";
-const STILL = "/assets/ui/hero-portrait.webp";
+// Tamaño de `portrait.webp`: lo escribe `scripts/portrait/make_portrait.py`.
+import portraitMeta from "../../../public/assets/ui/portrait.json";
+const PORTRAIT_WIDTH = portraitMeta.width;
+const PORTRAIT_HEIGHT = portraitMeta.height;
 ---
 
 <section class="hero" id="hero" aria-labelledby="hero-title">
@@ -90,23 +93,31 @@ const STILL = "/assets/ui/hero-portrait.webp";
     </script>
 
     {/*
-      El retrato, en ASCII a color (`hero-portrait.ts`). Sin JS, la misma imagen
-      ya dibujada.
+      El retrato: la foto recortada a color. Encima la anima un shader
+      (`hero-portrait.ts`); sin JS, sin WebGL o con movimiento reducido se queda
+      esta misma foto, fija.
     */}
-    <div
-        class="hero__portrait"
-        data-hero-portrait
-        data-ascii="/assets/ui/portrait-ascii.json"
-        data-colors="/assets/ui/portrait-ascii.png"
-        data-still={STILL}
-        data-alt={t("hero.portraitAlt")}
-        role="img"
-        aria-label={t("hero.portraitAlt")}
-    >
-        <noscript>
-            <img class="hero__portrait-still" src={STILL} alt={t("hero.portraitAlt")} width="1100" height="1296" />
-        </noscript>
+    <div class="hero__portrait" data-hero-portrait>
+        <img
+            class="hero__portrait-still"
+            src="/assets/ui/portrait.webp"
+            alt={t("hero.portraitAlt")}
+            width={PORTRAIT_WIDTH}
+            height={PORTRAIT_HEIGHT}
+            fetchpriority="high"
+            decoding="async"
+        />
     </div>
+    {/* Si va a haber escena, la foto fija se esconde hasta que la escena entra:
+        si no, se vería nítida, luego en mosaico y luego nítida otra vez. */}
+    <script is:inline>
+        (function () {
+            try {
+                if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+                document.querySelector("[data-hero-portrait]").setAttribute("data-pending", "");
+            } catch (e) {}
+        })();
+    </script>
 </section>
 
 <script>
@@ -155,7 +166,7 @@ const STILL = "/assets/ui/hero-portrait.webp";
     }
 
     .term__prompt {
-        color: var(--mac-green);
+        color: var(--color-live);
     }
 
     .term__line {
@@ -226,20 +237,45 @@ const STILL = "/assets/ui/hero-portrait.webp";
         align-self: stretch;
         display: flex;
         justify-content: center;
-        align-items: center;
+        align-items: flex-end;
         min-block-size: 0;
     }
 
-    .hero__portrait :global(canvas) {
-        display: block;
-        max-inline-size: 100%;
+    /* La foto se funde con el fondo por abajo: el recorte acaba en la camiseta
+       y un corte recto quedaría pegado. */
+    .hero__portrait-still,
+    .hero__portrait :global(.hero__portrait-canvas) {
+        mask-image: linear-gradient(to top, transparent, #000 16%);
     }
 
-    .hero__portrait :global(.hero__portrait-still) {
+    .hero__portrait-still {
         max-block-size: 100%;
         inline-size: auto;
         max-inline-size: 100%;
         object-fit: contain;
+        transition: opacity var(--duration-fast) var(--ease-out);
+    }
+
+    .hero__portrait :global(.hero__portrait-canvas) {
+        position: absolute;
+        pointer-events: none;
+    }
+
+    /* Mientras llega la escena, la foto no se ve; si no llega, aparece sola. */
+    .hero__portrait[data-pending] .hero__portrait-still {
+        opacity: 0;
+        animation: portrait-fallback 0s 2.5s forwards;
+    }
+
+    .hero__portrait[data-live] .hero__portrait-still {
+        opacity: 0;
+        animation: none;
+    }
+
+    @keyframes portrait-fallback {
+        to {
+            opacity: 1;
+        }
     }
 
     /* En estrecho: la terminal arriba y el retrato debajo. */

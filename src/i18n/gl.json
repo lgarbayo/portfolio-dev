@@ -120,7 +120,7 @@
     "nav.menu": "Menú",
     "nav.menu.extras": "Máis",
     "hero.location": "Ourense, Galicia",
-    "hero.portraitAlt": "Retrato de Luis Garbayo en arte ASCII a cor, sorrindo, cun micrófono de diadema",
+    "hero.portraitAlt": "Luis Garbayo sorrindo, cun micrófono de diadema e unha man xunto á orella",
     "overview.label": "Galicia → Madrid",
     "overview.lead": "Nado en Ourense, Galicia. Constrúo software e IA, con debilidade pola saúde.",
     "overview.cv": "Currículo completo",
@@ -142,5 +142,14 @@
     "contact.copied": "Copiado",
     "contact.backToTop": "Volver arriba",
     "contact.globeAlt": "Globo de puntos cunha ruta entre Ourense, A Coruña e Madrid",
-    "hero.roleAt": "{role} en {organization}."
+    "hero.roleAt": "{role} en {organization}.",
+    "trail.label": "Ruta da páxina",
+    "pageLinks.label": "Seguir navegando",
+    "pageLinks.previous": "Anterior",
+    "pageLinks.next": "Seguinte",
+    "pageLinks.back": "Volver",
+    "pageLinks.more": "Máis",
+    "blog.count": "{count} artigos",
+    "links.count": "{count} canles",
+    "footer.nav": "Mapa do sitio"
 }

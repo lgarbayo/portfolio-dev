@@ -1,0 +1,87 @@
+---
+import { useTranslations, type Locale } from "@/i18n/index";
+
+/**
+ * Lo último de cada página que no es la portada: adónde ir después. Dos o tres
+ * tarjetas —el artículo anterior y el siguiente, el blog, la portada, los
+ * enlaces— para que ninguna página sea un callejón sin salida.
+ */
+export interface PageLink {
+    href: string;
+    /** Línea pequeña de arriba: «Anterior», «Volver», «Siguiente»… */
+    kicker: string;
+    title: string;
+    /** Debajo del título: una fecha, cuántos artículos hay, el dominio… */
+    meta?: string;
+    /** Hacia atrás la flecha va a la izquierda; hacia delante, a la derecha. */
+    direction?: "back" | "forward";
+    lang?: string;
+}
+
+interface Props {
+    locale: Locale;
+    links: PageLink[];
+}
+
+const { locale, links } = Astro.props;
+const t = useTranslations(locale);
+---
+
+<nav class="pagelinks" aria-label={t("pageLinks.label")}>
+    {links.map((link) => (
+        <a class="pagelinks__card" href={link.href} data-direction={link.direction ?? "forward"}>
+            <span class="pagelinks__kicker label">
+                {link.direction === "back" ? `← ${link.kicker}` : `${link.kicker} →`}
+            </span>
+            <span class="pagelinks__title" lang={link.lang}>{link.title}</span>
+            {link.meta && <span class="pagelinks__meta">{link.meta}</span>}
+        </a>
+    ))}
+</nav>
+
+<style>
+    .pagelinks {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
+        gap: var(--space-3);
+        margin-block-start: var(--space-8);
+        padding-block-start: var(--space-5);
+        border-block-start: 0.5px solid var(--color-border);
+    }
+
+    .pagelinks__card {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-1);
+        padding: var(--space-4);
+        background: rgba(255, 255, 255, 0.04);
+        border: 0.5px solid var(--mac-border);
+        border-radius: 10px;
+        color: var(--color-text);
+        text-decoration: none;
+        transition:
+            background-color var(--duration-fast) var(--ease-out),
+            border-color var(--duration-fast) var(--ease-out);
+    }
+
+    .pagelinks__card[data-direction="forward"] {
+        text-align: end;
+    }
+
+    .pagelinks__card:hover,
+    .pagelinks__card:focus-visible {
+        background: rgba(255, 255, 255, 0.08);
+        border-color: var(--color-border-strong);
+    }
+
+    .pagelinks__title {
+        font-size: var(--text-sm);
+        line-height: var(--leading-tight);
+        text-wrap: balance;
+    }
+
+    .pagelinks__meta {
+        font-size: var(--text-xs);
+        color: var(--color-text-subtle);
+    }
+</style>

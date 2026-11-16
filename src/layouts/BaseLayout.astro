@@ -9,7 +9,7 @@ import Analytics from "@/components/Analytics.astro";
 import ConsentBanner from "@/components/ConsentBanner.astro";
 import CursorGlow from "@/components/CursorGlow.astro";
 import { ClientRouter } from "astro:transitions";
-import { locales, useTranslations, type Locale } from "@/i18n/index";
+import { useTranslations, type Locale } from "@/i18n/index";
 import "@/styles/global.css";
 
 interface Props {
@@ -40,15 +40,13 @@ const {
 } = Astro.props;
 
 const t = useTranslations(locale);
-// La barra de abajo dice dónde se está como lo diría una terminal: la ruta sin
-// el idioma delante, colgando de `~`. En la home la va cambiando el scroll.
-const pagePath = onHome
+// Fuera de la home la barra de abajo no tiene secciones que contar: dice dónde
+// se está en su lugar.
+const pageLabel = onHome
     ? undefined
-    : "~/" +
-      Astro.url.pathname
-          .split("/")
-          .filter((part, index) => part && !(index === 1 && (locales as readonly string[]).includes(part)))
-          .join("/");
+    : Astro.url.pathname.includes("/blog")
+      ? t("nav.blog")
+      : title;
 ---
 
 <!doctype html>
@@ -82,7 +80,7 @@ const pagePath = onHome
         </main>
 
         <Footer locale={locale} />
-        <Hud locale={locale} path={pagePath} />
+        <Hud locale={locale} pageLabel={pageLabel} />
 
         <GameOverlay locale={locale} />
         <PageTransition />
@@ -102,6 +100,7 @@ const pagePath = onHome
             import { initAnalytics, destroyAnalytics } from "@/lib/analytics";
             import { initConsentBanner } from "@/lib/consent";
             import { initSheets } from "@/lib/sheets";
+            import { initSectionFx, destroySectionFx } from "@/lib/section-fx";
 
             /*
              * En la primera carga esto corría dos veces: una al evaluarse el
@@ -122,6 +121,7 @@ const pagePath = onHome
                 initLocaleLinks();
                 void initPageTransition();
                 initSectionTransition();
+                initSectionFx();
                 initPostMotion();
                 initSheets();
                 // Al final del arranque: la vista de página se manda con el
@@ -138,6 +138,7 @@ const pagePath = onHome
                 booted = false;
                 destroyReveal();
                 destroyPostMotion();
+                destroySectionFx();
                 destroyAnalytics();
             });
         </script>

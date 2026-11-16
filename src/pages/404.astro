@@ -16,7 +16,7 @@ const t = useTranslations(locale);
 const posts = await getPublishedPosts(locale);
 ---
 
-<BaseLayout locale={locale} title={t("notFound.title")} description={t("notFound.description")}>
+<BaseLayout locale={locale} title={t("notFound.title")} description={t("notFound.description")} showBlog={posts.length > 0}>
     {/* La marca que hace que la analítica pueda separar esta página del
         resto: se sirve bajo cualquier URL rota, así que su ruta no dice
         nada. Con el grupo aparte, el informe de páginas de la 404 es la

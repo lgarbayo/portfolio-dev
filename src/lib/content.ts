@@ -78,17 +78,34 @@ export async function getLocalizedEntry<C extends CollectionKey>(
     return entries[0];
 }
 
+/**
+ * Cabeza de la sección de proyectos, colocada a mano. Lo que no está aquí va
+ * detrás, ordenado por destacado, año y slug. Antes esto era un intercambio
+ * suelto entre Taiafox y MeigaSearch; con cada hackathon nuevo el orden
+ * alfabético barajaba la cabeza, así que mejor decirlo una vez y entero.
+ */
+const PROJECT_ORDER = [
+    "agentic-smart-health",
+    "mecena",
+    "payperphase",
+    "taiafox",
+    "pepon-bot",
+    "seed-algorithm",
+    "meigasearch",
+];
+
 /** Selección y orden de proyectos compartidos por la web y Game Mode. */
 export async function getPortfolioProjects(locale: Locale) {
+    const rank = (slug: string) => {
+        const index = PROJECT_ORDER.indexOf(slug);
+        return index === -1 ? PROJECT_ORDER.length : index;
+    };
     const projects = (await getLocalizedEntries("projects", locale)).sort((a, b) => {
+        const byRank = rank(a.data.slug) - rank(b.data.slug);
+        if (byRank !== 0) return byRank;
         if (a.data.featured !== b.data.featured) return a.data.featured ? -1 : 1;
         return (b.data.year ?? 0) - (a.data.year ?? 0) || a.data.slug.localeCompare(b.data.slug);
     });
-    const taiafox = projects.findIndex((project) => project.data.slug === "taiafox");
-    const meigasearch = projects.findIndex((project) => project.data.slug === "meigasearch");
-    if (taiafox >= 0 && meigasearch >= 0) {
-        [projects[taiafox], projects[meigasearch]] = [projects[meigasearch], projects[taiafox]];
-    }
     return projects.filter((project) => !project.data.slug.endsWith("-api"));
 }
 

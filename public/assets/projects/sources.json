@@ -58,5 +58,13 @@
     "asset": "/assets/experience/dataspartan-project-manager.webp",
     "source": "https://github.com/lgarbayo/awesome-project-manager-app-web",
     "kind": "application-screenshot"
+  },
+  "payperphase": {
+    "source": "https://github.com/lgarbayo/payperphase/blob/HEAD/docs/submission/screens/patient-plan.png",
+    "kind": "application-screenshot"
+  },
+  "mecena": {
+    "source": "https://github.com/lgarbayo/mecena/blob/HEAD/docs/images/mecena-mobile.png",
+    "kind": "application-screenshot"
   }
 }

@@ -3,8 +3,8 @@
  * tocar ni un componente — si algún componente necesita un literal, es que
  * falta un token.
  *
- * La web es oscura, sin tema claro: negro de terminal de fondo, una rejilla
- * tenue encima y blancos rotos para el texto. Va en escala de grises —los
+ * La web es oscura, sin tema claro: negro puro y plano de fondo —toda la web,
+ * la página de enlaces incluida— y blancos rotos para el texto. Va en escala de grises —los
  * canales R, G y B valen lo mismo en cada tono—, porque un gris con una pizca
  * de azul deja de leerse como neutro al lado de uno que no la tiene. El color
  * lo ponen las fotos de las ciudades y nada más; la única excepción es
@@ -27,7 +27,7 @@
        Negro de terminal, no gris pizarra: la web es oscura y punto, y el fondo
        es casi negro para que la rejilla, los vóxeles del retrato y las fotos de
        las ciudades sean lo único que tenga luz. */
-    --color-bg: #050505;
+    --color-bg: #000000;
     --color-surface: #0e0e0e;
     --color-surface-raised: #161616;
     --color-border: rgba(235, 235, 235, 0.12);
@@ -51,9 +51,12 @@
     /* El único color que no es gris: el punto de «en curso» y el de contacto. */
     --color-live: #3ddc84;
 
-    /* --- Rejilla de fondo --- */
-    --grid-size: 72px;
-    --grid-line: rgba(235, 235, 235, 0.05);
+
+    /* --- Velos ---
+       El fondo de la página medio transparente: el degradado de la cabecera y
+       de la barra de abajo, y el menú a pantalla completa. */
+    --color-scrim: rgba(0, 0, 0, 0.85);
+    --color-scrim-strong: rgba(0, 0, 0, 0.94);
 
     /* --- Color: acentos secundarios (heredados de los mundos del juego) --- */
     --color-world-about: #cfcfcf;
@@ -70,6 +73,26 @@
        misma familia de los sprites del modo juego: la web y el juego hablan con
        la misma letra. */
     --font-pixel: "Departure Mono", "JetBrains Mono", ui-monospace, monospace;
+    /* La del sistema, para el cromo de las ventanas: en un Mac sale San
+       Francisco, que es justo lo que tiene que parecer. */
+    --font-system: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", "Inter",
+        system-ui, sans-serif;
+
+    /* --- Ventanas de macOS ---
+       El semáforo con sus colores de verdad y el cristal oscuro de las ventanas
+       en modo oscuro: translúcido, con desenfoque y un filo de luz arriba. Es
+       el único sitio, junto a `--color-live`, donde la web tiene color. */
+    --mac-red: #ff5f57;
+    --mac-yellow: #febc2e;
+    --mac-green: #28c840;
+    --mac-blue: #0a84ff;
+    --mac-window: rgba(28, 28, 30, 0.78);
+    --mac-titlebar: rgba(44, 44, 46, 0.72);
+    --mac-border: rgba(255, 255, 255, 0.12);
+    --mac-highlight: inset 0 0.5px 0 rgba(255, 255, 255, 0.18);
+    --mac-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.9), 0 22px 70px rgba(0, 0, 0, 0.65);
+    --mac-radius: 12px;
+    --mac-blur: blur(28px) saturate(170%);
 
     /* Escala fluida: cada paso interpola entre móvil y escritorio, así que no
        hacen falta breakpoints tipográficos. */

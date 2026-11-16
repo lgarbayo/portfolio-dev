@@ -52,12 +52,6 @@ const GITHUB_ICON = "/assets/ui/github-mark-white.svg";
         /* Por debajo va la barra fija del contador: se le deja su hueco. */
         padding-block: var(--space-5) calc(var(--hud-height) + var(--space-4));
         font-size: var(--text-xs);
-        /* Punto de anclaje propio: sin él, con el anclaje obligatorio activo, el
-           pie queda pegado al final de la última sección y cuesta llegar. */
-        scroll-snap-align: start;
-        /* Hueco para que el launcher del juego, anclado abajo a la derecha, no
-           se coma ningún enlace del pie. */
-        padding-inline-end: 0;
     }
 
     .footer__inner {
@@ -99,12 +93,6 @@ const GITHUB_ICON = "/assets/ui/github-mark-white.svg";
         font-family: var(--font-mono);
     }
 
-    @media (min-width: 48.001rem) {
-        .footer {
-            padding-block-end: var(--space-8);
-        }
-    }
-
     @media (max-width: 48rem) {
         .footer__inner {
             flex-direction: column;
@@ -113,18 +101,6 @@ const GITHUB_ICON = "/assets/ui/github-mark-white.svg";
 
         .footer__meta {
             text-align: start;
-        }
-
-        /* En móvil medio el launcher sigue fijo en la esquina inferior derecha:
-           se reserva sitio para que no solape el último enlace. */
-        .footer {
-            padding-block-end: var(--space-9);
-        }
-    }
-
-    @media (max-width: 36rem) {
-        .footer {
-            padding-block-end: var(--space-6);
         }
     }
 </style>

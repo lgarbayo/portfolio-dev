@@ -40,8 +40,12 @@ const LINKS = "/links/";
             </button>
 
             <dialog class="qr__dialog" data-qr-dialog aria-label={t("qr.title")}>
+                <div class="qr__window mac-window">
+                    <div class="mac-titlebar">
+                        <span class="mac-lights" aria-hidden="true"><i></i><i></i><i></i></span>
+                        <span class="mac-title">{t("qr.title")}</span>
+                    </div>
                 <div class="qr__panel">
-                    <p class="qr__title">{t("qr.title")}</p>
                     {/* Sin `lazy`: dentro de un diálogo cerrado el navegador
                         podría no llegar a pedirlo nunca, y entonces el hueco
                         aparece justo cuando alguien ya está apuntando con la
@@ -53,6 +57,7 @@ const LINKS = "/links/";
                     <button class="qr__close" type="button" data-qr-close>
                         {t("qr.close")}
                     </button>
+                </div>
                 </div>
             </dialog>
         </>
@@ -100,8 +105,13 @@ const LINKS = "/links/";
     }
 
     .qr__dialog::backdrop {
-        background: rgba(38, 38, 38, 0.42);
+        background: rgba(0, 0, 0, 0.6);
         backdrop-filter: blur(4px);
+    }
+
+    .qr__window {
+        min-inline-size: 18rem;
+        background: rgba(28, 28, 30, 0.92);
     }
 
     .qr__panel {
@@ -110,18 +120,6 @@ const LINKS = "/links/";
         align-items: center;
         gap: var(--space-4);
         padding: var(--space-6);
-        background: var(--color-surface);
-        border: 1px solid var(--color-border);
-        border-radius: var(--radius-md);
-        box-shadow: var(--shadow-lg);
-    }
-
-    .qr__title {
-        font-family: var(--font-mono);
-        font-size: var(--text-sm);
-        letter-spacing: var(--tracking-wide);
-        text-transform: uppercase;
-        color: var(--color-text-subtle);
     }
 
     /* Blanco y con aire alrededor aunque el sitio sea oscuro: bastantes
@@ -142,20 +140,21 @@ const LINKS = "/links/";
     .qr__close {
         min-block-size: var(--tap-target);
         padding-inline: var(--space-5);
-        background: none;
-        border: 1px solid var(--color-border-strong);
-        border-radius: var(--radius-full);
+        border: 0;
+        border-radius: 6px;
+        background: rgba(255, 255, 255, 0.12);
         color: var(--color-text);
-        font-size: var(--text-sm);
+        font-family: var(--font-system);
+        font-size: 0.875rem;
         cursor: pointer;
         transition:
-            border-color var(--duration-fast) var(--ease-out),
+            background-color var(--duration-fast) var(--ease-out),
             color var(--duration-fast) var(--ease-out);
     }
 
     .qr__close:hover,
     .qr__close:focus-visible {
-        border-color: var(--color-accent);
-        color: var(--color-accent);
+        background: var(--mac-blue);
+        color: #fff;
     }
 </style>

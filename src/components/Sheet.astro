@@ -2,7 +2,8 @@
 import { useTranslations, type Locale } from "@/i18n/index";
 
 /**
- * Ficha de detalle: un `<dialog>` nativo con cabecera y botón de cerrar.
+ * Ficha de detalle: un `<dialog>` nativo con forma de ventana de macOS. El
+ * botón rojo del semáforo cierra, como en una ventana de verdad; Escape también.
  *
  * Los paneles de la home enseñan una línea por entrada; el detalle —tareas,
  * fotos, enlaces— vive aquí. El `<dialog>` modal da gratis lo difícil: el foco
@@ -22,15 +23,20 @@ const t = useTranslations(locale);
 ---
 
 <dialog class="sheet" id={id} aria-labelledby={`${id}-title`}>
-    <div class="sheet__frame">
+    <div class="sheet__frame mac-window">
+        <div class="mac-titlebar">
+            <span class="mac-lights">
+                <button class="sheet__close" type="button" data-sheet-close aria-label={`${t("overview.close")} (Esc)`}>
+                    <span aria-hidden="true">×</span>
+                </button>
+                <i aria-hidden="true"></i>
+                <i aria-hidden="true"></i>
+            </span>
+            <span class="mac-title" aria-hidden="true">{title}</span>
+        </div>
         <header class="sheet__head">
-            <div>
-                {kicker && <p class="label">{kicker}</p>}
-                <h3 class="sheet__title" id={`${id}-title`}>{title}</h3>
-            </div>
-            <button class="sheet__close label" type="button" data-sheet-close>
-                {t("overview.close")} · Esc
-            </button>
+            {kicker && <p class="label">{kicker}</p>}
+            <h3 class="sheet__title" id={`${id}-title`}>{title}</h3>
         </header>
         <div class="sheet__body">
             <slot />
@@ -47,9 +53,10 @@ const t = useTranslations(locale);
         max-block-size: min(100% - 4rem, 52rem);
         padding: 0;
         color: var(--color-text);
-        background: var(--color-surface);
-        border: 1px solid var(--color-border-strong);
-        box-shadow: var(--shadow-lg);
+        /* El marco lo pone la ventana de dentro: el `<dialog>` es transparente. */
+        background: none;
+        border: 0;
+        overflow: visible;
     }
 
     .sheet::backdrop {
@@ -64,23 +71,18 @@ const t = useTranslations(locale);
     @keyframes sheet-in {
         from {
             opacity: 0;
-            translate: 0 0.75rem;
+            scale: 0.96;
         }
     }
 
     .sheet__frame {
-        display: flex;
-        flex-direction: column;
-        max-block-size: inherit;
+        max-block-size: min(100svh - 4rem, 52rem);
+        background: rgba(28, 28, 30, 0.92);
     }
 
     .sheet__head {
-        display: flex;
-        align-items: flex-start;
-        justify-content: space-between;
-        gap: var(--space-4);
-        padding: var(--space-5);
-        border-block-end: 1px solid var(--color-border);
+        padding: var(--space-5) var(--space-5) var(--space-4);
+        border-block-end: 0.5px solid var(--color-border);
     }
 
     .sheet__title {
@@ -92,19 +94,37 @@ const t = useTranslations(locale);
         letter-spacing: var(--tracking-wide);
     }
 
+    /* El rojo del semáforo. La × sólo aparece al pasar por encima, como en
+       macOS; el área táctil es más grande que el punto. */
     .sheet__close {
-        flex: none;
-        padding: var(--space-2) 0;
-        background: none;
-        border: 0;
+        position: relative;
+        display: grid;
+        place-items: center;
         cursor: pointer;
     }
 
-    .sheet__close:hover {
-        color: var(--color-accent-strong);
+    .sheet__close::before {
+        content: "";
+        position: absolute;
+        inset: -10px;
+    }
+
+    .sheet__close span {
+        font-family: var(--font-system);
+        font-size: 11px;
+        font-weight: 700;
+        line-height: 1;
+        color: rgba(0, 0, 0, 0.6);
+        opacity: 0;
+    }
+
+    .sheet__close:hover span,
+    .sheet__close:focus-visible span {
+        opacity: 1;
     }
 
     .sheet__body {
+        min-block-size: 0;
         display: flex;
         flex-direction: column;
         gap: var(--space-4);

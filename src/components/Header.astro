@@ -27,18 +27,21 @@ const onBlog = Astro.url.pathname.includes("/blog");
 ---
 
 {/*
-  Cabecera de pantalla: el nombre a un lado, y al otro el contacto y el menú.
-  Va fija y transparente por encima de todo, como el marco de un monitor: la
-  navegación ya no vive en la barra sino en el menú a pantalla completa.
+  Cabecera: el avatar y el usuario a un lado; al otro, los idiomas, el QR y el
+  menú. El menú no ocupa la pantalla: es un desplegable como los de la barra de
+  menús de macOS, con la sección actual marcada y su atajo de teclado.
 */}
 <header class="header">
-    <a class="header__brand" href={anchor("hero")}>Luis Garbayo</a>
+    <a class="header__brand" href={anchor("hero")} aria-label="Luis Garbayo">
+        <img class="header__avatar" src="/assets/ui/avatar-pixel.png" alt="" width="28" height="28" />
+        <span>lgarbayo</span>
+    </a>
 
     <div class="header__actions">
-        <a class="header__contact" href={anchor("contact")} data-track="nav_click" data-track-nav-target="contact">
-            {t("nav.contact")}
-            <span class="header__dot" aria-hidden="true"></span>
-        </a>
+        <div class="header__lang">
+            <LanguageSelector locale={locale} counterpartPaths={counterpartPaths} />
+        </div>
+        <QrButton locale={locale} />
         <button
             class="header__toggle"
             type="button"
@@ -47,7 +50,7 @@ const onBlog = Astro.url.pathname.includes("/blog");
             data-menu-toggle
         >
             <span aria-hidden="true">{t("nav.menu")}</span>
-            <span class="header__bars" aria-hidden="true">≡</span>
+            <span class="header__chevron" aria-hidden="true">⌄</span>
             <span class="visually-hidden" data-menu-label-open={t("nav.menu.open")}
                 data-menu-label-close={t("nav.menu.close")}>{t("nav.menu.open")}</span>
         </button>
@@ -56,40 +59,51 @@ const onBlog = Astro.url.pathname.includes("/blog");
 
 <nav class="menu" id="primary-nav" aria-label={t("nav.primary")} data-menu>
     <ol class="menu__list" role="list">
-        {sections.map((section) => (
+        {sections.map((section, index) => (
             <li>
                 <a
-                    class="menu__link"
+                    class="menu__item"
                     href={anchor(section.id)}
                     data-nav-section={section.id}
                     data-nav-label={section.label}
                     data-track="nav_click"
                     data-track-nav-target={section.id}
                 >
-                    <span class="menu__number">{section.number}</span>
+                    <span class="menu__check" aria-hidden="true">✓</span>
                     <span class="menu__label">{section.label}</span>
+                    {/* Los números del teclado ya saltan a cada sección
+                        (`lib/shortcuts.ts`): el menú lo dice, como en macOS. */}
+                    <kbd class="menu__key" aria-hidden="true">{index + 1}</kbd>
                 </a>
             </li>
         ))}
     </ol>
 
-    <div class="menu__extras">
-        <p class="label">{t("nav.menu.extras")}</p>
-        <div class="menu__row">
-            {showBlog && (
-                <a
-                    class="menu__extra"
-                    href={localizedPath(locale, "blog")}
-                    data-track="nav_click"
-                    data-track-nav-target="blog-index"
-                    {...onBlog ? { "aria-current": "page" } : {}}
-                >
-                    &gt; {t("blog.all")}
-                </a>
-            )}
-            <button class="menu__extra" type="button" data-open-game>&gt; {t("game.launcher.label")}</button>
-            <QrButton locale={locale} />
-        </div>
+    <hr class="menu__sep" />
+
+    <div class="menu__list">
+        {showBlog && (
+            <a
+                class="menu__item"
+                href={localizedPath(locale, "blog")}
+                data-track="nav_click"
+                data-track-nav-target="blog-index"
+                {...onBlog ? { "aria-current": "page" } : {}}
+            >
+                <span class="menu__check" aria-hidden="true">✓</span>
+                <span class="menu__label">{t("blog.all")}</span>
+            </a>
+        )}
+        <button class="menu__item" type="button" data-open-game>
+            <span class="menu__check" aria-hidden="true"></span>
+            <span class="menu__label">{t("game.launcher.label")}</span>
+            <kbd class="menu__key" aria-hidden="true">G</kbd>
+        </button>
+    </div>
+
+    {/* En el móvil los idiomas no caben en la cabecera: bajan aquí. */}
+    <div class="menu__lang">
+        <hr class="menu__sep" />
         <LanguageSelector locale={locale} counterpartPaths={counterpartPaths} />
     </div>
 </nav>
@@ -114,11 +128,8 @@ const onBlog = Astro.url.pathname.includes("/blog");
         padding-inline: var(--gutter);
         /* Un degradado y no un fondo: la cabecera no es una barra, es texto
            sobre la pantalla, pero tiene que leerse encima de una foto. */
-        background: linear-gradient(to bottom, rgba(5, 5, 5, 0.85), transparent);
-        font-family: var(--font-pixel);
+        background: linear-gradient(to bottom, var(--color-scrim), transparent);
         font-size: var(--text-xs);
-        letter-spacing: var(--tracking-wide);
-        text-transform: uppercase;
         pointer-events: none;
     }
 
@@ -127,7 +138,6 @@ const onBlog = Astro.url.pathname.includes("/blog");
     }
 
     .header__brand,
-    .header__contact,
     .header__toggle {
         display: inline-flex;
         align-items: center;
@@ -138,159 +148,181 @@ const onBlog = Astro.url.pathname.includes("/blog");
     }
 
     .header__brand {
+        gap: var(--space-3);
+        font-family: var(--font-mono);
         font-size: var(--text-sm);
+        font-weight: var(--weight-medium);
+    }
+
+    .header__avatar {
+        inline-size: 28px;
+        block-size: 28px;
+        border-radius: 50%;
+        box-shadow: 0 0 0 0.5px var(--mac-border);
     }
 
     .header__actions {
         display: inline-flex;
         align-items: center;
-        gap: var(--space-5);
+        gap: var(--space-2);
     }
 
-    .header__contact {
-        color: var(--color-text-muted);
-    }
-
-    .header__contact:hover {
-        color: var(--color-accent-strong);
-    }
-
-    .header__dot {
-        inline-size: 6px;
-        block-size: 6px;
-        background: var(--color-live);
-        box-shadow: 0 0 8px var(--color-live);
-    }
-
+    /* El botón del menú, como uno de la barra de menús: sin borde hasta que se
+       pasa por encima o está abierto. */
     .header__toggle {
-        padding: 0;
+        gap: var(--space-1);
+        padding: 0 var(--space-3);
         background: none;
         border: 0;
-        letter-spacing: inherit;
-        text-transform: inherit;
-        font: inherit;
+        border-radius: 6px;
+        font-family: var(--font-system);
+        font-size: 0.875rem;
+        font-weight: 500;
         cursor: pointer;
+        transition: background-color var(--duration-fast) var(--ease-out);
     }
 
-    .header__bars {
-        font-size: 1.25em;
+    .header__toggle:hover,
+    .header__toggle[aria-expanded="true"] {
+        background: rgba(255, 255, 255, 0.1);
+    }
+
+    .header__chevron {
+        font-size: 1.1em;
         line-height: 1;
+        translate: 0 -0.2em;
+        transition: rotate var(--duration-fast) var(--ease-out);
     }
 
-    /* --- Menú a pantalla completa --- */
+    .header__toggle[aria-expanded="true"] .header__chevron {
+        rotate: 180deg;
+        translate: 0 0.15em;
+    }
+
+    /* --- El menú: un desplegable de macOS --- */
 
     .menu {
         position: fixed;
-        inset: 0;
-        z-index: calc(var(--z-menu) - 1);
-        display: grid;
-        grid-template-columns: minmax(0, 1fr) minmax(0, 20rem);
-        align-items: center;
-        gap: var(--space-8);
-        padding: calc(var(--header-height) + var(--space-6)) var(--gutter) calc(var(--hud-height) + var(--space-6));
-        background: rgba(5, 5, 5, 0.94);
-        backdrop-filter: blur(10px);
+        inset-block-start: calc(var(--header-height) - var(--space-2));
+        inset-inline-end: var(--gutter);
+        z-index: var(--z-menu);
+        inline-size: 16.5rem;
+        max-block-size: calc(100svh - var(--header-height) - var(--space-4));
+        padding: 5px;
         overflow-y: auto;
-        overscroll-behavior: contain;
+        background: rgba(40, 40, 42, 0.72);
+        border: 0.5px solid var(--mac-border);
+        border-radius: 10px;
+        box-shadow: var(--mac-highlight), var(--mac-shadow);
+        -webkit-backdrop-filter: var(--mac-blur);
+        backdrop-filter: var(--mac-blur);
+        font-family: var(--font-system);
+        font-size: 0.875rem;
+        transform-origin: top right;
         /* Cerrado no debe ser alcanzable con Tab: `visibility` lo saca del orden
            de foco, cosa que la opacidad sola no hace. */
         visibility: hidden;
         opacity: 0;
+        scale: 0.97;
         transition:
-            opacity var(--duration-base) var(--ease-out),
-            visibility var(--duration-base);
+            opacity var(--duration-fast) var(--ease-out),
+            scale var(--duration-fast) var(--ease-out),
+            visibility var(--duration-fast);
     }
 
     .menu[data-open] {
         visibility: visible;
         opacity: 1;
+        scale: 1;
     }
 
     .menu__list {
         display: flex;
         flex-direction: column;
-        gap: var(--space-1);
         margin: 0;
         padding: 0;
         list-style: none;
     }
 
-    .menu__link {
-        display: inline-flex;
-        align-items: baseline;
-        gap: var(--space-5);
-        padding-block: var(--space-1);
-        color: var(--color-text-subtle);
-        text-decoration: none;
-        font-family: var(--font-pixel);
-        text-transform: uppercase;
-        transition: color var(--duration-fast) var(--ease-out);
-    }
-
-    .menu__number {
-        font-size: var(--text-sm);
-    }
-
-    .menu__label {
-        font-size: clamp(2rem, 1.2rem + 3.5vw, 4.25rem);
-        line-height: 1.05;
-    }
-
-    .menu__link:hover,
-    .menu__link:focus-visible,
-    .menu__link[data-active] {
-        color: var(--color-accent-strong);
-    }
-
-    .menu__link[data-active] .menu__number::before {
-        content: "▸ ";
-    }
-
-    .menu__extras {
-        display: flex;
-        flex-direction: column;
-        gap: var(--space-4);
-        align-self: end;
-    }
-
-    .menu__row {
-        display: flex;
-        flex-direction: column;
-        align-items: flex-start;
-        gap: var(--space-2);
-    }
-
-    .menu__extra {
-        padding: 0;
+    .menu__item {
+        display: grid;
+        grid-template-columns: 1.1rem minmax(0, 1fr) auto;
+        align-items: center;
+        gap: var(--space-1);
+        inline-size: 100%;
+        min-block-size: 1.9rem;
+        padding: 0 0.6rem 0 0.35rem;
         background: none;
         border: 0;
-        color: var(--color-text-muted);
-        font-family: var(--font-pixel);
-        font-size: var(--text-sm);
-        text-transform: uppercase;
+        border-radius: 5px;
+        color: rgba(255, 255, 255, 0.9);
+        font: inherit;
+        text-align: start;
         text-decoration: none;
-        letter-spacing: var(--tracking-wide);
-        cursor: pointer;
+        cursor: default;
     }
 
-    .menu__extra:hover,
-    .menu__extra[aria-current] {
-        color: var(--color-accent-strong);
+    /* El resaltado azul de macOS al pasar por encima o con el teclado. */
+    .menu__item:hover,
+    .menu__item:focus-visible {
+        background: var(--mac-blue);
+        color: #fff;
+        outline: none;
+    }
+
+    .menu__check {
+        font-size: 0.8em;
+        text-align: center;
+        visibility: hidden;
+    }
+
+    .menu__item[data-active] .menu__check,
+    .menu__item[aria-current] .menu__check {
+        visibility: visible;
+    }
+
+    .menu__key {
+        font-family: var(--font-system);
+        font-size: 0.8125rem;
+        color: rgba(255, 255, 255, 0.4);
+    }
+
+    .menu__item:hover .menu__key,
+    .menu__item:focus-visible .menu__key {
+        color: rgba(255, 255, 255, 0.75);
+    }
+
+    .menu__sep {
+        margin: 5px 0.6rem;
+        border: 0;
+        border-block-start: 0.5px solid rgba(255, 255, 255, 0.14);
+    }
+
+    .menu__lang {
+        display: none;
+    }
+
+    .menu__lang :global(.lang) {
+        padding-inline: 0.6rem;
     }
 
     @media (max-width: 48rem) {
-        .header__contact {
+        .header__lang {
             display: none;
         }
 
-        .menu {
-            grid-template-columns: minmax(0, 1fr);
-            align-content: start;
-            gap: var(--space-7);
+        .menu__lang {
+            display: block;
         }
 
-        .menu__extras {
-            align-self: start;
+        .menu {
+            inset-inline: var(--gutter);
+            inline-size: auto;
+        }
+
+        .menu__item {
+            min-block-size: 2.6rem;
+            font-size: 1rem;
         }
     }
 </style>

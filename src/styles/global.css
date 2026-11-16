@@ -44,15 +44,8 @@ body {
     display: flex;
     flex-direction: column;
     min-block-size: 100dvh;
-    /* La rejilla del fondo, fija: no se desplaza con el contenido, así que se
-       lee como la pantalla y no como el papel. */
+    /* Negro plano: sin rejilla ni degradados. */
     background-color: var(--color-bg);
-    background-image:
-        linear-gradient(var(--grid-line) 1px, transparent 1px),
-        linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
-    background-size: var(--grid-size) var(--grid-size);
-    background-position: center top;
-    background-attachment: fixed;
     color: var(--color-text);
     /* Monoespaciada para todo el texto de la web, blog incluido: es una
        interfaz, no una revista. */
@@ -171,22 +164,6 @@ samp {
     border-radius: var(--radius-sm);
 }
 
-/* --- Capa de pantalla ---
-   Scanlines muy tenues y un viñeteado en los bordes, por encima de todo y sin
-   recibir eventos. Es lo que da el aire de monitor sin tocar la legibilidad: las
-   líneas son de un 3 %, y con movimiento reducido no cambia nada porque no se
-   mueve. */
-body::after {
-    content: "";
-    position: fixed;
-    inset: 0;
-    z-index: var(--z-overlay);
-    pointer-events: none;
-    background:
-        repeating-linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 0 1px, transparent 1px 3px),
-        radial-gradient(ellipse at center, transparent 60%, rgba(0, 0, 0, 0.55) 100%);
-}
-
 /* Etiqueta de interfaz: pixelada, pequeña, en mayúsculas y espaciada. La usan
    las cabeceras de panel, el contador, los metadatos de cada fila. */
 .label {
@@ -207,6 +184,86 @@ body::after {
     color: var(--color-text-muted);
     font-size: var(--text-xs);
     white-space: nowrap;
+}
+
+/* --- Ventana de macOS ---
+   Cromo compartido: el hero (Terminal), la pantalla de proyectos (Safari), las
+   fichas y la página de enlaces. Cada sitio pone su contenido; esto pone el
+   marco, la barra de título y el semáforo.
+
+       <div class="mac-window">
+         <div class="mac-titlebar">
+           <span class="mac-lights" aria-hidden="true"><i></i><i></i><i></i></span>
+           <span class="mac-title">Título</span>
+         </div>
+         …
+       </div>
+*/
+.mac-window {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    background: var(--mac-window);
+    border: 0.5px solid var(--mac-border);
+    border-radius: var(--mac-radius);
+    box-shadow: var(--mac-highlight), var(--mac-shadow);
+    -webkit-backdrop-filter: var(--mac-blur);
+    backdrop-filter: var(--mac-blur);
+    overflow: hidden;
+}
+
+.mac-titlebar {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    flex: none;
+    min-block-size: 2.25rem;
+    padding-inline: 0.85rem;
+    background: var(--mac-titlebar);
+    border-block-end: 0.5px solid rgba(0, 0, 0, 0.6);
+    font-family: var(--font-system);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    letter-spacing: 0;
+    text-transform: none;
+    color: rgba(255, 255, 255, 0.55);
+    user-select: none;
+}
+
+/* El título va centrado en la ventana, no en el hueco que deja el semáforo. */
+.mac-title {
+    position: absolute;
+    inset-inline: 5rem;
+    overflow: hidden;
+    text-align: center;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.mac-lights {
+    display: inline-flex;
+    gap: 8px;
+}
+
+.mac-lights > i,
+.mac-lights > button {
+    display: block;
+    inline-size: 12px;
+    block-size: 12px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: var(--mac-red);
+    box-shadow: inset 0 0 0 0.5px rgba(0, 0, 0, 0.25);
+}
+
+.mac-lights > :nth-child(2) {
+    background: var(--mac-yellow);
+}
+
+.mac-lights > :nth-child(3) {
+    background: var(--mac-green);
 }
 
 /* --- Utilidades --- */

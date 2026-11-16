@@ -10,9 +10,9 @@ const { locale } = Astro.props;
 const t = useTranslations(locale);
 
 /*
- * A la derecha, lo que estoy haciendo ahora: el puesto en curso más reciente y
- * la titulación que sigue abierta. Salen del contenido, no del marcado, para
- * que el hero no se quede contando un trabajo que ya terminó.
+ * Lo que estoy haciendo ahora: el puesto en curso más reciente y la titulación
+ * que sigue abierta. Salen del contenido, no del marcado, para que el hero no
+ * se quede contando un trabajo que ya terminó.
  */
 const now = new Date();
 const currentJob = (await getLocalizedEntries("experience", locale))
@@ -28,174 +28,238 @@ const lines = [
     currentDegree && `${currentDegree.data.title}, ${currentDegree.data.institution}.`,
 ].filter((line): line is string => Boolean(line));
 
-const STATIC = "/assets/ui/hero-portrait.webp";
-const VOXELS = "/assets/ui/portrait-voxels.png";
+const PROMPT = "luis@ourense ~ %";
+const STILL = "/assets/ui/hero-portrait.webp";
 ---
 
 <section class="hero" id="hero" aria-labelledby="hero-title">
     {/*
-      El retrato: la imagen fija va en el HTML y la escena de cubos la sustituye
-      en escritorio (`hero-portrait.ts`). La imagen es la misma malla dibujada
-      plana, así que el cambio no se nota más que en que empieza a moverse.
+      Una ventana de Terminal de macOS: el nombre, el rol y lo de ahora salen
+      como la respuesta a tres órdenes. El texto está entero en el HTML; la
+      animación de escribir es `hero-terminal.ts`.
     */}
-    <div class="hero__portrait" data-hero-portrait data-voxels={VOXELS}>
-        <img
-            class="hero__portrait-still"
-            src={STATIC}
-            alt={t("hero.portraitAlt")}
-            width="1056"
-            height="1260"
-            fetchpriority="high"
-            decoding="async"
-        />
-    </div>
-
-    <div class="hero__intro">
-        <h1 class="hero__name" id="hero-title">Luis Garbayo</h1>
-        <p class="hero__meta label">
-            <span>// {t("hero.role")}</span>
-            <span>{t("hero.location")}</span>
-        </p>
-    </div>
-
-    {lines.length > 0 && (
-        <div class="hero__now">
-            <p class="label">{t("hero.currently")}</p>
-            {lines.map((line) => <p class="hero__now-line">{line}</p>)}
+    <div class="hero__terminal mac-window" data-terminal>
+        <div class="mac-titlebar">
+            <span class="mac-lights" aria-hidden="true"><i></i><i></i><i></i></span>
+            <span class="mac-title">luis — -zsh — 80×24</span>
         </div>
-    )}
+        <div class="term">
+            <p class="term__line" data-step aria-hidden="true">
+                <span class="term__prompt">{PROMPT}</span> <span data-type="whoami">whoami</span>
+            </p>
+            <h1 class="term__name" id="hero-title" data-step>Luis Garbayo</h1>
 
-    <a class="hero__scroll label" href="#about" aria-hidden="true" tabindex="-1">{t("hero.scroll")} ↓</a>
+            <p class="term__line" data-step aria-hidden="true">
+                <span class="term__prompt">{PROMPT}</span> <span data-type="cat role.txt">cat role.txt</span>
+            </p>
+            <p class="term__out" data-step>
+                {t("hero.role")} <span class="term__dim">·</span> {t("hero.location")}
+            </p>
+
+            {lines.length > 0 && (
+                <>
+                    <p class="term__line" data-step aria-hidden="true">
+                        <span class="term__prompt">{PROMPT}</span> <span data-type="cat now.md">cat now.md</span>
+                    </p>
+                    {lines.map((line) => (
+                        <p class="term__out term__now" data-step>
+                            <span class="term__arrow" aria-hidden="true">→</span> {line}
+                        </p>
+                    ))}
+                </>
+            )}
+
+            <p class="term__line" data-step aria-hidden="true" data-cursor-home>
+                <span class="term__prompt">{PROMPT}</span> <span class="term__cursor" data-cursor></span>
+            </p>
+        </div>
+    </div>
+    {/* Antes del primer pintado: si toca animar, se esconden los pasos aquí y no
+        en el módulo, que llega tarde y dejaría ver el texto un instante. */}
+    <script is:inline>
+        (function () {
+            try {
+                if (sessionStorage.getItem("hero-typed")) return;
+                if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+                document.querySelector("[data-terminal]").setAttribute("data-typing", "");
+            } catch (e) {}
+        })();
+    </script>
+
+    {/*
+      El retrato, en ASCII a color (`hero-portrait.ts`). Sin JS, la misma imagen
+      ya dibujada.
+    */}
+    <div
+        class="hero__portrait"
+        data-hero-portrait
+        data-ascii="/assets/ui/portrait-ascii.json"
+        data-colors="/assets/ui/portrait-ascii.png"
+        data-still={STILL}
+        data-alt={t("hero.portraitAlt")}
+        role="img"
+        aria-label={t("hero.portraitAlt")}
+    >
+        <noscript>
+            <img class="hero__portrait-still" src={STILL} alt={t("hero.portraitAlt")} width="1100" height="1296" />
+        </noscript>
+    </div>
 </section>
 
 <script>
     import { initHeroPortrait, destroyHeroPortrait } from "@/lib/hero-portrait";
-    // Después del primer pintado: el retrato fijo ya está, la escena puede
-    // esperar a que el navegador respire.
+    import { initHeroTerminal, destroyHeroTerminal } from "@/lib/hero-terminal";
     const start = () => {
-        const idle = window.requestIdleCallback ?? ((cb: () => void) => setTimeout(cb, 200));
-        idle(() => void initHeroPortrait());
+        void initHeroTerminal();
+        void initHeroPortrait();
     };
     start();
     document.addEventListener("astro:page-load", start);
-    document.addEventListener("astro:before-swap", destroyHeroPortrait);
+    document.addEventListener("astro:before-swap", () => {
+        destroyHeroTerminal();
+        destroyHeroPortrait();
+    });
 </script>
 
 <style>
     .hero {
         position: relative;
         display: grid;
-        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
         align-items: center;
+        gap: var(--space-7);
         min-block-size: 100svh;
-        padding-inline: var(--gutter);
-        padding-block: var(--header-height) var(--hud-height);
+        padding: calc(var(--header-height) + var(--space-4)) var(--gutter) calc(var(--hud-height) + var(--space-4));
         overflow: hidden;
-        isolation: isolate;
     }
 
-    .hero__portrait {
-        position: absolute;
-        inset-block: var(--header-height) 0;
-        inset-inline: 0;
-        z-index: -1;
+    /* --- La ventana de Terminal --- */
+
+    .hero__terminal {
+        z-index: 1;
+        max-inline-size: 40rem;
+    }
+
+    .term {
         display: flex;
-        justify-content: center;
-        align-items: flex-end;
+        flex-direction: column;
+        gap: 0.35rem;
+        padding: var(--space-5) var(--space-5) var(--space-6);
+        font-family: var(--font-mono);
+        font-size: var(--text-sm);
+        line-height: 1.5;
+        color: var(--color-text);
     }
 
-    .hero__portrait :global(canvas) {
-        position: absolute;
-        inset: 0;
-        inline-size: 100%;
-        block-size: 100%;
+    .term__prompt {
+        color: var(--mac-green);
     }
 
-    .hero__portrait-still {
-        block-size: 92%;
-        inline-size: auto;
-        max-inline-size: 100%;
-        object-fit: contain;
-        object-position: bottom;
-        /* Se funde con el negro por abajo, igual que la escena. */
-        mask-image: linear-gradient(to top, transparent, #000 18%);
-        transition: opacity var(--duration-slow) var(--ease-out);
+    .term__line {
+        color: var(--color-text);
     }
 
-    .hero__portrait[data-live] .hero__portrait-still {
-        opacity: 0;
+    .term__line:not(:first-child) {
+        margin-block-start: var(--space-3);
     }
 
-    .hero__intro {
-        align-self: center;
-        text-shadow: 0 2px 18px rgba(0, 0, 0, 0.8);
-    }
-
-    .hero__name {
-        font-size: clamp(2.25rem, 1.4rem + 3.2vw, 4.25rem);
+    .term__name {
+        margin-block: var(--space-1);
+        font-size: clamp(2.25rem, 1.3rem + 3.4vw, 4.5rem);
         line-height: 1;
         color: var(--color-accent-strong);
     }
 
-    .hero__meta {
-        display: flex;
-        flex-wrap: wrap;
-        gap: var(--space-2) var(--space-6);
-        margin-block-start: var(--space-3);
+    .term__out {
+        color: var(--color-text-muted);
     }
 
-    .hero__now {
-        justify-self: end;
-        max-inline-size: 22rem;
-        text-align: end;
-        text-shadow: 0 2px 18px rgba(0, 0, 0, 0.8);
+    .term__dim {
+        color: var(--color-text-subtle);
     }
 
-    .hero__now-line {
-        margin-block-start: var(--space-2);
-        font-family: var(--font-pixel);
-        font-size: var(--text-sm);
-        text-transform: uppercase;
-        letter-spacing: var(--tracking-wide);
+    .term__now {
         color: var(--color-text);
     }
 
-    .hero__scroll {
-        position: absolute;
-        inset-block-end: calc(var(--hud-height) + var(--space-3));
-        inset-inline-start: 50%;
-        translate: -50% 0;
-        text-decoration: none;
-        animation: hero-blink 2.4s steps(2, jump-none) infinite;
+    .term__arrow {
+        color: var(--mac-yellow);
     }
 
-    @keyframes hero-blink {
+    .term__cursor {
+        display: inline-block;
+        inline-size: 0.6em;
+        block-size: 1.15em;
+        margin-inline-start: 0.15em;
+        vertical-align: text-bottom;
+        background: var(--color-text);
+        animation: term-blink 1.06s steps(1) infinite;
+    }
+
+    @keyframes term-blink {
         50% {
-            opacity: 0.35;
+            opacity: 0;
         }
     }
 
-    /* En estrecho, como en un móvil de verdad: nombre arriba, retrato en medio
-       y lo de ahora abajo, cada cosa en su franja. */
-    @media (max-width: 48rem) {
+    /* Mientras escribe: los pasos que aún no tocan, escondidos pero ocupando
+       su sitio, para que la ventana no crezca a saltos. Si el módulo no llega
+       a ejecutarse, a los 6 s aparece todo de todas formas. */
+    .hero__terminal[data-typing] [data-step]:not([data-shown]) {
+        visibility: hidden;
+        animation: term-fallback 0s 6s forwards;
+    }
+
+    @keyframes term-fallback {
+        to {
+            visibility: visible;
+        }
+    }
+
+    /* --- El retrato --- */
+
+    .hero__portrait {
+        position: relative;
+        align-self: stretch;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-block-size: 0;
+    }
+
+    .hero__portrait :global(canvas) {
+        display: block;
+        max-inline-size: 100%;
+    }
+
+    .hero__portrait :global(.hero__portrait-still) {
+        max-block-size: 100%;
+        inline-size: auto;
+        max-inline-size: 100%;
+        object-fit: contain;
+    }
+
+    /* En estrecho: la terminal arriba y el retrato debajo. */
+    @media (max-width: 56rem) {
         .hero {
             grid-template-columns: minmax(0, 1fr);
-            grid-template-rows: auto 1fr auto;
-            align-items: start;
-            padding-block: calc(var(--header-height) + var(--space-4)) calc(var(--hud-height) + var(--space-4));
+            grid-template-rows: auto minmax(22rem, 1fr);
+            gap: var(--space-5);
         }
 
-        .hero__portrait {
-            inset-block: 22% 12%;
+        .hero__terminal {
+            max-inline-size: none;
         }
 
-        .hero__now {
-            grid-row: 3;
-            justify-self: end;
+        .term {
+            padding: var(--space-4);
+            font-size: var(--text-xs);
         }
+    }
 
-        .hero__scroll {
-            display: none;
+    @media (prefers-reduced-motion: reduce) {
+        .term__cursor {
+            animation: none;
         }
     }
 </style>

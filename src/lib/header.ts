@@ -1,10 +1,10 @@
 /**
- * Comportamiento del header: menú móvil con trampa de foco y marcado de la
- * sección activa.
+ * Comportamiento del header: el menú desplegable y el marcado de la sección
+ * activa.
  *
- * El menú abierto es una capa modal: mientras esté abierto, Tab no debe poder
- * salirse de él a la página de detrás, y Escape lo cierra. Fuera del menú no hay
- * ninguna trampa de foco en el sitio.
+ * El menú es un desplegable, no una capa: la página sigue haciendo scroll
+ * detrás, y se cierra con Escape, al pulsar fuera o al seguir un enlace. Tab
+ * da la vuelta dentro de él mientras está abierto, como en un menú de macOS.
  */
 
 const FOCUSABLE =
@@ -30,7 +30,6 @@ export function initHeader(): void {
     const open = () => {
         menu.setAttribute("data-open", "");
         toggle.setAttribute("aria-expanded", "true");
-        document.body.setAttribute("data-scroll-locked", "");
         if (label) label.textContent = closeLabel;
         menu.querySelector<HTMLElement>(FOCUSABLE)?.focus();
     };
@@ -38,7 +37,6 @@ export function initHeader(): void {
     const close = ({ restoreFocus = true } = {}) => {
         menu.removeAttribute("data-open");
         toggle.setAttribute("aria-expanded", "false");
-        document.body.removeAttribute("data-scroll-locked");
         if (label) label.textContent = openLabel;
         if (restoreFocus) toggle.focus();
     };
@@ -77,11 +75,20 @@ export function initHeader(): void {
     // Seguir un enlace del menú cierra la capa: quedarse abierta encima de la
     // sección a la que se acaba de saltar no tiene sentido.
     const onMenuClick = (event: Event) => {
-        const link = (event.target as HTMLElement | null)?.closest("a");
+        const link = (event.target as HTMLElement | null)?.closest("a, [data-open-game]");
         if (link && isOpen()) close({ restoreFocus: false });
     };
 
+    // Pulsar fuera lo cierra, sin devolver el foco: quien ha pulsado en otra
+    // parte ya ha decidido adónde va.
+    const onOutside = (event: PointerEvent) => {
+        if (!isOpen()) return;
+        const target = event.target as Node;
+        if (!menu.contains(target) && !toggle.contains(target)) close({ restoreFocus: false });
+    };
+
     toggle.addEventListener("click", onToggleClick);
+    document.addEventListener("pointerdown", onOutside);
     document.addEventListener("keydown", onKeydown);
     menu.addEventListener("click", onMenuClick);
 
@@ -91,8 +98,8 @@ export function initHeader(): void {
         toggle.removeEventListener("click", onToggleClick);
         document.removeEventListener("keydown", onKeydown);
         menu.removeEventListener("click", onMenuClick);
+        document.removeEventListener("pointerdown", onOutside);
         stopSectionSpy();
-        document.body.removeAttribute("data-scroll-locked");
         cleanup = null;
     };
 }

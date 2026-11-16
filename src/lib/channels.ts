@@ -50,6 +50,12 @@ export const channels: readonly Channel[] = [
         icon: "/assets/ui/devpost-svgrepo-com.svg",
         name: "Devpost",
     },
+    {
+        href: "https://www.youtube.com/@lugarbayo",
+        label: "contact.youtube",
+        icon: "/assets/ui/youtube.svg",
+        name: "YouTube",
+    },
 ];
 
 /** Los enlaces externos se abren fuera; `mailto:` no. */

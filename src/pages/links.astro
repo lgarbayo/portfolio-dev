@@ -44,59 +44,75 @@ const counterpartPaths = Object.fromEntries(
     counterpartPaths={counterpartPaths}
     alternateLocales={[locale]}
 >
+    {/* Una ventana de macOS con la lista agrupada de Ajustes del Sistema:
+        icono, nombre y la flecha. Una fila por canal, a todo lo ancho, que se
+        pulsa con el pulgar. */}
     <section class="links">
-        {
-            portrait && (
-                <img
-                    class="links__portrait"
-                    src={portrait}
-                    alt={t("links.portraitAlt")}
-                    width="112"
-                    height="112"
-                    fetchpriority="high"
-                />
-            )
-        }
+        <div class="links__window mac-window">
+            <div class="mac-titlebar">
+                <span class="mac-lights" aria-hidden="true"><i></i><i></i><i></i></span>
+                <span class="mac-title">lgarbayo — links</span>
+            </div>
 
-        <h1 class="links__title">{t("site.title")}</h1>
+            <div class="links__body">
+                {
+                    portrait && (
+                        <img
+                            class="links__portrait"
+                            src={portrait}
+                            alt={t("links.portraitAlt")}
+                            width="88"
+                            height="88"
+                            fetchpriority="high"
+                        />
+                    )
+                }
 
-        <ul class="links__list" role="list">
-            {
-                channels.map((channel) => (
+                <h1 class="links__title">{t("site.title")}</h1>
+
+                <ul class="links__list" role="list">
+                    {
+                        channels.map((channel) => (
+                            <li>
+                                <a
+                                    class="links__link"
+                                    href={channel.href}
+                                    aria-label={t(channel.label)}
+                                    data-track="channel_click"
+                                    data-track-channel-name={channel.name}
+                                    data-track-channel-surface="links"
+                                    {...isExternal(channel.href)
+                                        ? { target: "_blank", rel: "noopener noreferrer" }
+                                        : {}}
+                                >
+                                    <span class="links__badge" aria-hidden="true">
+                                        <span class="links__icon" style={`--icon: url(${channel.icon})`} />
+                                    </span>
+                                    <span class="links__name">{channel.name}</span>
+                                    <span class="links__chevron" aria-hidden="true">›</span>
+                                </a>
+                            </li>
+                        ))
+                    }
+                </ul>
+
+                <ul class="links__list" role="list">
                     <li>
                         <a
                             class="links__link"
-                            href={channel.href}
-                            aria-label={t(channel.label)}
+                            href={localizedPath(locale)}
                             data-track="channel_click"
-                            data-track-channel-name={channel.name}
+                            data-track-channel-name="Portfolio"
                             data-track-channel-surface="links"
-                            {...isExternal(channel.href)
-                                ? { target: "_blank", rel: "noopener noreferrer" }
-                                : {}}
                         >
-                            <span
-                                class="links__icon"
-                                aria-hidden="true"
-                                style={`--icon: url(${channel.icon})`}
-                            />
-                            <span class="links__name">{channel.name}</span>
+                            <span class="links__badge links__badge--site" aria-hidden="true">~</span>
+                            <span class="links__name">{t("links.portfolio")}</span>
+                            <span class="links__chevron" aria-hidden="true">›</span>
                         </a>
                     </li>
-                ))
-            }
-            <li>
-                <a
-                    class="links__link links__link--site"
-                    href={localizedPath(locale)}
-                    data-track="channel_click"
-                    data-track-channel-name="Portfolio"
-                    data-track-channel-surface="links"
-                >
-                    <span class="links__name">{t("links.portfolio")}</span>
-                </a>
-            </li>
-        </ul>
+                </ul>
+            </div>
+        </div>
     </section>
 </BaseLayout>
 
@@ -104,81 +120,113 @@ const counterpartPaths = Object.fromEntries(
     /* Una columna estrecha y centrada: esto se abre en un móvil recién
        escaneado, y ahí una lista a lo ancho no aporta nada. */
     .links {
+        display: grid;
+        place-items: center;
+        inline-size: min(100% - var(--gutter) * 2, 26rem);
+        margin-inline: auto;
+        padding-block: calc(var(--header-height) + var(--space-4)) calc(var(--hud-height) + var(--space-6));
+    }
+
+    .links__window {
+        inline-size: 100%;
+    }
+
+    .links__body {
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: var(--space-3);
-        inline-size: min(100% - var(--gutter) * 2, 26rem);
-        margin-inline: auto;
-        padding-block: var(--space-8);
+        gap: var(--space-4);
+        padding: var(--space-6) var(--space-4) var(--space-5);
         text-align: center;
     }
 
-    /* El fichero es cuadrado, así que el círculo no recorta nada; `cover` está
-       por si algún día se cambia por uno que no lo sea. El fondo del avatar es
-       opaco y hace de disco de color detrás de la figura. */
     .links__portrait {
-        inline-size: 7rem;
-        block-size: 7rem;
+        inline-size: 5.5rem;
+        block-size: 5.5rem;
         border-radius: var(--radius-full);
         object-fit: cover;
-        border: 1px solid var(--color-border-strong);
+        box-shadow: 0 0 0 0.5px var(--mac-border), 0 8px 24px rgba(0, 0, 0, 0.5);
     }
 
     .links__title {
-        margin-block-start: var(--space-2);
-        font-size: var(--text-2xl);
-        color: var(--color-accent);
+        font-size: var(--text-xl);
+        color: var(--color-accent-strong);
     }
 
+    /* La lista agrupada: un bloque redondeado con separadores finos que no
+       llegan al borde izquierdo, empiezan donde empieza el texto. */
     .links__list {
-        display: flex;
-        flex-direction: column;
-        gap: var(--space-3);
         inline-size: 100%;
-        margin-block-start: var(--space-5);
+        margin: 0;
         padding: 0;
         list-style: none;
+        background: rgba(255, 255, 255, 0.06);
+        border-radius: 10px;
+        overflow: hidden;
     }
 
-    /* A todo lo ancho y con altura de sobra: se pulsa con el pulgar, de pie y
-       con prisa, que es el peor momento para un objetivo pequeño. */
+    .links__list li + li .links__link::before {
+        content: "";
+        position: absolute;
+        inset-block-start: 0;
+        inset-inline: 3.1rem 0;
+        border-block-start: 0.5px solid rgba(255, 255, 255, 0.12);
+    }
+
     .links__link {
+        position: relative;
         display: flex;
         align-items: center;
-        justify-content: center;
         gap: var(--space-3);
-        min-block-size: calc(var(--tap-target) + var(--space-2));
-        padding-inline: var(--space-5);
-        border: 1px solid var(--color-border-strong);
-        border-radius: var(--radius-full);
+        min-block-size: calc(var(--tap-target) + var(--space-1));
+        padding-inline: 0.65rem 0.9rem;
         color: var(--color-text);
         text-decoration: none;
-        font-size: var(--text-base);
-        transition:
-            border-color var(--duration-fast) var(--ease-out),
-            color var(--duration-fast) var(--ease-out);
+        font-family: var(--font-system);
+        font-size: 0.9375rem;
+        text-align: start;
+        transition: background-color var(--duration-fast) var(--ease-out);
     }
 
     .links__link:hover,
     .links__link:focus-visible {
-        border-color: var(--color-accent);
-        color: var(--color-accent);
+        background: rgba(255, 255, 255, 0.08);
     }
 
-    .links__link--site {
-        border-color: var(--color-accent);
-        color: var(--color-accent);
+    /* El icono en su cuadradito redondeado, como los de Ajustes. */
+    .links__badge {
+        display: grid;
+        place-items: center;
+        flex: none;
+        inline-size: 1.75rem;
+        block-size: 1.75rem;
+        background: rgba(255, 255, 255, 0.12);
+        border-radius: 7px;
+        color: #fff;
+        font-family: var(--font-mono);
+        font-weight: 700;
     }
 
-    /* El icono es una máscara sobre el color del texto, no una imagen suelta:
-       así sigue al enlace cuando cambia de color al pasar por encima. */
+    .links__badge--site {
+        background: var(--mac-blue);
+    }
+
+    .links__name {
+        flex: 1;
+    }
+
+    .links__chevron {
+        font-size: 1.25rem;
+        line-height: 1;
+        color: var(--color-text-subtle);
+    }
+
+    /* El icono es una máscara sobre el color del texto, no una imagen suelta. */
     .links__icon {
-        inline-size: 1.25rem;
-        block-size: 1.25rem;
+        inline-size: 1rem;
+        block-size: 1rem;
         background-color: currentColor;
         -webkit-mask: var(--icon) center / contain no-repeat;
         mask: var(--icon) center / contain no-repeat;
-        opacity: 0.9;
     }
 </style>

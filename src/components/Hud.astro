@@ -4,43 +4,33 @@ import { useTranslations, type Locale } from "@/i18n/index";
 
 interface Props {
     locale: Locale;
-    /** Fuera de la home no hay secciones que contar: se enseña esto en su lugar. */
-    pageLabel?: string;
+    /** Fuera de la home, la ruta de la página («~/blog/…»). */
+    path?: string;
 }
 
-const { locale, pageLabel } = Astro.props;
+const { locale, path } = Astro.props;
 const t = useTranslations(locale);
 ---
 
 {/*
-  La barra de abajo: en qué sección estás y qué hora es en Ourense. Es la mitad
-  inferior del marco de pantalla que empieza en la cabecera. El contador lo
-  rellena `hud.ts` a partir del menú; sin JS se queda en la portada, que es
-  donde se aterriza.
+  La barra de abajo, como el prompt de una terminal: dónde estás («~/projects
+  %») y, al otro lado, el modo juego. En la home la ruta la cambia `hud.ts`
+  según la sección que se ve; sin JS se queda en `~`, que es donde se aterriza.
 */}
 <div class="hud" data-hud>
-    {/* Contador y hora son decorado para un lector de pantalla: las secciones
-        ya tienen sus títulos, y anunciar cada cambio al hacer scroll sería ruido. */}
-    <p class="hud__section" aria-hidden="true">
-        {pageLabel ? (
-            <span class="hud__label">{pageLabel}</span>
-        ) : (
-            <>
-                <span data-hud-index>01</span>
-                <span class="hud__total">/ <span data-hud-total>07</span></span>
-                <span class="hud__label" data-hud-label>{t("nav.home")}</span>
-            </>
-        )}
+    {/* Decorado para un lector de pantalla: las secciones ya tienen sus
+        títulos, y anunciar cada cambio al hacer scroll sería ruido. */}
+    <p class="hud__prompt" aria-hidden="true">
+        <span class="hud__user">luis@ourense</span>
+        <span class="hud__path" data-hud-path>{path ?? "~"}</span>
+        <span class="hud__sigil">%</span>
+        <span class="hud__cursor"></span>
     </p>
-    <span class="hud__rule"></span>
     {/* El modo juego vive aquí, en la barra: era un botón flotante en la
-        esquina y en este diseño tapaba justo el rótulo de cada ciudad. */}
+        esquina y tapaba justo el rótulo de cada ciudad. */}
     <button class="hud__game" type="button" data-open-game aria-label={t("game.launch")}>
         ▸ {t("game.launcher.label")} <Kbd key="G" />
     </button>
-    <p class="hud__clock" aria-hidden="true">
-        Ourense <time data-hud-clock>--:--</time>
-    </p>
 </div>
 
 <script>
@@ -58,31 +48,52 @@ const t = useTranslations(locale);
         z-index: var(--z-sticky);
         display: flex;
         align-items: center;
+        justify-content: space-between;
         gap: var(--space-4);
         block-size: var(--hud-height);
         padding-inline: var(--gutter);
-        background: linear-gradient(to top, rgba(5, 5, 5, 0.85), transparent);
-        font-family: var(--font-pixel);
+        background: linear-gradient(to top, var(--color-scrim), transparent);
+        font-family: var(--font-mono);
         font-size: var(--text-xs);
-        letter-spacing: var(--tracking-wide);
-        text-transform: uppercase;
         color: var(--color-text-subtle);
         pointer-events: none;
     }
 
-    .hud p {
+    .hud__prompt {
         display: flex;
-        gap: var(--space-2);
+        align-items: center;
+        gap: 0.5ch;
+        min-inline-size: 0;
         white-space: nowrap;
     }
 
-    .hud__label {
-        margin-inline-start: var(--space-3);
-        color: var(--color-text-muted);
+    .hud__user {
+        color: var(--mac-green);
+        opacity: 0.8;
+    }
+
+    .hud__path {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        color: var(--color-text);
+    }
+
+    .hud__cursor {
+        inline-size: 0.55em;
+        block-size: 1.1em;
+        background: var(--color-text-muted);
+        animation: hud-blink 1.06s steps(1) infinite;
+    }
+
+    @keyframes hud-blink {
+        50% {
+            opacity: 0;
+        }
     }
 
     .hud__game {
         display: inline-flex;
+        flex: none;
         align-items: center;
         gap: var(--space-2);
         padding: var(--space-1) 0;
@@ -90,8 +101,6 @@ const t = useTranslations(locale);
         border: 0;
         color: var(--color-text-muted);
         font: inherit;
-        letter-spacing: inherit;
-        text-transform: inherit;
         white-space: nowrap;
         cursor: pointer;
         pointer-events: auto;
@@ -101,19 +110,9 @@ const t = useTranslations(locale);
         color: var(--color-accent-strong);
     }
 
-    .hud__rule {
-        flex: 1;
-        block-size: 1px;
-        background: var(--color-border);
-    }
     @media (max-width: 48rem) {
-        .hud .hud__rule,
-        .hud .hud__clock {
+        .hud__user {
             display: none;
-        }
-
-        .hud__game {
-            margin-inline-start: auto;
         }
 
         .hud__game :global(.kbd) {
@@ -121,4 +120,9 @@ const t = useTranslations(locale);
         }
     }
 
+    @media (prefers-reduced-motion: reduce) {
+        .hud__cursor {
+            animation: none;
+        }
+    }
 </style>

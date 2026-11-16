@@ -9,7 +9,7 @@ import Analytics from "@/components/Analytics.astro";
 import ConsentBanner from "@/components/ConsentBanner.astro";
 import CursorGlow from "@/components/CursorGlow.astro";
 import { ClientRouter } from "astro:transitions";
-import { useTranslations, type Locale } from "@/i18n/index";
+import { locales, useTranslations, type Locale } from "@/i18n/index";
 import "@/styles/global.css";
 
 interface Props {
@@ -40,13 +40,15 @@ const {
 } = Astro.props;
 
 const t = useTranslations(locale);
-// Fuera de la home la barra de abajo no tiene secciones que contar: dice dónde
-// se está en su lugar.
-const pageLabel = onHome
+// La barra de abajo dice dónde se está como lo diría una terminal: la ruta sin
+// el idioma delante, colgando de `~`. En la home la va cambiando el scroll.
+const pagePath = onHome
     ? undefined
-    : Astro.url.pathname.includes("/blog")
-      ? t("nav.blog")
-      : title;
+    : "~/" +
+      Astro.url.pathname
+          .split("/")
+          .filter((part, index) => part && !(index === 1 && (locales as readonly string[]).includes(part)))
+          .join("/");
 ---
 
 <!doctype html>
@@ -80,7 +82,7 @@ const pageLabel = onHome
         </main>
 
         <Footer locale={locale} />
-        <Hud locale={locale} pageLabel={pageLabel} />
+        <Hud locale={locale} path={pagePath} />
 
         <GameOverlay locale={locale} />
         <PageTransition />

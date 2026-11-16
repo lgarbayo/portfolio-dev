@@ -41,6 +41,15 @@ const links = (data: Project["data"]) =>
         data.repoUrl && { href: data.repoUrl, label: t("projects.viewRepo"), kind: "repo" },
     ].filter((link): link is { href: string; label: string; kind: string } => Boolean(link));
 
+// La barra de direcciones de la ventana de Safari: la web del proyecto si la
+// tiene, y si no el primer enlace que haya (el repo, Devpost…).
+const address = (data: Project["data"]) => {
+    const href = data.landingUrl ?? data.demoUrl ?? links(data)[0]?.href;
+    if (!href) return "lgarbayo.com";
+    const url = new URL(href);
+    return (url.host.replace(/^www\./, "") + url.pathname).replace(/\/$/, "");
+};
+
 // Capturas que no son 16:9 —un móvil en vertical, un mapa panorámico— se
 // enseñan enteras en vez de recortadas.
 const CONTAIN = new Set(["pepon-bot", "taiafox"]);
@@ -81,7 +90,14 @@ const meta = (data: Project["data"]) =>
             <ol class="work__slides" role="list">
                 {featured.map((project, index) => (
                     <li class="slide" data-work-slide={index} {...index === 0 ? { "data-active": "" } : {}}>
-                        <div class="slide__screen">
+                        <div class="slide__screen mac-window">
+                            {/* Una ventana de Safari: semáforo y la dirección
+                                del proyecto en la barra. */}
+                            <div class="mac-titlebar slide__bar" aria-hidden="true">
+                                <span class="mac-lights"><i></i><i></i><i></i></span>
+                                <span class="slide__address">{address(project.data)}</span>
+                            </div>
+                            <div class="slide__view">
                             {project.data.thumbnail ? (
                                 <img
                                     class:list={["slide__image", { "slide__image--contain": CONTAIN.has(project.data.slug) }]}
@@ -93,6 +109,7 @@ const meta = (data: Project["data"]) =>
                             ) : (
                                 <span class="slide__placeholder">{project.data.title}</span>
                             )}
+                            </div>
                         </div>
                         <div class="slide__info">
                             <p class="label">{number(index)} · {meta(project.data)}</p>
@@ -293,17 +310,41 @@ const meta = (data: Project["data"]) =>
 
     /* La pantalla curva: girada hacia dentro, con viñeta y líneas, como un
        monitor de tubo visto de lado. */
-    .slide__screen {
+    /* La barra de direcciones: una píldora centrada, como la de Safari. */
+    .slide__bar {
+        justify-content: flex-start;
+    }
+
+    .slide__address {
+        flex: 0 1 26rem;
+        margin-inline: auto;
+        padding: 0.2rem 0.9rem;
+        overflow: hidden;
+        background: rgba(255, 255, 255, 0.08);
+        border-radius: 6px;
+        font-weight: 400;
+        text-align: center;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        color: rgba(255, 255, 255, 0.7);
+    }
+
+    .slide__address::before {
+        content: "⌕ ";
+        color: rgba(255, 255, 255, 0.35);
+    }
+
+    .slide__view {
         position: relative;
         aspect-ratio: 16 / 9;
-        max-block-size: 52svh;
-        background: #000;
-        border: 1px solid var(--color-border-strong);
-        border-radius: 14px / 22px;
-        box-shadow:
-            0 30px 80px rgba(0, 0, 0, 0.7),
-            0 0 0 6px rgba(255, 255, 255, 0.02);
+        max-block-size: 50svh;
         overflow: hidden;
+        background: #000;
+    }
+
+    .slide__screen {
+        position: relative;
+        background: #1c1c1e;
         transform: rotateY(-10deg) rotateX(2deg);
         transform-origin: left center;
         transition: transform var(--duration-slower) var(--ease-out);
@@ -447,6 +488,18 @@ const meta = (data: Project["data"]) =>
         font-size: var(--text-xs);
     }
 
+    /* Una sola columna: con el contexto y la fecha al lado, la etiqueta —que
+       puede ser larga, «Facultad de Matemáticas · Universidade de…»— se
+       llevaba todo el ancho y el título quedaba en una letra por línea. Va
+       encima, como antetítulo. */
+    .activity {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .activity > .label {
+        order: -1;
+    }
+
     .activity__text {
         margin-block-start: var(--space-1);
         color: var(--color-text-muted);
@@ -498,6 +551,19 @@ const meta = (data: Project["data"]) =>
 
         .work__more {
             grid-template-columns: minmax(0, 1fr);
+        }
+    }
+
+    /* En móvil las etiquetas bajan a su propia línea: en la misma fila se
+       comían el nombre del proyecto. */
+    @media (max-width: 36rem) {
+        .more__row {
+            grid-template-columns: minmax(0, 1fr) auto;
+        }
+
+        .more__tags {
+            grid-row: 2;
+            grid-column: 1 / -1;
         }
     }
 </style>

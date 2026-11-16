@@ -110,6 +110,12 @@ const experience = defineCollection({
         ...localized,
         role: z.string(),
         organization: z.string(),
+        /**
+         * Cómo se nombra la organización fuera de la ficha del puesto —la línea
+         * de «ahora» del inicio—, cuando ahí conviene más contexto que en la
+         * propia ficha. Sin él, `organization`.
+         */
+        displayName: z.string().optional(),
         employmentType: z.string().optional(),
         location: z.string().optional(),
         /**

@@ -158,6 +158,17 @@ const t = useTranslations(locale);
         border: 1px solid var(--color-border);
     }
 
+    /* Una sola imagen no es una galería: va a todo el ancho y entera. */
+    .sheet__body :global(.sheet__gallery:has(> :only-child)) {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .sheet__body :global(.sheet__gallery > :only-child img) {
+        aspect-ratio: auto;
+        block-size: auto;
+        border-radius: 6px;
+    }
+
     .sheet__body :global(.sheet__tags) {
         display: flex;
         flex-wrap: wrap;

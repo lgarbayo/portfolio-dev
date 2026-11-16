@@ -24,11 +24,14 @@ const currentDegree = (await getLocalizedEntries("education", locale)).find(
 
 const lines = [
     currentJob &&
-        t("hero.roleAt", { role: currentJob.data.role, organization: currentJob.data.organization }),
+        t("hero.roleAt", {
+            role: currentJob.data.role,
+            organization: currentJob.data.displayName ?? currentJob.data.organization,
+        }),
     currentDegree && `${currentDegree.data.title}, ${currentDegree.data.institution}.`,
 ].filter((line): line is string => Boolean(line));
 
-const PROMPT = "luis@ourense ~ %";
+const PROMPT = "luis@garbayo ~ %";
 const STILL = "/assets/ui/hero-portrait.webp";
 ---
 

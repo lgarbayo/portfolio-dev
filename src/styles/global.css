@@ -190,6 +190,16 @@ samp {
     white-space: nowrap;
 }
 
+/* --- Juntura de píxeles entre secciones (`lib/section-seams.ts`) ---
+   Por encima del contenido y por debajo de la cabecera y la barra de abajo. */
+.seams {
+    position: fixed;
+    inset: 0;
+    z-index: calc(var(--z-sticky) - 1);
+    pointer-events: none;
+    image-rendering: pixelated;
+}
+
 /* --- Al cambiar de sección (`lib/section-fx.ts`) ---
    La franja de barrido: una banda clara con líneas de barrido que baja por la
    pantalla una vez, por encima de todo y sin recibir eventos. */

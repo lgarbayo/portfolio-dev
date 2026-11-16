@@ -45,7 +45,10 @@ export async function createGlobeScene(
     const { scene, camera, renderer, destroy: destroyBase } = createScene({
         container,
         fov: 30,
-        cameraPosition: [0, 0, 3.1],
+        // Con 30° de campo vertical, a 4.4 se ven ±1.18 unidades: la esfera
+        // (radio 1) y los arcos de la ruta caben enteros con algo de aire. A
+        // 3.1 se veían ±0.83 y el globo se cortaba arriba y abajo.
+        cameraPosition: [0, 0, 4.4],
     });
 
     const globe = new THREE.Group();

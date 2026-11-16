@@ -317,6 +317,12 @@ const last = places[places.length - 1]!;
         transition: opacity var(--duration-slower) var(--ease-in-out);
     }
 
+    /* La foto no se funde: salta, en tres pasos, como al cambiar de canal. El
+       temblor de CRT de encima lo pone `overview.ts`. */
+    .overview__photo {
+        transition: opacity 0.2s steps(3, end);
+    }
+
     .overview__photo[data-active],
     .overview__caption[data-active],
     .overview__credits li[data-active] {

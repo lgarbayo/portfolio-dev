@@ -1,5 +1,9 @@
 <div class="cursor-glow" data-cursor-glow aria-hidden="true" transition:persist></div>
-<div class="cursor-mark" data-cursor-mark aria-hidden="true" transition:persist>
+{/* `popover`: así el cursor puede ir a la capa superior del navegador, la
+    misma de los `<dialog>` modales (el QR, las fichas). Con un z-index normal
+    quedaba debajo de ellos y, con el cursor del sistema escondido, no se veía
+    ninguno. */}
+<div class="cursor-mark" data-cursor-mark aria-hidden="true" popover="manual" transition:persist>
     <span class="cursor-mark__ring"></span>
     <span class="cursor-mark__dot"></span>
 </div>
@@ -9,6 +13,24 @@
     const mark = document.querySelector<HTMLElement>("[data-cursor-mark]");
     if (glow && mark) {
         const mouse = window.matchMedia("(any-hover: hover) and (any-pointer: fine)");
+
+        // A la capa superior, y de vuelta encima cada vez que se abre un
+        // diálogo modal: en esa capa manda el último que entra.
+        const canPopover = typeof mark.showPopover === "function";
+        const raise = () => {
+            if (!canPopover) return;
+            try {
+                if (mark.matches(":popover-open")) mark.hidePopover();
+                mark.showPopover();
+            } catch {
+                // Sin popover se queda donde estaba: por debajo de los diálogos.
+            }
+        };
+        raise();
+        new MutationObserver((records) => {
+            if (records.some((r) => r.target instanceof HTMLDialogElement && r.target.open)) raise();
+        }).observe(document.documentElement, { subtree: true, attributes: true, attributeFilter: ["open"] });
+        document.addEventListener("astro:page-load", raise);
         let frame = 0;
         let x = 0;
         let y = 0;
@@ -29,7 +51,10 @@
             x = event.clientX;
             y = event.clientY;
             const target = event.target instanceof Element ? event.target : null;
-            const editing = Boolean(target?.closest('input, textarea, select, [contenteditable]:not([contenteditable="false"])'));
+            // Sin popover, encima de un diálogo abierto el cursor propio no se
+            // vería: se deja el del sistema.
+            const covered = !canPopover && Boolean(document.querySelector("dialog[open]"));
+            const editing = covered || Boolean(target?.closest('input, textarea, select, [contenteditable]:not([contenteditable="false"])'));
             mark.toggleAttribute("data-interactive", Boolean(target?.closest('a, button, [role="button"], summary, canvas')));
             mark.toggleAttribute("data-pressed", event.buttons > 0);
             mark.toggleAttribute("data-visible", !editing);
@@ -69,6 +94,14 @@
         pointer-events: none;
         opacity: 0;
         mix-blend-mode: difference;
+        /* Lo que el navegador pone por defecto a un popover: fuera. */
+        margin: 0;
+        padding: 0;
+        border: 0;
+        background: none;
+        overflow: visible;
+        inline-size: 0;
+        block-size: 0;
     }
 
     .cursor-mark[data-visible] { opacity: 1; }

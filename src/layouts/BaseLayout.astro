@@ -101,6 +101,7 @@ const pageLabel = onHome
             import { initConsentBanner } from "@/lib/consent";
             import { initSheets } from "@/lib/sheets";
             import { initSectionFx, destroySectionFx } from "@/lib/section-fx";
+            import { initSectionSeams, destroySectionSeams } from "@/lib/section-seams";
 
             /*
              * En la primera carga esto corría dos veces: una al evaluarse el
@@ -122,6 +123,7 @@ const pageLabel = onHome
                 void initPageTransition();
                 initSectionTransition();
                 initSectionFx();
+                initSectionSeams();
                 initPostMotion();
                 initSheets();
                 // Al final del arranque: la vista de página se manda con el
@@ -139,6 +141,7 @@ const pageLabel = onHome
                 destroyReveal();
                 destroyPostMotion();
                 destroySectionFx();
+                destroySectionSeams();
                 destroyAnalytics();
             });
         </script>

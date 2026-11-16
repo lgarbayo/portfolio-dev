@@ -1,3 +1,5 @@
+import { prefersReducedMotion } from "./reduced-motion";
+
 /**
  * «Sobre mí»: qué ciudad va de fondo según lo que se lleva recorrido.
  *
@@ -21,11 +23,22 @@ export function initOverview(): void {
     const pinned = window.matchMedia("(min-width: 62.0625rem)");
     let current = 0;
     let frame = 0;
+    let crtTimer = 0;
 
     const show = (index: number) => {
         if (index === current) return;
         current = index;
         for (const el of groups) el.toggleAttribute("data-active", Number(el.dataset.place) === index);
+        // Cambiar de ciudad es cambiar de canal: la imagen vuelve con el mismo
+        // temblor de CRT que tras la cortina de píxeles.
+        if (!prefersReducedMotion()) {
+            const root = document.documentElement;
+            root.removeAttribute("data-crt");
+            void root.offsetWidth;
+            root.setAttribute("data-crt", "");
+            window.clearTimeout(crtTimer);
+            crtTimer = window.setTimeout(() => root.removeAttribute("data-crt"), 450);
+        }
     };
 
     const measure = () => {

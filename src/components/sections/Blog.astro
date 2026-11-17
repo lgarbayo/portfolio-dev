@@ -1,6 +1,7 @@
 ---
 import Section from "../Section.astro";
 import { getPublishedPosts } from "@/lib/content";
+import { getMediumPosts } from "@/lib/medium";
 import { readingMinutes } from "@/lib/reading-time";
 import { localeTags, localizedPath, useTranslations, type Locale } from "@/i18n/index";
 
@@ -13,21 +14,49 @@ const t = useTranslations(locale);
 
 // Los últimos cuatro: el índice completo está a un clic, aquí basta con que se
 // vea que el blog está vivo y de qué va.
-const posts = (await getPublishedPosts(locale)).slice(0, 4);
+// Los de Medium entran en la misma cuenta, por fecha.
+const latest = [
+    ...(await getPublishedPosts(locale)).map((post) => ({
+        key: post.id,
+        href: localizedPath(post.data.locale, `blog/${post.data.slug}`),
+        external: false,
+        date: post.data.pubDate,
+        title: post.data.title,
+        description: post.data.description,
+        lang: post.data.locale,
+        aside: t("blog.readingTime", { minutes: String(readingMinutes(post.body ?? "")) }),
+    })),
+    ...(await getMediumPosts()).map((entry) => ({
+        key: entry.url,
+        href: entry.url,
+        external: true,
+        date: entry.pubDate,
+        title: entry.title,
+        description: entry.description,
+        lang: entry.lang,
+        aside: `${t("blog.onMedium")} ↗`,
+    })),
+]
+    .sort((a, b) => b.date.getTime() - a.date.getTime())
+    .slice(0, 4);
 const date = new Intl.DateTimeFormat(localeTags[locale], { day: "2-digit", month: "short", year: "numeric" });
 ---
 
 <Section id="blog" title={t("blog.latest")} description={t("blog.description")}>
     <ul class="posts" role="list">
-        {posts.map((post) => (
+        {latest.map((entry) => (
             <li data-reveal>
-                <a class="posts__row" href={localizedPath(post.data.locale, `blog/${post.data.slug}`)}>
-                    <time class="label" datetime={post.data.pubDate.toISOString()}>{date.format(post.data.pubDate)}</time>
+                <a
+                    class="posts__row"
+                    href={entry.href}
+                    {...entry.external ? { target: "_blank", rel: "noopener noreferrer", "data-track": "medium_click" } : {}}
+                >
+                    <time class="label" datetime={entry.date.toISOString()}>{date.format(entry.date)}</time>
                     <span class="posts__main">
-                        <span class="posts__title" lang={post.data.locale}>{post.data.title}</span>
-                        <span class="posts__description">{post.data.description}</span>
+                        <span class="posts__title" lang={entry.lang}>{entry.title}</span>
+                        <span class="posts__description" lang={entry.lang}>{entry.description}</span>
                     </span>
-                    <span class="label">{t("blog.readingTime", { minutes: String(readingMinutes(post.body ?? "")) })}</span>
+                    <span class:list={["label", { posts__source: entry.external }]}>{entry.aside}</span>
                 </a>
             </li>
         ))}
@@ -36,6 +65,10 @@ const date = new Intl.DateTimeFormat(localeTags[locale], { day: "2-digit", month
 </Section>
 
 <style>
+    .posts__source {
+        color: var(--color-live);
+    }
+
     .posts {
         margin: 0;
         padding: 0;

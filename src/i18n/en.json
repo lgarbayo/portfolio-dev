@@ -68,6 +68,7 @@
     "contact.github": "See my code on GitHub",
     "contact.devpost": "See my hackathon projects on Devpost",
     "contact.youtube": "Watch my videos on YouTube",
+    "contact.medium": "Read my articles on Medium",
     "cv.title": "CV",
     "cv.open": "Open the CV in {language}",
     "cv.download": "Download",
@@ -150,6 +151,10 @@
     "pageLinks.back": "Back",
     "pageLinks.more": "More",
     "blog.count": "{count} articles",
+    "blog.countOne": "1 article",
+    "blog.onMedium": "On Medium",
+    "blog.mediumNotice": "On Medium.",
+    "blog.alsoMedium": "I also write on Medium",
     "links.count": "{count} channels",
     "footer.nav": "Site map"
 }

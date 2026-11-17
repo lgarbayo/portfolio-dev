@@ -91,14 +91,21 @@ const PROJECT_ORDER = [
     "taiafox",
     "pepon-bot",
     "seed-algorithm",
-    "meigasearch",
 ];
+
+/**
+ * Cola de «Más proyectos», también a mano: los que fueron destacados y dejaron
+ * de serlo van al final, por detrás de todo lo demás.
+ */
+const PROJECT_TAIL = ["meigasearch", "breogan"];
 
 /** Selección y orden de proyectos compartidos por la web y Game Mode. */
 export async function getPortfolioProjects(locale: Locale) {
     const rank = (slug: string) => {
         const index = PROJECT_ORDER.indexOf(slug);
-        return index === -1 ? PROJECT_ORDER.length : index;
+        if (index !== -1) return index;
+        const tail = PROJECT_TAIL.indexOf(slug);
+        return tail === -1 ? PROJECT_ORDER.length : PROJECT_ORDER.length + 1 + tail;
     };
     const projects = (await getLocalizedEntries("projects", locale)).sort((a, b) => {
         const byRank = rank(a.data.slug) - rank(b.data.slug);

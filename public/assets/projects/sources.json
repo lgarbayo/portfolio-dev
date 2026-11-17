@@ -64,7 +64,7 @@
     "kind": "application-screenshot"
   },
   "mecena": {
-    "source": "https://github.com/lgarbayo/mecena/blob/HEAD/docs/images/mecena-mobile.png",
+    "source": "https://github.com/lgarbayo/mecena",
     "kind": "application-screenshot"
   }
 }

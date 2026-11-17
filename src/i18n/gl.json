@@ -68,6 +68,7 @@
     "contact.github": "Mira o meu código en GitHub",
     "contact.devpost": "Mira os meus proxectos de hackathon en Devpost",
     "contact.youtube": "Mira os meus vídeos en YouTube",
+    "contact.medium": "Le os meus artigos en Medium",
     "cv.title": "CV",
     "cv.open": "Abrir o CV en {language}",
     "cv.download": "Descargar",
@@ -150,6 +151,10 @@
     "pageLinks.back": "Volver",
     "pageLinks.more": "Máis",
     "blog.count": "{count} artigos",
+    "blog.countOne": "1 artigo",
+    "blog.onMedium": "En Medium",
+    "blog.mediumNotice": "En inglés, en Medium.",
+    "blog.alsoMedium": "Tamén escribo en Medium",
     "links.count": "{count} canles",
     "footer.nav": "Mapa do sitio"
 }

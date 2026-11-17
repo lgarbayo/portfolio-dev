@@ -10,7 +10,7 @@ description: >-
 category: hackathon
 context: HackUDC 2026
 year: 2026
-featured: true
+featured: false
 tags:
   - Python
   - FastAPI

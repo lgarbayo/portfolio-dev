@@ -11,7 +11,7 @@ description: >-
 context: "Hacktoberfest 2025"
 category: hackathon
 year: 2025
-featured: true
+featured: false
 tags:
   - Python
   - FastAPI

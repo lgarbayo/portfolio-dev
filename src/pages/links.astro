@@ -3,6 +3,7 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
 import { channels, isExternal } from "@/lib/channels";
 import { publicAssetExists } from "@/lib/assets";
 import { getPublishedPosts } from "@/lib/content";
+import { MEDIUM_PROFILE, getMediumPosts } from "@/lib/medium";
 import { defaultLocale, locales, localizedPath, useTranslations } from "@/i18n/index";
 
 /*
@@ -22,6 +23,8 @@ import { defaultLocale, locales, localizedPath, useTranslations } from "@/i18n/i
 const locale = defaultLocale;
 const t = useTranslations(locale);
 const posts = await getPublishedPosts(locale);
+const medium = await getMediumPosts();
+const articles = (count: number) => (count === 1 ? t("blog.countOne") : t("blog.count", { count }));
 
 // Retrato propio de esta página, no el de la sección Sobre mí: allí va una foto
 // y aquí un avatar, que aguanta mejor el recorte redondo y el tamaño pequeño.
@@ -124,11 +127,34 @@ const counterpartPaths = Object.fromEntries(
                             >
                                 <span class="links__badge links__badge--blog" aria-hidden="true">✎</span>
                                 <span class="links__name">{t("nav.blog")}</span>
-                                <span class="links__count">{t("blog.count", { count: posts.length })}</span>
+                                <span class="links__count">{articles(posts.length)}</span>
                                 <span class="links__chevron" aria-hidden="true">›</span>
                             </a>
                         </li>
                     )}
+                    {/* Medium va con el blog y no con las redes: también son
+                        artículos, y el índice del blog ya los lista juntos. */}
+                    <li>
+                        <a
+                            class="links__link"
+                            href={MEDIUM_PROFILE}
+                            aria-label={t("contact.medium")}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            data-track="channel_click"
+                            data-track-channel-name="Medium"
+                            data-track-channel-surface="links"
+                        >
+                            <span class="links__badge" aria-hidden="true">
+                                <span class="links__icon" style="--icon: url(/assets/ui/medium.svg)" />
+                            </span>
+                            <span class="links__name">Medium</span>
+                            {medium.length > 0 && (
+                                <span class="links__count">{articles(medium.length)}</span>
+                            )}
+                            <span class="links__chevron" aria-hidden="true">›</span>
+                        </a>
+                    </li>
                 </ul>
             </div>
         </div>

@@ -1,7 +1,7 @@
 ---
 import Section from "../Section.astro";
 import { getPublishedPosts } from "@/lib/content";
-import { getMediumPosts } from "@/lib/medium";
+import { MEDIUM_PROFILE } from "@/lib/medium";
 import { readingMinutes } from "@/lib/reading-time";
 import { localeTags, localizedPath, useTranslations, type Locale } from "@/i18n/index";
 
@@ -14,58 +14,43 @@ const t = useTranslations(locale);
 
 // Los últimos cuatro: el índice completo está a un clic, aquí basta con que se
 // vea que el blog está vivo y de qué va.
-// Los de Medium entran en la misma cuenta, por fecha.
-const latest = [
-    ...(await getPublishedPosts(locale)).map((post) => ({
-        key: post.id,
-        href: localizedPath(post.data.locale, `blog/${post.data.slug}`),
-        external: false,
-        date: post.data.pubDate,
-        title: post.data.title,
-        description: post.data.description,
-        lang: post.data.locale,
-        aside: t("blog.readingTime", { minutes: String(readingMinutes(post.body ?? "")) }),
-    })),
-    ...(await getMediumPosts()).map((entry) => ({
-        key: entry.url,
-        href: entry.url,
-        external: true,
-        date: entry.pubDate,
-        title: entry.title,
-        description: entry.description,
-        lang: entry.lang,
-        aside: `${t("blog.onMedium")} ↗`,
-    })),
-]
-    .sort((a, b) => b.date.getTime() - a.date.getTime())
-    .slice(0, 4);
+const posts = (await getPublishedPosts(locale)).slice(0, 4);
 const date = new Intl.DateTimeFormat(localeTags[locale], { day: "2-digit", month: "short", year: "numeric" });
 ---
 
 <Section id="blog" title={t("blog.latest")} description={t("blog.description")}>
     <ul class="posts" role="list">
-        {latest.map((entry) => (
+        {posts.map((post) => (
             <li data-reveal>
-                <a
-                    class="posts__row"
-                    href={entry.href}
-                    {...entry.external ? { target: "_blank", rel: "noopener noreferrer", "data-track": "medium_click" } : {}}
-                >
-                    <time class="label" datetime={entry.date.toISOString()}>{date.format(entry.date)}</time>
+                <a class="posts__row" href={localizedPath(post.data.locale, `blog/${post.data.slug}`)}>
+                    <time class="label" datetime={post.data.pubDate.toISOString()}>{date.format(post.data.pubDate)}</time>
                     <span class="posts__main">
-                        <span class="posts__title" lang={entry.lang}>{entry.title}</span>
-                        <span class="posts__description" lang={entry.lang}>{entry.description}</span>
+                        <span class="posts__title" lang={post.data.locale}>{post.data.title}</span>
+                        <span class="posts__description">{post.data.description}</span>
                     </span>
-                    <span class:list={["label", { posts__source: entry.external }]}>{entry.aside}</span>
+                    <span class="label">{t("blog.readingTime", { minutes: String(readingMinutes(post.body ?? "")) })}</span>
                 </a>
             </li>
         ))}
     </ul>
-    <a class="posts__all label" href={localizedPath(locale, "blog")}>&gt; {t("blog.all")} →</a>
+    <div class="posts__more">
+        <a class="posts__all label" href={localizedPath(locale, "blog")}>&gt; {t("blog.all")} →</a>
+        <a class="posts__all posts__medium label" href={MEDIUM_PROFILE} target="_blank" rel="noopener noreferrer" data-track="medium_click">
+            &gt; {t("blog.alsoMedium")} ↗
+        </a>
+    </div>
 </Section>
 
 <style>
-    .posts__source {
+    /* El índice del blog y, aparte, Medium: los artículos de allí no se
+       listan aquí, sólo se enlaza el perfil. */
+    .posts__more {
+        display: flex;
+        flex-wrap: wrap;
+        column-gap: var(--space-6);
+    }
+
+    .posts__medium {
         color: var(--color-live);
     }
 

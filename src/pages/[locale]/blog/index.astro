@@ -5,7 +5,7 @@ import PageTrail from "@/components/PageTrail.astro";
 import PageLinks from "@/components/PageLinks.astro";
 import { channels } from "@/lib/channels";
 import { getPublishedPosts } from "@/lib/content";
-import { MEDIUM_PROFILE, getMediumPosts } from "@/lib/medium";
+import { MEDIUM_PROFILE } from "@/lib/medium";
 import { locales, localizedPath, useTranslations, type Locale } from "@/i18n/index";
 
 export function getStaticPaths() {
@@ -15,8 +15,6 @@ export function getStaticPaths() {
 const locale = Astro.params.locale as Locale;
 const t = useTranslations(locale);
 const posts = await getPublishedPosts(locale);
-// «Todos los artículos» quiere decir todos: también los que escribo en Medium.
-const medium = await getMediumPosts();
 ---
 
 <BaseLayout
@@ -47,7 +45,7 @@ const medium = await getMediumPosts();
             </a>
         </header>
 
-        <PostList locale={locale} posts={posts} medium={medium} emptyMessage={t("blog.empty")} />
+        <PostList locale={locale} posts={posts} emptyMessage={t("blog.empty")} />
 
         {
             posts.length > 0 && (

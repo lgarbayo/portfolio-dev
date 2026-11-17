@@ -1,24 +1,15 @@
 ---
 import type { CollectionEntry } from "astro:content";
 import { readingMinutes } from "@/lib/reading-time";
-import type { MediumPost } from "@/lib/medium";
 import { localeTags, localizedPath, useTranslations, type Locale } from "@/i18n/index";
 
 interface Props {
     locale: Locale;
     posts: CollectionEntry<"posts">[];
-    /** Artículos de Medium, que van mezclados por fecha con los del blog. */
-    medium?: MediumPost[];
     emptyMessage: string;
 }
 
-const { locale, posts, medium = [], emptyMessage } = Astro.props;
-
-type Item = { kind: "post"; date: Date; post: CollectionEntry<"posts"> } | { kind: "medium"; date: Date; medium: MediumPost };
-const items: Item[] = [
-    ...posts.map((post) => ({ kind: "post" as const, date: post.data.pubDate, post })),
-    ...medium.map((entry) => ({ kind: "medium" as const, date: entry.pubDate, medium: entry })),
-].sort((a, b) => b.date.getTime() - a.date.getTime());
+const { locale, posts, emptyMessage } = Astro.props;
 const t = useTranslations(locale);
 
 const formatter = new Intl.DateTimeFormat(localeTags[locale], {
@@ -29,69 +20,42 @@ const formatter = new Intl.DateTimeFormat(localeTags[locale], {
 ---
 
 {
-    items.length === 0 ? (
+    posts.length === 0 ? (
         // Un índice vacío dice que todavía no hay nada, en vez de enseñar una
         // lista vacía que parece un fallo.
         <p class="postlist__empty">{emptyMessage}</p>
     ) : (
         <ul class="postlist" role="list">
-            {items.map((item) => item.kind === "medium" ? (
-                // Un artículo de Medium: misma tarjeta, pero sale fuera, y lo
-                // dice antes de pulsar.
-                <li class="postlist__item postlist__item--external" data-reveal>
-                    <div class="postlist__text">
-                        <a
-                            class="postlist__link"
-                            href={item.medium.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            data-track="medium_click"
-                        >
-                            <p class="postlist__meta">
-                                <time datetime={item.medium.pubDate.toISOString()}>
-                                    {formatter.format(item.medium.pubDate)}
-                                </time>
-                                <span aria-hidden="true">·</span>
-                                <span class="postlist__source">{t("blog.onMedium")} ↗</span>
-                            </p>
-                            <h2 class="postlist__title" lang={item.medium.lang}>{item.medium.title}</h2>
-                            <p class="postlist__description" lang={item.medium.lang}>{item.medium.description}</p>
-                            {item.medium.lang !== locale && (
-                                <p class="postlist__fallback">{t("blog.mediumNotice")}</p>
-                            )}
-                        </a>
-                    </div>
-                </li>
-            ) : (
+            {posts.map((post) => (
                 <li class="postlist__item" data-reveal>
                     <div class="postlist__text">
                         <a
                             class="postlist__link"
-                            href={localizedPath(item.post.data.locale, `blog/${item.post.data.slug}`)}
+                            href={localizedPath(post.data.locale, `blog/${post.data.slug}`)}
                         >
                             <p class="postlist__meta">
-                                <time datetime={item.post.data.pubDate.toISOString()}>
-                                    {formatter.format(item.post.data.pubDate)}
+                                <time datetime={post.data.pubDate.toISOString()}>
+                                    {formatter.format(post.data.pubDate)}
                                 </time>
                                 <span aria-hidden="true">·</span>
                                 <span>
                                     {t("blog.readingTime", {
-                                        minutes: readingMinutes(item.post.body ?? ""),
+                                        minutes: readingMinutes(post.body ?? ""),
                                     })}
                                 </span>
                             </p>
                             <h2 class="postlist__title">
-                                {item.post.data.title}
-                                {item.post.data.draft && <span class="postlist__draft">{t("blog.draft")}</span>}
+                                {post.data.title}
+                                {post.data.draft && <span class="postlist__draft">{t("blog.draft")}</span>}
                             </h2>
-                            <p class="postlist__description">{item.post.data.description}</p>
-                            {item.post.data.locale !== locale && (
+                            <p class="postlist__description">{post.data.description}</p>
+                            {post.data.locale !== locale && (
                                 <p class="postlist__fallback">{t("content.fallbackNotice")}</p>
                             )}
                         </a>
-                        {item.post.data.tags.length > 0 && (
+                        {post.data.tags.length > 0 && (
                             <ul class="postlist__tags" role="list">
-                                {item.post.data.tags.map((tag) => (
+                                {post.data.tags.map((tag) => (
                                     <li>
                                         <a class="tag" href={localizedPath(locale, `blog/tag/${tag}`)}>
                                             {tag}
@@ -108,17 +72,17 @@ const formatter = new Intl.DateTimeFormat(localeTags[locale], {
                       toca los que están en pantalla. Sin JS se queda el póster,
                       que es exactamente su primer fotograma.
                     */}
-                    {item.post.data.motion && (
+                    {post.data.motion && (
                         <a
                             class="postlist__media-link"
-                            href={localizedPath(item.post.data.locale, `blog/${item.post.data.slug}`)}
-                            aria-label={item.post.data.title}
+                            href={localizedPath(post.data.locale, `blog/${post.data.slug}`)}
+                            aria-label={post.data.title}
                         >
                         <video
                             class="postlist__motion"
-                            src={item.post.data.motion}
-                            poster={item.post.data.motionPoster}
-                            aria-label={item.post.data.motionAlt}
+                            src={post.data.motion}
+                            poster={post.data.motionPoster}
+                            aria-label={post.data.motionAlt}
                             muted
                             loop
                             playsinline
@@ -134,15 +98,6 @@ const formatter = new Intl.DateTimeFormat(localeTags[locale], {
 }
 
 <style>
-    .postlist__source {
-        color: var(--color-live);
-    }
-
-    /* Sin clip ni portada: a su altura, no estirada hasta la de al lado. */
-    .postlist__item--external {
-        align-self: start;
-    }
-
     .postlist {
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));

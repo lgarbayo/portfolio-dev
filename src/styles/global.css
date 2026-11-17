@@ -312,6 +312,16 @@ img[data-loaded] {
     }
 }
 
+/* --- Cambio de imagen en píxeles (`lib/pixel-dissolve.ts`) ---
+   El canvas con la imagen que se va, justo encima de la nueva. */
+.pixel-dissolve {
+    position: absolute;
+    inset: 0;
+    inline-size: 100%;
+    block-size: 100%;
+    pointer-events: none;
+}
+
 /* --- Ventana de macOS ---
    Cromo compartido: el hero (Terminal), la pantalla de proyectos (Safari), las
    fichas y la página de enlaces. Cada sitio pone su contenido; esto pone el

@@ -292,20 +292,27 @@ const meta = (data: Project["data"]) =>
         perspective: 1600px;
     }
 
+    /* El cambio es al instante: la transición la pone la captura que se va,
+       deshaciéndose en píxeles (`work.ts`). El texto entra a saltos. */
     .slide {
         grid-area: 1 / 1;
         display: grid;
         gap: var(--space-5);
-        opacity: 0;
         visibility: hidden;
-        transition:
-            opacity var(--duration-slow) var(--ease-out),
-            visibility var(--duration-slow);
     }
 
     .slide[data-active] {
-        opacity: 1;
         visibility: visible;
+    }
+
+    .slide[data-active] .slide__info {
+        animation: slide-info-in 0.3s steps(3, end);
+    }
+
+    @keyframes slide-info-in {
+        from {
+            opacity: 0;
+        }
     }
 
     /* La pantalla curva: girada hacia dentro, con viñeta y líneas, como un
@@ -334,16 +341,20 @@ const meta = (data: Project["data"]) =>
         color: rgba(255, 255, 255, 0.35);
     }
 
+    /* La captura en 16:9 y la ventana a su medida: el ancho sale del alto que
+       cabe, para que no quede ventana vacía al lado de la captura. (Con
+       `max-block-size` sobre la captura, Firefox estrechaba la imagen y la
+       ventana se quedaba ancha.) */
     .slide__view {
         position: relative;
         aspect-ratio: 16 / 9;
-        max-block-size: 50svh;
         overflow: hidden;
         background: #000;
     }
 
     .slide__screen {
         position: relative;
+        inline-size: min(100%, calc(var(--view-height, 50svh) * 16 / 9));
         background: #1c1c1e;
         transform: rotateY(-10deg) rotateX(2deg);
         transform-origin: left center;
@@ -553,8 +564,8 @@ const meta = (data: Project["data"]) =>
             transform: none;
         }
 
-        .slide__view {
-            max-block-size: 34svh;
+        .slide__screen {
+            --view-height: 34svh;
         }
 
         .work__more {
@@ -591,8 +602,8 @@ const meta = (data: Project["data"]) =>
             border-color: var(--color-live);
         }
 
-        .slide__view {
-            max-block-size: 30svh;
+        .slide__screen {
+            --view-height: 30svh;
         }
 
         .slide__title {
@@ -606,8 +617,8 @@ const meta = (data: Project["data"]) =>
             -webkit-line-clamp: 2;
         }
 
-        .slide__view {
-            max-block-size: 26svh;
+        .slide__screen {
+            --view-height: 26svh;
         }
     }
 

@@ -1,4 +1,5 @@
 import { prefersReducedMotion } from "./reduced-motion";
+import { pixelDissolve } from "./pixel-dissolve";
 
 /**
  * Proyectos destacados: qué proyecto sale en la pantalla.
@@ -30,12 +31,20 @@ export function initWork(): void {
 
     const show = (index: number) => {
         if (index === current) return;
+        const leaving = slides[current]?.querySelector<HTMLImageElement>(".slide__image");
+        const view = slides[index]?.querySelector<HTMLElement>(".slide__view");
         current = index;
-        slides.forEach((slide, i) => slide.toggleAttribute("data-active", i === index));
-        picks.forEach((pick, i) => {
-            if (i === index) pick.setAttribute("aria-current", "true");
-            else pick.removeAttribute("aria-current");
-        });
+        const toggle = () => {
+            slides.forEach((slide, i) => slide.toggleAttribute("data-active", i === index));
+            picks.forEach((pick, i) => {
+                if (i === index) pick.setAttribute("aria-current", "true");
+                else pick.removeAttribute("aria-current");
+            });
+        };
+        // La captura que se va se deshace en píxeles sobre la nueva, dentro de
+        // la ventana: la barra y el texto cambian al momento.
+        if (view) pixelDissolve(view, leaving, toggle, { block: 16, duration: 480 });
+        else toggle();
     };
 
     const travel = () => pin.offsetHeight - window.innerHeight;

@@ -88,6 +88,7 @@ const PROJECT_ORDER = [
     "agentic-smart-health",
     "mecena",
     "payperphase",
+    "product-walkthrough-video",
     "taiafox",
     "pepon-bot",
     "seed-algorithm",

@@ -66,5 +66,9 @@
   "mecena": {
     "source": "https://github.com/lgarbayo/mecena",
     "kind": "application-screenshot"
+  },
+  "product-walkthrough-video": {
+    "source": "https://github.com/lgarbayo/product-walkthrough-video/blob/HEAD/assets/style/04-chapter.jpg",
+    "kind": "application-screenshot"
   }
 }

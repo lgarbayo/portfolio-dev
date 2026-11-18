@@ -43,7 +43,7 @@ Scrolling or picking a project changes the window; *Open +* shows its key points
 and links. On phones the list becomes a row of numbers above the window. Below, the
 rest of the projects and other activities.
 
-![Selected work: a list of six projects and the Agentic Smart Health viewer in a Safari window](docs/images/projects.png)
+![Selected work: the list of featured projects and the Agentic Smart Health viewer in a Safari window](docs/images/projects.png)
 
 ### Interactive stack
 
